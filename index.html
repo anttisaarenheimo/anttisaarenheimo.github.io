@@ -18,11 +18,12 @@ td {
 </style>
 </HEAD> 
 <BODY>
+<DIV><H3>GRAVEL BATTERY STORAGE DESIGNER - UP TO 82% RETURN EFFICIENCY - powered by Coolprop</H3></DIV>
 <DIV><LABEL>FluidName:</LABEL>
 	<SELECT id="name"><!--OPTION>Argon</OPTION><OPTION>CarbonDioxide</OPTION--><OPTION>Helium</OPTION><OPTION>Hydrogen</OPTION><!--OPTION>Methane</OPTION--><OPTION selected>Nitrogen</OPTION><!--OPTION>R134a</OPTION><OPTION>Water</OPTION-->
 	</SELECT><BUTTON onClick="drawTpDiagram()">Draw T-P diagram</BUTTON>  
+	<BUTTON onClick="drawJustStorage()">Redraw storage</BUTTON> 
 	<BUTTON onClick="calcDiagrams()">Draw diagrams</BUTTON> 
-	<BUTTON onClick="drawStorage('myPicture', getMetrics())">Draw picture</BUTTON> 
 
 	<!--<INPUT id="noDistrictHeat" checked type="checkbox" value="true"><LABEL>Use stored liqued nitrogen to maximize electric output</LABEL>-->
 	<!--BUTTON 
@@ -39,17 +40,18 @@ td {
 </Div>
 <DIV>
 	<LABEL>T high (Kelvins): </LABEL><INPUT size="6" id="tHigh" type="float" value="1033"> 
-	<INPUT id="tHighRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="tHighFrom" type="float" value="800"> - <INPUT size="6" id="tHighTo" type="float" value="1300">
+	<INPUT id="tHighRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="tHighFrom" type="float" value="800"> - <INPUT size="6" id="tHighTo" type="float" value="1400">
 </DIV>
 <DIV>
 	<LABEL>P high/low: </LABEL><INPUT size="6" id="highToLowPressureRatio" type="float" value="25" onchange="metricsChanged()">
+	<LABEL>P low kPa: </LABEL><INPUT size="6" id="targetPLow" type="float" value="102" onchange="metricsChanged()">
 	<INPUT id="pRatioRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="pRatioFrom" type="float" value="10"> - <INPUT size="6" id="pRatioTo" type="float" value="50">
 </DIV>
 <DIV>
 	<LABEL>High pressure storage size (Mm3): </LABEL><INPUT size="4" id="hpStorageSizeRockMm3" type="float" value="5" onchange="metricsChanged()">
 	<INPUT id="hpStorageSize" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="hpStorageSizeFrom" type="float" value="3"> - <INPUT size="4" id="hpStorageSizeTo" type="float" value="20">
-	<LABEL>Gross work out (MW): </LABEL><INPUT size="4" id="grossWorkOut" type="float" value="1400" onchange="drawTpDiagram()">
-	<LABEL>Max relative pressure drop in pipes: </LABEL><INPUT size="4" id="maxPressureDrop" type="float" value="0.01" onchange="drawTpDiagram()">
+	<LABEL>Gross work out (MW): </LABEL><INPUT size="4" id="grossWorkOut" type="float" value="1400">
+	<LABEL>Max relative pressure drop in pipes: </LABEL><INPUT size="4" id="maxPressureDrop" type="float" value="0.01">
 </DIV>
 <DIV>
 	<LABEL>Rock density	(tn/m3): </LABEL><INPUT size="4" id="rockDensity" type="float" value="2.65" onchange="metricsChanged()">
@@ -103,7 +105,7 @@ td {
 	var LOST_AS_HEAT = 0.05;
 	var extraCompressionHeat = 0.09;
 	var name="Nitrogen";
-	var generatorLocation = 'TOP';		// TOP, MIDDLE, BOTTOM
+	var generatorLocation = 'GROUND';		// TOP, GROUND, MIDDLE, BOTTOM
 	var coldExpanderLocation = 'SAME';	// or BOTTOM
 	var chargeLevel = 0.5; // 0 - 1
 
@@ -115,8 +117,8 @@ td {
 	var impulseTurbineEffciency = 0.90;
 	var pTransformer = {};
 
-	drawStorage('myPicture', getMetrics());
-
+	drawJustStorage();
+	
 	// Steam saturation is not an adibatic process.  Instead the wetness and released enthalpy is calculated using constant entropy.
 	// It probably needs much higher pressure drop than abiabatic expansion with high cp/cv
 	// https://www.e3s-conferences.org/articles/e3sconf/pdf/2021/28/e3sconf_pgsge2021_03055.pdf
@@ -512,8 +514,21 @@ td {
 
 	var pTriplePoint, tTriplePoint;
 	const motorGenerator = getBooleanParam('motorGenerator');
-	
+
 	function drawTpDiagram() {
+		drawIt(true);
+	}
+	function drawJustStorage() {
+		if (typeof Module.PropsSI === 'undefined') {
+console.log("Waiting coolprop to init ...");		
+			setTimeout( drawJustStorage, 300 );
+		}
+		else {
+			drawIt(false);
+		}
+	}
+	
+	function drawIt(drawTpDiagram) {
 		name = getInputParam('name', 'Nitrogen' );
 		pCrit = Module.PropsSI('PCRIT', '', 0, '', 0, name)
 		tCrit = Module.PropsSI('TCRIT', '', 0, '', 0, name);
@@ -572,7 +587,12 @@ if (cycleData == null) return;
 */	
 //XXX: TBD: Triple point ja jäätymispiste tulee ottaa huomioon typen nesteytyksessä
 
-		iDrawBraytonCycle( "myCanvas", hotCycle, coldCycle, cycleData);
+		if (drawTpDiagram) {
+			iDrawBraytonCycle( "myCanvas", hotCycle, coldCycle, cycleData);
+		}
+		cycleData.hotCycle = hotCycle;
+		cycleData.coldCycle = coldCycle;
+		drawStorage( 'myPicture', getMetrics(), cycleData );
 	}
 /*
 Obsolate function, we now calclulate dimensions from the known volumes
@@ -634,12 +654,53 @@ var metrics = {};
 function metricsChanged() {
 console.log("metricsChanged()..");	
 	metrics = {};
-	getMetrics();
+	//getMetrics();
 }
+
+function getMetricsOfCaveDome45( s )
+{
+	var ret = {};
+	ret.s = s;
+	// TBD configurable max angle, now it is always 60
+	const maxAngle = getFloatParam('maxOpenPitAngle', 60 );
+	ret.rTop = ret.s / 2
+	ret.side = s / (4*Math.cos(Math.PI*maxAngle/180));
+	ret.hBottom = Math.sqrt(ret.side*ret.side - ret.rTop*ret.rTop/4);		// leikatun kartion korkeus kärkeen
+	ret.r=s/(2*Math.cos(Math.PI/4));		// inner circle angle 45 in both sides
+	ret.rBottom = ret.s / 4; // this is always fixed: diameter of bottom is half of the top diameter
+	ret.sideArea = Math.PI*ret.side*(ret.rTop + ret.rBottom);
+	ret.hTop = ret.r*(1-Math.sin(Math.PI/4));		// height of cut ball segment
+	ret.vCaveBottom= (Math.PI*s*s)*ret.hBottom*(2/(2*2*3) - 1/(4*4*3));	// kartion leikattu kärkipuolikkan tilavuus 1/8 täyden kartion tilavuudesta
+	ret.vCaveTop = Math.PI*ret.hTop*ret.hTop*(ret.r-ret.hTop/3);				// leikatun pallosegmentin tilavuus
+	ret.vCave = ret.vCaveBottom + ret.vCaveTop;
+console.log("Cave dome45("+s+")="+JSON.stringify(ret));
+	return ret;
+}
+
+function getMetricsOfDome45( volume )
+{
+	var ret = {};
+	// Pallosegmentin tilavuus:  V=PI*h*h*(r-h/3);
+	// r = h/(1-Math.cos(Math.PI/4))
+	// V=PI*h*h*h(1/(1-Math.cos(Math.PI/4))-1/3);
+	// h = pow(V/(PI*(1/(1-Math.cos(Math.PI/4))-1/3)), 1/3);
+	ret.h = Math.pow(volume/(Math.PI*(1/(1-Math.cos(Math.PI/4))-1/3)), 1/3);
+	ret.r = ret.h/(1-Math.cos(Math.PI/4));
+	ret.s = ret.r *(2*Math.sin(Math.PI/4));
+	ret.volume = volume;
+	ret.vCheck = Math.PI * ret.h * ret.h * (ret.r - ret.h/3);
+console.log("dome45("+volume+")="+JSON.stringify(ret));
+	return ret;
+}
+
+var scaleToActualVolume = null;
+var dome300 = null;
 
 function getMetrics(pRatio, hpStorageSizeRockMm3) {
 	if (metrics && metrics.rGround && typeof pRatio === 'undefined' && typeof hpStorageSizeRockMm3 === 'undefined') return metrics;
-	const isCylinder = getBooleanParam( 'shapeCylinder', true );
+	const isCylinder = false; // getBooleanParam( 'shapeCylinder', true );
+	const tHigh = getFloatParam('tHigh', 1033);
+
 	var storageMetrics = {
 		heatPumpCompressorTin : 313, // getFloatParam("heatPumpCompressorTin", 313);	// 40 Celsius
 		heatExchangeDeltaT : 2,  // // 2 K difference in heat exchange
@@ -648,6 +709,7 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 		<!-- these hidden old values are set based on the values of hpStorageSizeRockM3, highToLowPressureRatio, rockDensity, gravelDensity, insGravelDensity -->
 		hpStorageSizeRockM3 : (hpStorageSizeRockMm3 ? hpStorageSizeRockMm3 : getFloatParam('hpStorageSizeRockMm3', 6.5 )) * 1000000,	
 		ins : getFloatParam('highPressureInsulationM', 10 ), // in meters
+		maxHpGravelExpansion : getFloatParam('maxHpGravelExpansion', 0.05 ), 
 		costOfSurfaceM2 : getFloatParam('costOfSurfaceM2', 1000 ),
 		costOfMiningM3 : getFloatParam('costOfMiningM3', 12 ),
 		generatorCostOfKW : getFloatParam('generatorCostOfKW', 250),
@@ -658,9 +720,23 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 		pRatioTolerance : getFloatParam('pRatioTolerance_kPa', 100)*1000,	// by default about 1 bar tolerance before the deck starts to rise by pressure
 		gravelDensity : getFloatParam('gravelDensity', 2.1 ),	// high density because it makes storage more compact and aboslute pressure drop does not matter in a high pressure
 		insGravelDensity : getFloatParam('insGravelDensity', 1.6 ),	// low density to minimize the pressure drop in low pressure
-		rockHeatCapasity : getFloatParam('rockHeatCapasity', 0.80 ) // kJ/kg/K
+		rockHeatCapasity : getFloatParam('rockHeatCapasity', 0.80 )*1000, // kJ/kg/K
+		maxPartLiquid : 0.03,   // spefic value is calculated later
+		rockdomeThicknessOfCyliderRadius : 1/6	// arch top height is 12 times the dimension 
 	};
 	metrics = storageMetrics;
+	
+	if (metrics.ins == 10) metrics.ins = metrics.ins*tHigh/1030; // scale the insluation layer to the default!
+	
+	// Let's fix the dome rock temperature to approximately 300K, we assume insulation k value of cave top is 10 times of 10m gravel inslulation in the bottom lp storage
+	metrics.caveTopInsulation = (tHigh-300)/(300-70) * metrics.ins/10;
+	
+	// scale the low pressure insulation layer for its lower temps but check also the tLow temp diff between 70K and 300K
+	const lpInsForHighT = metrics.ins * (tHigh*400/1030-300)/(tHigh-300);	
+	const lpInsForLowT = metrics.ins * (300-70)/(tHigh-300);	
+	const domeThickness = 25;
+	metrics.insLpSides = lpInsForHighT > lpInsForLowT ? lpInsForHighT : lpInsForLowT;
+	
 	var h, loop = 0;
 
 	// The low and high pressure storages have the same weight.  The weight of low pressure storage must contain the high pressure.
@@ -668,96 +744,161 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 	// V1 = the high pressure cylider rock volume needed to contains pHigh pressure == 
 
 	// this estimation was based on radius=150 and insulation layer=10, 
-	metrics.expectedAverageDensity = (metrics.gravelDensity * 4 + metrics.insGravelDensity) / 5;	// very near to the actual value when high pressure insulation layer is 10 m
+	metrics.hpExpectedAverageDensity = (metrics.gravelDensity * 4 + metrics.insGravelDensity) / 5;	// very near to the actual value when high pressure insulation layer is 10 m
+	var lpExpectedV3AverageGravelDensity = (metrics.gravelDensity * 7 + metrics.insGravelDensity) / 8;	// This applies below ground!
 	for (;;) {
 		metrics.V1 = metrics.hpStorageSizeRockM3;
 		// the mined volume in cylinder
-		metrics.actualV1 =  metrics.V1 * metrics.rockDensity/metrics.expectedAverageDensity;
+		metrics.actualV1 =  metrics.V1 * metrics.rockDensity/metrics.hpExpectedAverageDensity;
 
 		// V1 is the dense base rock volume needed above to contain the pressure, 
-
 		// V2 = the rock volume to contain the expansion of gravel in the high pressure cylinder,
 		// 		== the volume exceeding the high pressure storage because of gravel fill
 		metrics.V2 = metrics.actualV1 - metrics.V1;
 		// the mined volume above the high pressure cylinder
 		metrics.V3 = metrics.V1 - metrics.V2;		
 		// volume above ground
-		metrics.V4 = metrics.V1 * (metrics.rockDensity / metrics.expectedAverageDensity) - metrics.V3;
-		metrics.totalMiningVolume = metrics.actualV1 + metrics.V3;	// 
+
+		const targetPLow = getFloatParam( 'targetPLow', 102 ) * 1000;
+		metrics.pLow = targetPLow; 
+		metrics.pHigh = metrics.pLow * metrics.highToLowPressureRatio;
 		
 		if (isCylinder) {
 			// The shape is almost complete cylinder extended only by the 1:5 driving slopes 
 			// Let's keep this very simple: we want pLow to be just above air pressure, lets say 105 kPa =>
-			const targetPLow = getBooleanParam( 'targetPLow', 105000 );
-			metrics.pLow = targetPLow; 
-			metrics.pHigh = metrics.pLow * metrics.highToLowPressureRatio;
-
 			const dBars = (metrics.pHigh/1000) / 10;
 			const totalDepth = 2 * (dBars / metrics.rockDensity);
+
+			metrics.V4 = metrics.V1 * (metrics.rockDensity / metrics.hpExpectedAverageDensity) - metrics.V3;
+			metrics.totalMiningVolume = metrics.actualV1 + metrics.V3;	// 
+
 			// V1 = h * PI * r * r => r = sqrt(V1/(h*PI));
-			metrics.hCylinder = (metrics.rockDensity/metrics.expectedAverageDensity) * (totalDepth/2);
+			metrics.hCylinder = (metrics.rockDensity/metrics.hpExpectedAverageDensity) * (totalDepth/2);
 			metrics.hBelow = totalDepth - metrics.hCylinder;
-			metrics.hAbove = totalDepth * (metrics.rockDensity/metrics.expectedAverageDensity - 1);
+			metrics.hAbove = totalDepth * (metrics.rockDensity/metrics.hpExpectedAverageDensity - 1);
 			metrics.pHighStorageHeight = metrics.hCylinder - 13.3;	// 10 m insulation on top and 3 m in the bottom
 			metrics.rCylinder = Math.sqrt( metrics.V1 / (Math.PI*totalDepth/2));
 			metrics.rTop = metrics.rGround = metrics.rCylinder;
 			metrics.sideAbove = metrics.hAbove;
 			metrics.sideBelow = metrics.hBelow;
+			metrics.caveSide = metrics.hCylinder;
+			metrics.rCaveBottom = metrics.rCylinder;
+			metrics.rOpenBottom = metrics.rCylinder;
+			metrics.domeThickness = 0;
+
+			// let's assume the vertical insulation= ins (10m) and high pressure horizontal insulation on top 10m (and bottom 3.3m)
+			metrics.highPressureStorageVolume = (metrics.rCylinder - metrics.ins) * (metrics.rCylinder - metrics.ins) * Math.PI * metrics.pHighStorageHeight;  
+			metrics.highPressureInsulationMVolume = (metrics.rCylinder*metrics.rCylinder - (metrics.rCylinder-metrics.ins)*(metrics.rCylinder-metrics.ins))*Math.PI*metrics.pHighStorageHeight
+													+ metrics.rCylinder*metrics.rCylinder*0.3*Math.PI;
+			// for simplicity we assume the percentage of insulation of the total volume to be the same in high and low pressures storages
+			metrics.hpAverageGravelDensity = // total high pressure height 
+				(metrics.highPressureStorageVolume * metrics.gravelDensity +  metrics.highPressureInsulationMVolume*metrics.insGravelDensity) /
+				(metrics.highPressureStorageVolume +  metrics.highPressureInsulationMVolume);
+			metrics.highPressureStorageSurfaceArea = 2 * metrics.rCylinder * metrics.rCylinder * Math.PI + 2 * metrics.rCylinder * Math.PI * metrics.hCylinder; // hot storage surface area to be insulated
+
+			const h2 = h * metrics.rCylinder / metrics.rGround;
+			metrics.lowPressureStorageSurfaceArea = 
+				isCylinder ? metrics.highPressureStorageSurfaceArea :
+				Math.PI * metrics.rTop*metrics.rTop + 
+				// Kulma 60 => s = sqrt(h*h+r*r), joten vaipan pinta-ala = r * sqrt(h*h+r*r) * PI;
+				Math.PI * (metrics.rGround * Math.sqrt(metrics.rGround*metrics.rGround+h*h) 
+				- metrics.rCylinder*Math.sqrt(metrics.rCylinder*metrics.rCylinder + h2*h2))
+				// Kulma 45 =>  h = r => s = sqrt(2 * r * r) + yläpuoli
+				+ Math.PI * (metrics.rTop*metrics.rTop + metrics.rGround * Math.sqrt(metrics.rGround*metrics.rGround*2) 
+					  - metrics.rTop * Math.sqrt(metrics.rTop*metrics.rTop*2));
 		}
 		else {
-			// The upper cut made in 60 degrees angle and the above ground fill in 45 decrees angle
-		
-			// The dimensions of above ground gravel is predefined: 45 decree angle and each side equal, s=s1=s2=s2 => the top radius = s/2;
-			// Let x = metrics.hAbove, the height of above ground gravel 
-			// => s*s = x*x + x*x => top radius rTop = sqrt(2*x*x)/2,  rGround= x+sqrt(2*x*x)/2;
-			// V4 = rGround*rGround*rGround*PI/3 - rTop*rTop*rTop*PI/3
-			// V4 = rGround*rGround*rGround*PI/3 - rTop*rTop*rTop*PI/3
-			// When V=V4*3/PI
-			// V = (x+sqrt(2*x*x)/2)*(x+sqrt(2*x*x)/2)*(x+sqrt(2*x*x)/2) - (sqrt(2*x*x)/2)*(sqrt(2*x*x)/2)*(sqrt(2*x*x)/2)
-			// Solve with https://www.wolframalpha.com/  =>
-			// Because we know that V and r both are positive
-			// V = 1/2*(5+3*sqrt(2))*x*x*x*x
-			// => x = pow((2*V4*3/PI) / (5+3*sqrt(2)),1/3)
-			metrics.hAbove = Math.pow((2*metrics.V4*3/Math.PI) / (5+3*Math.sqrt(2)),1/3);
-			metrics.rTop = Math.sqrt(2*metrics.hAbove*metrics.hAbove)/2;
-			metrics.rGround = metrics.hAbove+metrics.rTop;
-	/*
-	metrics.testV4 = metrics.rGround*metrics.rGround*metrics.rGround*Math.PI/3 - metrics.rTop*metrics.rTop*metrics.rTop*Math.PI/3;
-	console.log("V4-testV4="+(metrics.V4-metrics.testV4));
-	if (Math.abs(metrics.V4-metrics.testV4)>10) {
-		console.log("Test failed:"+JSON.stringify(storageMetrics)); 
-		return;
-	}*/
-			// Let rCylinder to be the radius of high pressure cylider cutting the 60 dec cone above it and h full height of the cylinder and s its side
-			// s*s = rGround*rGround + h*h	// 
-			// s = 2*rGround
-			// => h = sqrt(3*rGround*rGround);
-			// V3 = rGround*rGround*PI*h/3 - rCylinder*rCylinder*PI*(h*rCylinder/rGound)/3
-			// => V3 = rGround*rGround*PI*h/3 - rCylinder*rCylinder*PI*(h*rCylinder/rGound)/3
-			// => 3*V3/PI = rGround*rGround*h - rCylinder*rCylinder*(h*rCylinder/rGound);
-			// V=3*V3/PI and h = sqrt(3*rGround*rGround), r=rGround, x=rCylinder
-			// => V = r*r*sqrt(3*r*r) - x*x*(sqrt(3*r*r)*x/r);
-			// Solve that with https://www.wolframalpha.com/  =>
-			// It says "Alternate forms assuming r, V, and x are positive
-			//		V = sqrt(3) (r^3 - x^3)
-			//		V = sqrt(3) r^3 - sqrt(3) x^3
-			// => x^3 = r^3 - V/sqrt(3)
-			// => rCylinder = pow(pow(rGround,3) - 3*V3/(sqrt(3)*PI), 1/3)
-			metrics.rCylinder = Math.pow(Math.pow(metrics.rGround,3) - 3*metrics.V3/(Math.PI*Math.sqrt(3)), 1/3);
-			h = Math.sqrt(3*metrics.rGround*metrics.rGround);
-			metrics.hBelow = h*(metrics.rGround-metrics.rCylinder)/metrics.rCylinder;
-			// pHigh == (the mass in newtown above high pressure storage) / (top area of high pressure cylinder) + 100000 - pRatioTolerance;
-			metrics.pHigh = metrics.rockDensity*metrics.V1*1000*10 / (metrics.rCylinder*metrics.rCylinder*Math.PI) + 100000 - metrics.pRatioTolerance;
-			metrics.pLow = metrics.pHigh/metrics.highToLowPressureRatio;
+			// Let's a model dimensions for high pressure dome and scale it to the 
+			// Scaled from the example https://www.scribd.com/document/123738870/RCC-Domes 
+			// Dome has max pressure 30 MPa with weight 2.5MN/m2, when its width s=300m, inner radius r=214m, dome thickess 12,5m and max angle of the inner circle 45 astetta. 
+			// If max pressure of rock  150 MPa => max pressure of unbroken bedrock 60MPa (40%), 
+			// The radius of the external circle could be 250m
+			// Leikatun kartion sivujen jyrkkyys 60 astetta ja sivujen ja pohjan pituudet samat, 
+			// saadaan tasasivuinen puolesta välistä leikattu kartio, korkeus hS =  
+			// Tällöin sen tilavuus cV = (PI*s*s/4)*hS/3 - PI*s*s/16*hS/6
+			// s=2*r*cos(Math.PI/4) = r=s/(2*Math.cos(Math.PI/4), (PI/4 == 45 degrees)
+			if (dome300 == null) dome300 = getMetricsOfCaveDome45(300);
+			// pow(sActual,3)/because pow(s,3)=vActual/vCave => sActual=pow(pow(s,3)*vActual/vCave, 1/3)
+			metrics.caveVolume = metrics.V1 * (metrics.rockDensity / metrics.hpExpectedAverageDensity);
+			scaleToActualVolume = metrics.caveVolume / dome300.vCave;
+console.log("Dome volume for width="+dome300.s+": "+dome300.vCave+"=> scaleToActualVolume="+scaleToActualVolume);
+			const caveS = Math.pow(Math.pow(300,3)*scaleToActualVolume, 1/3);
+			metrics.caveDome = getMetricsOfCaveDome45(caveS);
+			const dome = metrics.caveDome;
+			dome.scaleLength = dome.s/300;
+			metrics.domeThickness = dome.thickness = domeThickness * dome.scaleLength;
+			
+console.log("Actual dome width="+caveS+": "+metrics.caveVolume+"=> scaleLength="+dome.scaleLength+", dome="+JSON.stringify(dome));
+			
+			// next we calclulate 1. insulation layer in the side and bottom. 2 the volume extension reserve in the top of cave 3. the actual storage volume 
+			// 1. Kartion halkaisija pienenee 2*10/sin(60)
+			dome.rTopI = dome.rTop - metrics.ins/Math.sin(Math.PI*60/180);
+			dome.rBottomI = dome.rBottom * dome.rTopI / dome.rTop;
+			// Rock temperature about 300K,  bottom temp 200K => 100K diff, in the side the difference is tHigh-300 => bottom insulation should be ins*100/(tHigh-300)
+			// when h is the same => V1/V2=r1*r1/r2*r2 => V2 = V1*r2*r2/r1*r1
+			const r1 = dome.s/2, r2=dome.sActual/2;
+			metrics.highPressureInsulationMVolume = dome.vCave * (1 - dome.rTopI*dome.rTopI/(dome.rTop*dome.rTop)) + Math.PI * dome.rBottomI*dome.rBottomI*metrics.ins*100/(tHigh-300);
+			metrics.topInsulationVolume = dome.vCaveTop * (1- Math.pow(dome.r-(1+metrics.caveTopInsulation),3)/Math.pow(dome.r,3));	// min 1 m free space!
+			metrics.highPressureStorageVolume = (dome.vCave - metrics.highPressureInsulationMVolume - metrics.topInsulationVolume)*(1-metrics.maxHpGravelExpansion);
+			metrics.rCaveBottom = dome.rBottom;
 
-			const dBars = (metrics.pHigh/1000) / 10;
-			metrics.hCylinder = (dBars / metrics.rockDensity) * (metrics.rockDensity/metrics.expectedAverageDensity);
-			metrics.pHighStorageHeight = metrics.hCylinder - 13.3;	// 10 m insulation on top and 3 m in the bottom
+			// for simplicity we assume the percentage of insulation of the total volume to be the same in high and low pressures storages
+			metrics.hpAverageGravelDensity = // total high pressure height 
+				(metrics.highPressureStorageVolume * metrics.gravelDensity +  metrics.highPressureInsulationMVolume*metrics.insGravelDensity) / dome.vCave;
 
-			var x = metrics.rGround - metrics.rTop 
-			metrics.sideAbove = Math.sqrt( metrics.hAbove * metrics.hAbove + x * x );
-			x = metrics.rGround - metrics.rCylinder; 
+			metrics.actualV1 = dome.vCave;
+			metrics.totalMiningVolume = metrics.actualV1 + metrics.V3;
+
+			// V2 = the rock volume to contain the expansion of gravel in the high pressure cylinder,
+			// 		== the volume exceeding the high pressure storage because of gravel fill
+			metrics.V2 = metrics.actualV1 - metrics.V1;
+
+			// the mined volume above the high pressure cave
+			metrics.V3 = metrics.V1 - metrics.V2;		
+
+			// the volume above ground has now insludation layer, so it density the the compacted gravel density
+			metrics.lpExpectedV3AverageGravelDensity = lpExpectedV3AverageGravelDensity;
+			metrics.V4 = ((metrics.V1-metrics.V3)  + metrics.V3 * (1 - lpExpectedV3AverageGravelDensity/metrics.rockDensity))
+						* metrics.rockDensity / metrics.gravelDensity;
+/*console.log(metrics.V4+" = ("+metrics.V1+" * "+(1 - metrics.hpAverageGravelDensity/metrics.rockDensity)+" + "+metrics.V3+" * "+(1 - lpExpectedV3AverageGravelDensity/metrics.rockDensity)+")"+
+						"* "+(metrics.rockDensity / metrics.gravelDensity));*/
+			metrics.topDome = getMetricsOfDome45(metrics.V4);
+			metrics.sideAbove = metrics.topDome.r*Math.PI / 4;	// path from 45 to 90
+			metrics.hAbove = metrics.topDome.h;
+			metrics.rGround = metrics.topDome.s / 2;
+			metrics.rOpenBottom = dome.rTop;		// scale to to next level
+			// h = height of V3, hTot = distance to virtual end of cone
+			// V3 = PI*rGround*rGround*hTot/3 - PI*rOpenBottom*rOpenBottom*(hTot-h)/3
+			// hTot = h * rGround / (rGround-rOpenBottom);
+			// => V3 = PI*rGround*rGround*h * rGround / (rGround-rOpenBottom)/3 - PI*rOpenBottom*rOpenBottom*(h * rGround * (rGround-rOpenBottom)-h)/3
+			// => V3/h = PI*rGround*rGround * rGround / (rGround-rOpenBottom)/3 - PI*rOpenBottom*rOpenBottom*(rGround * (rGround-rOpenBottom)-1)/3
+			// => h = V3/(PI*rGround*rGround * rGround / (rGround-rOpenBottom)/3 - PI*rOpenBottom*rOpenBottom*(rGround * (rGround-rOpenBottom)-1)/3);
+			metrics.hBelow = 3 * metrics.V3/(Math.PI*metrics.rGround*metrics.rGround * metrics.rGround / (metrics.rGround-metrics.rOpenBottom)  
+						- Math.PI*metrics.rOpenBottom*metrics.rOpenBottom*(metrics.rGround / (metrics.rGround-metrics.rOpenBottom)-1));
+
+console.log("Vtest="+(Math.PI*metrics.rGround*metrics.rGround*metrics.hBelow));
+			metrics.caveSide = dome.side  + dome.hTop+dome.thickness;		// scale to to next level 
+
+			metrics.hCylinder = dome.hTop + dome.hBottom;
+			metrics.rTop = 0;
+			
+			// V3 = hBelow * rGround / (rGround-rOpenBottom) * rGround * rGround * PI / 3 - hBelow * (rGround / (rGround-rOpenBottom) - 1)*rOpenBottom*rOpenBottom*PI/3;
+			// => V3 = hBelow * (rGround / (rGround-rOpenBottom) * rGround * rGround * PI / 3 - (rGround / (rGround-rOpenBottom) - 1)*rOpenBottom*rOpenBottom*PI/3);
+			// => hBelow = V3 / (rGround / (rGround-rOpenBottom) * rGround * rGround * PI / 3 - (rGround / (rGround-rOpenBottom) - 1)*rOpenBottom*rOpenBottom*PI/3);
+			//metrics.hBelow = metrics.V3 / (metrics.rGround / (metrics.rGround-metrics.rOpenBottom) * metrics.rGround * metrics.rGround * Math.PI / 3 - 
+			//				(metrics.rGround / (metrics.rGround-metrics.rOpenBottom) - 1)*metrics.rOpenBottom*metrics.rOpenBottom*Math.PI/3);
+			var x = metrics.rGround - metrics.rOpenBottom; 
 			metrics.sideBelow = Math.sqrt( metrics.hBelow * metrics.hBelow + x * x );
+			const sinX = metrics.sideBelow / metrics.hBelow;
+			x = (metrics.rGround-sinX*metrics.insLpSides);
+console.log(x+"=("+metrics.rGround+"-"+sinX+"*"+metrics.insLpSides);
+			// V1/V2==pow(r1,3)/pow(r2,3) => V2 = V1*pow(r2,3)/pow(r1,3)
+			metrics.vLpInsulation = metrics.V3 - metrics.V3*Math.pow(x,3)/Math.pow(metrics.rGround,3) + Math.PI*metrics.rOpenBottom*metrics.rOpenBottom*metrics.ins;
+			metrics.lpV3AverageGravelDensity = (metrics.gravelDensity *(metrics.V3-metrics.vLpInsulation) + metrics.vLpInsulation*metrics.insGravelDensity) / metrics.V3;
+			metrics.highPressureStorageSurfaceArea = 2*Math.PI*dome.r*dome.hTop + Math.PI*dome.rBottomI*dome.rBottomI*Math.PI + dome.sideArea;
+			metrics.lowPressureStorageSurfaceArea = Math.PI*metrics.rOpenBottom*metrics.rOpenBottom + // BOTTOM
+													Math.PI*metrics.sideBelow*(metrics.rGround+metrics.rOpenBottom) + // side below ground
+													Math.PI*metrics.topDome.r*metrics.topDome.h;					// area of top ball
 		}
 /*
 //console.log("metrics.testV3 = "+(metrics.rGround*metrics.rGround*Math.PI*h/3)+" - "+(metrics.rCylinder*metrics.rCylinder*(h*metrics.rCylinder/metrics.rGround)*Math.PI/3)+", h="+h);
@@ -768,39 +909,39 @@ if (Math.abs(metrics.V3-metrics.testV3)>10) {
 	return;
 }*/
 		
-		// let's assume the vertical insulation= ins (10m) and high pressure horizontal insulation on top 10m (and bottom 3.3m)
-		metrics.highPressureStorageVolume = (metrics.rCylinder - metrics.ins) * (metrics.rCylinder - metrics.ins) * Math.PI * metrics.pHighStorageHeight;  // 10 m = insulation layer on the top
-		metrics.highPressureInsulationMVolume = (metrics.rCylinder*metrics.rCylinder - (metrics.rCylinder-metrics.ins)*(metrics.rCylinder-metrics.ins))*Math.PI*metrics.pHighStorageHeight
-												+ metrics.rCylinder*metrics.rCylinder*13.3*Math.PI;
-		// for simplicity we assume the percentage of insulation of the total volume to be the same in high and low pressures storages
-		metrics.hpAverageGravelDensity = // total high pressure height 
-			(metrics.highPressureStorageVolume * metrics.gravelDensity +  metrics.highPressureInsulationMVolume*metrics.insGravelDensity) /
-			(metrics.highPressureStorageVolume +  metrics.highPressureInsulationMVolume);
-		if (!metrics.hpAverageGravelDensity || !metrics.expectedAverageDensity) {
+		if (!metrics.hpAverageGravelDensity || !metrics.hpExpectedAverageDensity || !metrics.lpV3AverageGravelDensity) {
 console.log("Bad values:"+JSON.stringify(storageMetrics)); 
 alert("Internal error");
 return;
 		}
-		else if (Math.abs(metrics.hpAverageGravelDensity-metrics.expectedAverageDensity)<0.01) {
+		else if (Math.abs(metrics.hpAverageGravelDensity-metrics.hpExpectedAverageDensity)<0.01 && Math.abs(metrics.lpV3AverageGravelDensity-lpExpectedV3AverageGravelDensity)) {
+			metrics.lowPressureStorageVolume = metrics.V4 + metrics.V3 - metrics.vLpInsulation;
+			metrics.lpAverageGravelDensity = 
+				(metrics.V4 * metrics.gravelDensity + metrics.gravelDensity *(metrics.V3-metrics.vLpInsulation) + metrics.vLpInsulation*metrics.insGravelDensity) / (metrics.V4 + metrics.V3);
 			break;
 		}
 		else {
-console.log("Loop again: expected density="+metrics.expectedAverageDensity+" <> calclulated density="+metrics.hpAverageGravelDensity);
+console.log("Loop again: expected density="+metrics.hpExpectedAverageDensity+" <> calclulated density="+metrics.hpAverageGravelDensity+" or "+metrics.lpV3AverageGravelDensity+"<>"+lpExpectedV3AverageGravelDensity);
 			if (loop++ > 100) {
 console.log(JSON.stringify(storageMetrics)); 
-				alert("Cannot resolve expected density="+metrics.expectedAverageDensity+" <> calclulated density="+metrics.hpAverageGravelDensity);
+				alert("Cannot resolve expected density="+metrics.hpExpectedAverageDensity+" <> calclulated density="+metrics.hpAverageGravelDensity);
 				return;
 			}
-			metrics.expectedAverageDensity = metrics.hpAverageGravelDensity;
+			metrics.hpExpectedAverageDensity = metrics.hpAverageGravelDensity;
+			lpExpectedV3AverageGravelDensity = metrics.lpV3AverageGravelDensity;
 		}
 	}
-console.log("Volume: "+metrics.V1+", expected density="+metrics.expectedAverageDensity+" <> calclulated density="+metrics.hpAverageGravelDensity);
-console.log("pHigh: "+(metrics.pHigh/1000)+" kPa, pLow: "+(metrics.pLow/1000)+" kPa");
+	/*
+	metrics.testV4 = metrics.rGround*metrics.rGround*metrics.rGround*Math.PI/3 - metrics.rTop*metrics.rTop*metrics.rTop*Math.PI/3;
+	console.log("V4-testV4="+(metrics.V4-metrics.testV4));
+	if (Math.abs(metrics.V4-metrics.testV4)>10) {
+		console.log("Test failed:"+JSON.stringify(storageMetrics)); 
+		return;
+	}*/
 
 //console.log("pHighStorageHeight="+Math.round(metrics.pHighStorageHeight)+", highPressureStorageVolume Mm3="+Math.round(metrics.highPressureStorageVolume/1000000)+
 //		", hpAverageGravelDensity="+myRound(metrics.hpAverageGravelDensity,2));
 		// Above ground expansion of gravel V4:
-	metrics.highPressureStorageSurfaceArea = 2 * metrics.rCylinder * metrics.rCylinder * Math.PI + 2 * metrics.rCylinder * Math.PI * metrics.hCylinder; // hot storage surface area to be insulated
 
 	// TBD: chargeLevel = 0 - 1		// charge level of hot storage
 	// Hight<0 == below => decrease the in/out pressure, height>0 == above => increments in/out pressure
@@ -817,13 +958,25 @@ console.log("pHigh: "+(metrics.pHigh/1000)+" kPa, pLow: "+(metrics.pLow/1000)+" 
 		metrics.heightOfMainTurbinOut = -10;	// 5 m insulation and some extra 
 		metrics.pipeFromMainTurbin = 20;	// height and some extra 
 	}	
+	else if (generatorLocation == 'GROUND') {
+		metrics.pipeFromColdCompressor = metrics.sideBelow + metrics.caveSide + 50;
+		metrics.heightOfColdCompressorOut = -chargeLevel * metrics.hCylinder+metrics.domeThickness+metrics.hBelow;
+		metrics.heightAboveColdCompressorOut = chargeLevel * metrics.hCylinder+metrics.domeThickness+metrics.hBelow;
+		metrics.heightOfColdCompressorIn = chargeLevel * (metrics.hBelow+metrics.hAbove) - metrics.hAbove;
+		metrics.heightAboveColdCompressorIn = (1-chargeLevel) * (metrics.hBelow+metrics.hAbove) + metrics.hAbove;
+		metrics.pipeToColdCompressor = metrics.sideBelow + 50;
+		metrics.heightOfMainTurbinIn = metrics.hBelow + metrics.domeThickness;	// 
+		metrics.pipeToMainTurbin = metrics.sideBelow + metrics.domeThickness + metrics.rOpenBottom + 20;	// some extra
+		metrics.heightOfMainTurbinOut = 20;
+		metrics.pipeFromMainTurbin =  20;	// height and some extra 
+	}
 	else if (generatorLocation == 'MIDDLE') {
-		metrics.pipeFromColdCompressor = metrics.rCylinder + metrics.hCylinder + 20;
+		metrics.pipeFromColdCompressor = metrics.caveSide + 50;
 		metrics.heightOfColdCompressorOut = -chargeLevel * metrics.hCylinder;
 		metrics.heightAboveColdCompressorOut = chargeLevel * metrics.hCylinder;
 		metrics.heightOfColdCompressorIn = chargeLevel * (metrics.hBelow+metrics.hAbove);		// insulation
 		metrics.heightAboveColdCompressorIn = (1-chargeLevel) * (metrics.hBelow+metrics.hAbove);
-		metrics.pipeToColdCompressor = metrics.rCylinder + 20;
+		metrics.pipeToColdCompressor = metrics.rOpenBottom + 20;
 
 		metrics.heightOfMainTurbinIn = -10;	// 
 		metrics.pipeToMainTurbin = metrics.rCylinder + 20;	// some extra
@@ -839,9 +992,9 @@ console.log("pHigh: "+(metrics.pHigh/1000)+" kPa, pLow: "+(metrics.pLow/1000)+" 
 		metrics.pipeToColdCompressor = metrics.rCylinder + metrics.hCylinder + 20;
 
 		metrics.heightOfMainTurbinIn = metrics.hCylinder;
-		metrics.pipeToMainTurbin = metrics.hCylinder + metrics.rCylinder + 20;	// some extra
+		metrics.pipeToMainTurbin = metrics.caveSide + metrics.rCylinder + 20;	// some extra
 		metrics.heightOfMainTurbinOut = metrics.hCylinder + metrics.hBelow + metrics.hAbove;
-		metrics.pipeFromMainTurbin = metrics.hCylinder +  metrics.sideAbove + metrics.sideBelow + metrics.rTop + 20;	// height and some extra 
+		metrics.pipeFromMainTurbin = metrics.caveSide +  metrics.sideAbove + metrics.sideBelow + metrics.rTop + 20;	// height and some extra 
 	}
 	
 	if (coldExpanderLocation == 'BOTTOM') {
@@ -867,16 +1020,6 @@ console.log("pHigh: "+(metrics.pHigh/1000)+" kPa, pLow: "+(metrics.pLow/1000)+" 
 
 	// Kartion vaipan pinta-ala = PI * r * s, jossa s = sqrt(r*r + h*h), 
 	// Leikatun kartion vaipan apinta.ala = PI * r * s - PI * r2 * s2, jossa r2 ja s2 ovat leikatun kartion säde ja sivun pituus
-	const h2 = h * metrics.rCylinder / metrics.rGround;
-	metrics.lowPressureStorageSurfaceArea = 
-		isCylinder ? metrics.highPressureStorageSurfaceArea :
-		Math.PI * metrics.rTop*metrics.rTop + 
-		// Kulma 60 => s = sqrt(h*h+r*r), joten vaipan pinta-ala = r * sqrt(h*h+r*r) * PI;
-		Math.PI * (metrics.rGround * Math.sqrt(metrics.rGround*metrics.rGround+h*h) 
-		- metrics.rCylinder*Math.sqrt(metrics.rCylinder*metrics.rCylinder + h2*h2))
-		// Kulma 45 =>  h = r => s = sqrt(2 * r * r) + yläpuoli
-		+ Math.PI * (metrics.rTop*metrics.rTop + metrics.rGround * Math.sqrt(metrics.rGround*metrics.rGround*2) 
-			  - metrics.rTop * Math.sqrt(metrics.rTop*metrics.rTop*2));
 console.log(JSON.stringify(storageMetrics, null, 2)); 
 
 	if (typeof pRatio === 'undefined' && typeof hpStorageSizeRockMm3 === 'undefined') {
@@ -1019,8 +1162,8 @@ console.log(loop+": ret="+JSON.stringify(ret));
 		bottomLines.push("Uncharged as electricity %");
 		yTitles.push("TWh");
 		bottomLines.push("Stored electricity TWh");
-		bottomLines.push("Stored district heat TWh");
-		bottomLines.push("Extra available district heat above 50°C TWh");
+		bottomLines.push("Stored District heat TWh");
+		bottomLines.push("Extra available District heat above 50°C TWh");
 		
 		var extra = [];
 		var extra2 = [];
@@ -1178,11 +1321,11 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 	metrics.pipeFromMainCompressor = metrics.pipeToMainTurbin;
 */
 		var pHighInTurbin = (pHigh+getHeadLossPT(pHigh, tHigh, metrics.heightOfMainTurbinIn )) * (1-maxPressureDrop);
-		var pLowInTurbin = generatorLocation == 'TOP' ? pLow : pLow * (1-maxPressureDrop);	// we do not know out density yet???
+		var pLowInTurbin = generatorLocation == 'TOP' || generatorLocation == 'GROUND' ? pLow : pLow * (1-maxPressureDrop);	// we do not know out density yet???
 		var tHighActual = getActualTempAtP( tHigh, pHigh, pHighInTurbin );
 		var mainTurbin = doAdiabaticProcessWithS( name, pHighInTurbin, pLowInTurbin, tHighActual, tEfficiency, showLog ? "Hot turbin" : null );
 
-		if (generatorLocation != 'TOP') {
+		if (generatorLocation != 'TOP' && generatorLocation != 'GROUND') {
 			pLowInTurbin = (pLow + getHeadLoss(mainTurbin.dOut, metrics.heightOfMainTurbinOut)) * (1-maxPressureDrop);
 			mainTurbin = doAdiabaticProcessWithS( name, pHighInTurbin, pLowInTurbin, tHighActual, tEfficiency, showLog ? "Hot turbin" : null );
 		}
@@ -1291,14 +1434,27 @@ console.log("chargePDrops:"+JSON.stringify(chargePDrops, null, 2));
 "rockDensity":2.65,"gravelDensity":2.1,"insGravelDensity":1.6,"rockHeatCapasity":0.8,"hpAverageGravelDensity":2.0019739765394906,*/
 			// gas budjet in turbin case: 
 			var tc = {};
-			tc.hpGravelVolume = (hotCycle[0].hIn - coldCompressor.hOut) / (1000*metrics.gravelDensity*metrics.rockHeatCapasity*(hotCycle[0].tIn-coldCompressor.tOut));
+			// The volume changing the temperature in second for 1000kg mass flow in high pressure storage
+			tc.hpGravelVolume = (hotCycle[0].hIn - coldCompressor.hOut) / (metrics.gravelDensity*metrics.rockHeatCapasity*(hotCycle[0].tIn-coldCompressor.tOut));
 			tc.hpGravelWeight = tc.hpGravelVolume * metrics.gravelDensity * metrics.rockDensity;
 			tc.hpGasVolume = tc.hpGravelVolume *(metrics.rockDensity-metrics.gravelDensity)/metrics.rockDensity;
+			tc.hpGasCharged = tc.hpGasVolume * hotCycle[0].dIn;
+			tc.hpGasUncharged = tc.hpGasVolume * coldCompressor.dOut;
 			tc.hpStorageChange = tc.hpGasVolume * (coldCompressor.dOut - hotCycle[0].dIn);
 			// We must assume, that extra heat of turbin out will sooner or later cooled to compressor in temperature, BUT low pressure may rise until then!!!
-			tc.lpGravelVolume = (hotCycle[1].hIn - coldCompressor.hIn) / (1000*metrics.hpAverageGravelDensity*metrics.rockHeatCapasity*(hotCycle[1].tIn-coldCompressor.tIn));
-			tc.lpGravelWeight = tc.lpGravelVolume * metrics.hpAverageGravelDensity * metrics.rockDensity;
-			tc.lpGasVolume = tc.lpGravelVolume*(metrics.rockDensity-metrics.hpAverageGravelDensity)/metrics.rockDensity;
+			tc.lpGravelVolume = (hotCycle[1].hIn - coldCompressor.hIn) / (metrics.gravelDensity*metrics.rockHeatCapasity*(hotCycle[1].tIn-coldCompressor.tIn));
+			tc.lpGravelWeight = tc.lpGravelVolume * metrics.gravelDensity * metrics.rockDensity;
+			tc.lpGasVolume = tc.lpGravelVolume*(metrics.rockDensity-metrics.gravelDensity)/metrics.rockDensity;
+			tc.lpGasUncharged = tc.lpGasVolume * hotCycle[1].dIn;
+			tc.lpGasCharged = tc.hpGasUncharged + tc.lpGasUncharged - tc.hpGasCharged;	
+			tc.lpDensityCharged = tc.lpGasCharged / tc.lpGasVolume;
+			// actualDensity = x * dLiquid + (1-x) * dGas 
+			// => x = (actualDensity - dGas) / (dLiquid - dGas);
+			tc.dLiq = Module.PropsSI('D', 'T', coldCompressor.tIn, 'Q', 0, name);
+			tc.dGas = Module.PropsSI('D', 'T', coldCompressor.tIn, 'Q', 1, name);
+			tc.maxPartLiquid = (tc.lpDensityCharged - tc.dGas)/(tc.dLiq - tc.dGas);
+			metrics.maxPartLiquid=tc.maxPartLiquid;
+			
 			tc.lpStorageChange = tc.lpGasVolume * (hotCycle[1].dIn - coldCompressor.dIn);
 			tc.changeKg = tc.hpStorageChange + tc.lpStorageChange;
 console.log("tc="+JSON.stringify(tc));
@@ -1423,7 +1579,7 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 		/*
 			{"heatPumpCompressorTin":313,"heatExchangeDeltaT":2,"heatPumpHighP":20000000,"r":150,"ins":10,"costOfSurfaceM2":1500,"costOfMiningM3":12,
 			"generatorCostOfKW":250,"tcCostOfKW":50,"heCostOfKW":50,"rockDensity":2.65,"gravelDensity":2.1,"insGravelDensity":1.6,"rockHeatCapasity":0.8,
-			"V1":6668474.972242486,"totalMiningVolume":13336949.944484971,"expectedAverageDensity":2,"pHighStorageHeight":125,
+			"V1":6668474.972242486,"totalMiningVolume":13336949.944484971,"hpExpectedAverageDensity":2,"pHighStorageHeight":125,
 			"highPressureStorageVolume":6877951.6283572065,"highPressureInsulationMVolume":1957777.7098640874,"hpAverageGravelDensity":1.9892124444444448,
 			"V2":2215170.7770067565,"V3":4453304.195235729,"V4":4376186.7005341295,"highPressureStorageSurfaceArea":259181.39392115793,
 			"hBelow":71.29999999999998,"hAbove":55.20481933477791,"r2":130.44518066522207,"lowPressureStorageSurfaceArea":318262.12135286065}
@@ -1444,7 +1600,7 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
   "costOfPowerKW": 306646249.8139391
 }
 		*/
-		// Heat below 50C cannot be used as district heat
+		// Heat below 50C cannot be used as District heat
 		const hAt323K = Module.PropsSI('H', 'P', hotCycle[1].pIn, 'T', 323, name);
 		const hMinDistrictHeat = hotCycle[1].tIn > 323 ? hotCycle[1].hIn : hAt323K;
 		cycleData.heatOutInDischarge1000 = (hotCycle[0].hOut- hMinDistrictHeat);
@@ -1455,10 +1611,11 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 		
 		// How long it takes to uncharge the high pressure storage with gas flow 1000kg* hotCycle[0].massFlow and deltaH = hotCycle[0].hIn - coldCycle[0].hOut;
 		cycleData.hpStorageHeatCapacity = metrics.rockHeatCapasity*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(hotCycle[0].tIn-coldCycle[0].tOut);
-		cycleData.unchargeTimeS = cycleData.hpStorageHeatCapacity / ((hotCycle[0].hIn - coldCycle[0].hOut) * 1000 * hotCycle[0].massFlow); // kJ/kg == J 1000*1000/1000kg
-		cycleData.storedElectricity_kWh = cycleData.netWorkOut * 1000 * cycleData.unchargeTimeS / 3600;
-		cycleData.storedDistrictHeat_kWh = cycleData.heatOutInDischarge * 1000 * cycleData.unchargeTimeS / 3600;
-		cycleData.extraAvailableDistrictHeat_kWh = (hAt323K < hMinDistrictHeat ? (hMinDistrictHeat-hAt323K) : 0) * hotCycle[0].massFlow * 1000 * cycleData.unchargeTimeS / 3600;
+//"unchargeTimeS": 3492.9504982300864, ??????
+		cycleData.unchargeTimeS = cycleData.hpStorageHeatCapacity / ((hotCycle[0].hIn - coldCycle[0].hOut) * 1000 * hotCycle[0].massFlow); // 
+		cycleData.storedElectricity_kWh = cycleData.netWorkOut * cycleData.unchargeTimeS / 3600;
+		cycleData.storedDistrictHeat_kWh = cycleData.heatOutInDischarge * cycleData.unchargeTimeS / 3600;
+		cycleData.extraAvailableDistrictHeat_kWh = (hAt323K < hMinDistrictHeat ? (hMinDistrictHeat-hAt323K) : 0) * hotCycle[0].massFlow * cycleData.unchargeTimeS / 3600;
 		cycleData.costOfStoragekWh = cycleData.costOfStorage / (cycleData.storedElectricity_kWh + cycleData.storedDistrictHeat_kWh);
 		cycleData.costOfPowerKW = metrics.generatorCostOfKW + 
 			(metrics.tcCostOfKW * (hotCycle[0].workProduced + coldCycle[0].workConsumed + cycleData.hotWorkConsumed + coldCycle[1].workProduced + 
@@ -1527,7 +1684,7 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 "rockHeatCapasity":0.8,
 "hCylinder":94.33962264150944,
 "pHighStorageHeight":81.03962264150944,
-"V1":6668474.972242486,"expectedAverageDensity":2,
+"V1":6668474.972242486,"hpExpectedAverageDensity":2,
 "highPressureStorageVolume":4990032.269549,
 "highPressureInsulationMVolume":1678442.7026934854,
 "hpAverageGravelDensity":1.9741509333333331,"V2":1700710.4098415514,
@@ -1540,13 +1697,21 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 "r2":97.63075175449278,
 "lowPressureStorageSurfaceArea":340794.56804748066}
 */
-	function drawStorage( canvasId, metrics, bottomLines ) {
+	function workToMW( work ) {
+		return ' '+Math.round(work/1000)+' MW';
+	}
+	function toCelsius( t ) {
+		return Math.round(t - 273.15)+"\u2103";
+	}
+	function drawStorage( canvasId, metrics, cycleData, bottomLines ) {
 		const dg = {};
+		var gasName = getInputParam('name', 'Nitrogen' ).toLowerCase();
 		const canvas = document.getElementById(canvasId);
+		var title = "Metrics of "+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. gravel ton energy storage";
 		// let's keep this very simple, set scale 1 m == 2 px, 
 		dg.marginX = 30;
-		dg.marginTop = 80;		// for the facility and pipes
-		dg.marginBottom = 10 + (bottomLines ? bottomLines.length * 10 : 0);
+		dg.marginTop = 80 + (title ? 20 : 0);	// for the facility and pipes
+		dg.marginBottom = 10 + (bottomLines ? bottomLines.length * 12 : 0);
 		dg.meterToPixels = 2;
 		const width = metrics.rCylinder*2*dg.meterToPixels + dg.marginX;
 		const height = (metrics.hCylinder+metrics.hBelow+metrics.hAbove)*dg.meterToPixels+dg.marginTop+dg.marginBottom;
@@ -1559,7 +1724,7 @@ console.log("width="+width+", height="+height);
 		dg.minX = 0;
 		dg.maxY = metrics.hCylinder+metrics.hBelow+metrics.hAbove;
 		dg.minY = 0;
-		
+
 		ctx.textAlign = "start";
 		ctx.textBaseline = "bottom";
 		ctx.fillStyle = 'black';
@@ -1570,7 +1735,14 @@ console.log("width="+width+", height="+height);
 		dg.cWidth = dg.width - 2 * dg.marginX;
 		dg.height = canvas.getAttribute("height");
 		dg.cheight = dg.height - dg.marginTop - dg.marginBottom;
-		
+		if (title) {
+			ctx.font = "16px arial";
+			ctx.fillStyle = 'black'; 
+			var x = toX(dg,metrics.rCylinder)-ctx.measureText(title).width/2;
+console.log("x="+x+", title:"+title);			
+			if (x < 0) x = 2;
+			ctx.fillText(title, x, 20);
+		}
 		// Start with rock, https://www.w3schools.com/colors/colors_shades.asp
 		const colorRock = '#A9A9A9'; //	
 		const colorInsulation = '#808080'; // gray, 
@@ -1648,7 +1820,11 @@ console.log("width="+width+", height="+height);
 		ctx.fillStyle = colorHotLpGravel;
 		ctx.fill(region);
 //console.log(x+','+y);
-
+		if (cycleData) {
+			ctx.fillStyle = 'black'; 
+			ctx.font = "14px serif";
+			ctx.fillText(toCelsius(cycleData.hotCycle[0].tOut),toX(dg,ins)+10, toY(dg,hTop-ins/2)+20 );
+		}
 		region = new Path2D();
 		region.moveTo(x=toX(dg,ins), y = toY(dg, hTop -ins/2 - 0.1 * lpActH));
 		region.lineTo(x, y = toY(dg, hTop -ins/2 - 0.5 * lpActH));
@@ -1660,6 +1836,16 @@ console.log("width="+width+", height="+height);
 		ctx.fill(region);
 		ctx.fillStyle = colorWarmLpGravel;
 		ctx.fill(region);
+		if (cycleData) {
+			ctx.fillStyle = 'black'; 
+			ctx.font = "14px arial";
+			ctx.fillText(toCelsius(cycleData.hotCycle[1].tIn),toX(dg,ins)+10, y = toY(dg,hTop -ins/2 - 0.1 * lpActH)+20 );
+			ctx.fillText(Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in",toX(dg,ins)+10, toY(dg,hTop -ins/2 - 0.30 * lpActH) );
+			ctx.fillText("compacted fine-grained gravel",toX(dg,ins)+10, toY(dg,hTop -ins/2 - 0.30 * lpActH)+14 );
+		}
+		ctx.fillStyle = 'black'; 
+		ctx.font = "14px arial";
+		ctx.fillText("\u21D1 in charge", toX(dg,ins)+60, toY(dg, hTop -ins/2 - 0.5 * lpActH));
 
 		region = new Path2D();
 		region.moveTo(x=toX(dg,ins), y = toY(dg, hTop -ins/2 - 0.5 * lpActH));
@@ -1672,10 +1858,18 @@ console.log("width="+width+", height="+height);
 		ctx.fill(region);
 		ctx.fillStyle = colorColdLpGravel;
 		ctx.fill(region);
+		if (cycleData) {
+			ctx.fillStyle = 'white'; 
+			ctx.font = "14px serif";
+			ctx.fillText(toCelsius(cycleData.coldCycle[1].tOut),toX(dg,ins)+10, toY(dg,hTop -ins/2 - 0.5 * lpActH)+20 );
+		}
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("\u21D3 in uncharge", toX(dg,ins)+80, toY(dg, hTop -ins/2 - 0.5 * lpActH)+18);
 
-		const hpStorageTopY = toY( dg, metrics.hCylinder - 1.5*ins );
-		const hpStorageBottomY = toY( dg, ins/2);
-		const hpStorageMiddleY = toY( dg, 0.5*metrics.pHighStorageHeight + ins/2 );
+		const hpStorageTopY = toY( dg, metrics.hCylinder - ins );
+		const hpStorageBottomY = toY( dg, ins/3);
+		const hpStorageMiddleY = toY( dg, 0.5*metrics.pHighStorageHeight + ins/3 );
 		region = new Path2D();
 		region.moveTo(x=toX(dg,ins), hpStorageTopY );
 		region.lineTo(x, y = hpStorageMiddleY);
@@ -1687,6 +1881,17 @@ console.log("width="+width+", height="+height);
 		ctx.fill(region);
 		ctx.fillStyle = colorHotHpGravel;
 		ctx.fill(region);
+		if (cycleData) {
+			ctx.fillStyle = 'black'; 
+			ctx.font = "14px arial";
+			ctx.fillText(toCelsius(cycleData.hotCycle[0].tIn),toX(dg,ins)+10, y = hpStorageTopY+20 );
+			ctx.fillText("Gas flow "+Math.round(1000*cycleData.hotCycle[1].massFlow)+" kg/s in charge and "+Math.round(1000*cycleData.hotCycle[0].massFlow)+" kg/s in uncharge", 
+					toX(dg,ins)+80, y);
+			ctx.fillText(Math.round(cycleData.hotCycle[1].pOut/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",toX(dg,ins)+10, toY( dg, 0.75*metrics.pHighStorageHeight + ins/2 ));
+		}
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'black'; 
+		ctx.fillText("\u21D1 in uncharge", toX(dg,ins)+80, hpStorageMiddleY);
 
 		region = new Path2D();
 		region.moveTo(x=toX(dg,ins), hpStorageMiddleY );
@@ -1699,19 +1904,44 @@ console.log("width="+width+", height="+height);
 		ctx.fill(region);
 		ctx.fillStyle = colorColdHpGravel;
 		ctx.fill(region);
+		if (cycleData) {
+			ctx.fillStyle = 'black'; 
+			ctx.font = "14px serif";
+			ctx.fillText(toCelsius(cycleData.coldCycle[0].tOut),toX(dg,ins)+10, hpStorageMiddleY+20 );
+		}
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'black'; 
+		ctx.fillText("\u21D3 in charge", toX(dg,ins)+60, hpStorageMiddleY+18);
 
 		// liquid nitrogen
 		region = new Path2D();
-		region.moveTo(x=toX(dg,ins), y = toY(dg, hTop -ins/2 - 0.9 * lpActH));
+		const hTopLiquid = toY(dg, hTop -ins/2 - (1-metrics.maxPartLiquid/2) * lpActH);
+		const hMaxTopLiquid = toY(dg, hTop -ins/2 - (1-metrics.maxPartLiquid) * lpActH);
+		region.moveTo(x=toX(dg,ins), hTopLiquid);
 		region.lineTo(x, y = toY(dg, hTop -ins/2 - lpActH));
 		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = toY(dg, hTop -ins/2 - 0.9 * lpActH));
-		region.lineTo(x=toX(dg,ins), y);
+		region.lineTo(x, hTopLiquid);
+		region.lineTo(x=toX(dg,ins), hTopLiquid);
 		region.closePath();
 		ctx.fillStyle = 'white';
 		ctx.fill(region);
 		ctx.fillStyle = colorLiquidLpGravel;
 		ctx.fill(region);
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("Liquid "+gasName+" in the bottom", toX(dg,ins)+10, toY(dg, hTop -ins/2 - lpActH));
+
+		const yVoidTop = toY(dg, hTop -ins/2 - 0.6 * lpActH)
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = 'black';
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,0), yVoidTop);
+		ctx.lineTo(x = toX(dg,ins), yVoidTop );
+		ctx.lineTo(x, y = toY(dg, hTop -ins/2 - lpActH) );
+		ctx.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
+		ctx.lineTo(x, yVoidTop );
+		ctx.lineTo(toX(dg, metrics.rCylinder*2), yVoidTop);
+		ctx.stroke();
 
 		// next turbins, compressors and pipes, middle pipe diameter about 10m?
 		// draw first the middle tower with correct color
@@ -1782,63 +2012,78 @@ console.log("width="+width+", height="+height);
 		ctx.lineTo(towerLeftX+13, toY(dg, yLpTop+4));
 		ctx.stroke();
 
-		const xColdTurbinHp = x + ctWidth/2;
+		const xColdTurbinLp = x + ctWidth/2;
 		ctx.lineWidth = 5;
 		ctx.strokeStyle = 'black';
 		ctx.beginPath();
 		ctx.moveTo(x, y = toY(dg, towerH-10 ));
-		ctx.lineTo(xColdTurbinHp, y);
+		ctx.lineTo(xColdTurbinLp, y);
 		ctx.stroke();
-		const xColdTurbinLp = xColdTurbinHp + ctWidth/2;
+		const xColdTurbinHp = xColdTurbinLp + ctWidth/2;
 		const yColdLpTop = towerH-5, yColdLpBottom = hTop+5, yColdHpTop = yLpTop-8, yColdHpBottom = yLpBottom+6;
 
 		ctx.beginPath();
 		ctx.lineWidth = 2;
 		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xColdTurbinHp, y = toY(dg,yColdLpTop));
+		ctx.moveTo(x = xColdTurbinLp, y = toY(dg,yColdLpTop));
 		ctx.lineTo(x, toY(dg, yColdLpBottom));
-		ctx.lineTo(x = xColdTurbinLp, toY(dg,yColdHpBottom));
+		ctx.lineTo(x = xColdTurbinHp, toY(dg,yColdHpBottom));
 		ctx.lineTo(x, toY(dg,yColdHpTop));
-		ctx.lineTo(xColdTurbinHp, toY(dg,yColdLpTop));
+		ctx.lineTo(xColdTurbinLp, toY(dg,yColdLpTop));
 		ctx.closePath();
 		ctx.stroke();
 		ctx.font = "12px serif";
-		ctx.fillText("T", xColdTurbinHp+4, toY(dg,yColdLpBottom+1));
+		ctx.fillText("T", xColdTurbinLp+4, toY(dg,yColdLpBottom+1));
 
 		ctx.lineWidth = 9;
 		ctx.strokeStyle = colorColdLpGravel;
 		ctx.beginPath();
-		ctx.moveTo(xColdTurbinHp+5, toY(dg,yColdLpTop-1));
-		ctx.lineTo(xColdTurbinHp+5, y = toY(dg,yColdLpTop+15));
+		ctx.moveTo(xColdTurbinLp+5, toY(dg,yColdLpTop-1));
+		ctx.lineTo(xColdTurbinLp+5, y = toY(dg,yColdLpTop+15));
 		ctx.lineTo(towerLeftX+6, y );
 		ctx.lineTo(towerLeftX+6, toY(dg, hTop -ins/2 - 0.5 * lpActH));
 		ctx.stroke();
 		ctx.fillStyle = 'white'; 
 		ctx.font = "16px serif";
-		ctx.fillText("\u2191", xColdTurbinHp+2, toY(dg,yColdLpTop-1));
-
+		ctx.fillText("\u2191", xColdTurbinLp+2, toY(dg,yColdLpTop-1));
 
 		ctx.lineWidth = 4;
 		ctx.strokeStyle = colorColdHpGravel;
 		ctx.beginPath();
-		ctx.moveTo(xColdTurbinLp-3, toY(dg,yColdHpTop-1));
-		ctx.lineTo(xColdTurbinLp-3, y = toY(dg,yColdLpTop+20));
+		ctx.moveTo(xColdTurbinHp-3, toY(dg,yColdHpTop-1));
+		ctx.lineTo(xColdTurbinHp-3, y = toY(dg,yColdLpTop+20));
 		ctx.lineTo(x = toX(dg, metrics.rCylinder*2-2), y );
-		ctx.lineTo(x, y = toY(dg, 2));
+		ctx.lineTo(x, y = toY(dg, 1));
 		ctx.lineTo(x = toX(dg, metrics.rCylinder), y);
-		ctx.lineTo(x, toY(dg, ins/2));
+		ctx.lineTo(x, toY(dg, ins/3));
 		ctx.stroke();
 		ctx.fillStyle = 'black'; 
 		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xColdTurbinLp-7, toY(dg,yColdLpTop-1));
+		ctx.fillText("\u2193", xColdTurbinHp-7, toY(dg,yColdLpTop-1));
 
-		var xGeneratorLeft = xColdTurbinLp + ctWidth/2;
+
+		var xGeneratorLeft = xColdTurbinHp + ctWidth/2;
 		var xGeneratorRight = xGeneratorLeft + ctWidth*2;
+		const xChargeGeneratorRight = xGeneratorRight;
+
+		ctx.lineWidth = 1;
+		ctx.strokeStyle = 'black';
+		ctx.beginPath();
+		ctx.moveTo(xColdTurbinHp-7, toY(dg,yColdLpTop+7));
+		ctx.lineTo(xColdTurbinHp-7, y = toY(dg,yColdLpTop+19));
+		ctx.lineTo(xGeneratorLeft+19, y );
+		ctx.lineTo(xGeneratorLeft+19, y = toY(dg,yColdLpTop+7));
+		ctx.lineTo(xColdTurbinHp-7, y);
+		ctx.stroke();
+		ctx.font = "12px arial";
+		ctx.fillText("Cooler", xColdTurbinHp-5, toY(dg,yColdLpTop+12))
+		if (cycleData) ctx.fillText(workToMW(-cycleData.heatPumpCooling), xColdTurbinHp-7, toY(dg,yColdLpTop+6))
+		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatPumpHeating) : ''), xGeneratorLeft+13, toY(dg,yColdLpTop+12));
 
 		ctx.beginPath();
 		ctx.lineWidth = 5;
 		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xColdTurbinLp, y = toY(dg, towerH-10));
+		ctx.moveTo(x = xColdTurbinHp, y = toY(dg, towerH-10));
 		ctx.lineTo(xGeneratorLeft, y);
 		ctx.stroke();
 
@@ -1852,8 +2097,12 @@ console.log("width="+width+", height="+height);
 		ctx.lineTo(xGeneratorLeft, y);
 		ctx.closePath();
 		ctx.stroke();
-		ctx.font = "14px serif";
-		ctx.fillText("G / M", xGeneratorLeft+20, toY(dg,yLpBottom+4));
+		ctx.font = "13px arial";
+		ctx.fillText("G / M", xGeneratorLeft+20, toY(dg,yLpBottom+8));
+		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkIn), xGeneratorLeft+10, toY(dg,yLpBottom+1));
+		ctx.fillText("Charge", xGeneratorRight+1, toY(dg,yLpBottom+10));
+		ctx.font = "20px serif";
+		ctx.fillText("\u21DC", xGeneratorRight+1, toY(dg, towerH-14));
 
 		ctx.lineWidth = 2;
 		ctx.beginPath();
@@ -1916,7 +2165,7 @@ console.log("width="+width+", height="+height);
 		ctx.beginPath();
 		ctx.moveTo(xColdCompressorHp+3, toY(dg,yColdHpTop-1));
 		ctx.lineTo(xColdCompressorHp+3, y = toY(dg,yColdLpTop+20));
-		ctx.lineTo(xColdTurbinLp-3, y );
+		ctx.lineTo(xColdTurbinHp-3, y );
 		ctx.stroke();
 
 		xGeneratorRight = xColdCompressorHp - ctWidth/2;
@@ -1944,36 +2193,59 @@ console.log("width="+width+", height="+height);
 		ctx.lineTo(xGeneratorLeft, y);
 		ctx.closePath();
 		ctx.stroke();
-		ctx.font = "14px serif";
-		ctx.fillText("G / M", xGeneratorLeft+15, toY(dg,yLpBottom+4));
+		ctx.font = "13px arial";
+		ctx.fillText("G / M", xGeneratorLeft+15, toY(dg,yLpBottom+8));
+		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkOut), xGeneratorLeft+10, toY(dg,yLpBottom+1));
+		ctx.fillText("Uncharge", xGeneratorLeft-1-ctx.measureText("Uncharge").width, toY(dg,yLpBottom+11));
 
+
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("bed-", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-10));
+		ctx.fillText("bed-",x = 2+toX(dg, metrics.rCylinder*2), y);
+		ctx.fillText("rock", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-17));
+		ctx.fillText("rock",x, y );
+		ctx.font = "11px serif";
+		const depth = metrics.hBelow+metrics.hCylinder;
+//console.log( depthM+", yPx="+toY(dg,depth))
+		ctx.fillText( "-"+Math.round(depth)+"m", x, toY(dg,0));
+		ctx.fillText( "-"+Math.round(metrics.hBelow)+"m", x, toY(dg,metrics.hCylinder));
+		ctx.fillStyle = 'black'; 
+		ctx.fillText( "+"+Math.round(metrics.hAbove)+"m", x, toY(dg,hTop));
+
+		ctx.font = "40px serif";
+		ctx.fillText("\u21A6", toX(dg, metrics.rCylinder), toY(dg,metrics.hCylinder)+10);
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText(" Storage radius "+Math.round(metrics.rCylinder)+" m", toX(dg, metrics.rCylinder)+40, toY(dg,metrics.hCylinder)-4);
+
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("Insulated by sorted gravel + biochar", toX(dg,2), toY(dg,metrics.hCylinder+2));
+
+		ctx.beginPath();
+		ctx.moveTo(towerRightX, y = toY(dg, hTop-ins/2));
+		ctx.lineTo(towerRightX+15, y);
+		ctx.lineTo(towerRightX+15, y = toY(dg, hTop- ins/2 - 0.1 * lpActH));
+		ctx.lineTo(towerRightX, y);
+		ctx.stroke();
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("\u21D0", towerRightX-7, y+2);
+		ctx.fillText("\u21D0", towerRightX+8, y-10);
+		ctx.fillStyle = 'black'; 
+		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatOutInDischarge) : ''), towerRightX+10, y-2);
+
+
+		ctx.font = "20px serif";
+		ctx.fillText("\u21DC", xGeneratorLeft-20, toY(dg, towerH-14));
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.2 * lpActH));
+		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.3 * lpActH));
+		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.4 * lpActH));
+		ctx.fillText("\u21D4", towerLeftX-12, hMaxTopLiquid+4);
+		ctx.fillStyle = 'black'; 
+		ctx.fillText("\u21D5", toX(dg,metrics.rCylinder)-8, hpStorageTopY+6);
 		$("#"+canvasId).css('display','block');
-
-		/* TBD: 60 decrees 
-		const hBelowPx = toY(dg, metrics.hBelow);
-		const hAbovePx = toY(dg,metrics.hAbove);
-		const r2Px = toX(dg,metrics.rTop);
-		const rPx = toX(dg,metrics.rPx);
-		const hpsheightPx = toX(dg,metrics.hCylinder);
-		region = new Path2D();
-		// Insulation layer
-		// abouve ground
-		region.moveTo(x=toX(dg,0),groundY); 
-		region.lineTo(x = x+hAbovePx,y = groundY-hAbovePx);
-		region.lineTo(x = x + 2*(rPx+r2Px-hAbovePx), y );
-		region.lineTo(x=x+hAbovePx, groundY );
-		// below ground
-		region.lineTo(x = x-r2Px, y = groundY+hBelowPx );
-		region.lineTo(x, y = y+hpsheightPx );
-		region.lineTo(x = x-2*rPx, y);
-		region.lineTo(x, y-hpsheightPx);
-		region.lineTo(toX(dg,0),groundY); 
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorInsulation;
-		ctx.fill(region);
-		*/
 	}
 	
 	function drawDiagram4Y( canvasId, xVals, xTitle, arrayOfyVals, yTitles, topTitle, bottomLines ) {
@@ -2695,7 +2967,7 @@ console.log("Saturation curve ...");
 			ctx.strokeStyle = 'red';
 			ctx.stroke();
 			drawDirectionArrow( ctx, coldCycle[0], maxPressure*0.40, 15, false );
-			showPointData(ctx, coldCycle[0], FIRST_ITEM, 20, 20, coldCycle[0].massFlow );
+			showPointData(ctx, coldCycle[0], FIRST_ITEM, 25, 25, coldCycle[0].massFlow );
 			//showPointData(ctx, coldCycle[0], LAST_ITEM, 20, -40,  );
 			ctx.beginPath();
 			coldCycle[1].items.forEach( function(item) {
@@ -2709,7 +2981,7 @@ console.log("Saturation curve ...");
 			});
 			ctx.strokeStyle = 'green';
 			ctx.stroke();
-			showPointData(ctx, coldCycle[1], FIRST_ITEM, -25, -25, coldCycle[1].massFlow  );
+			showPointData(ctx, coldCycle[1], FIRST_ITEM, -15, -15, coldCycle[1].massFlow  );
 			showPointData(ctx, coldCycle[1], LAST_ITEM, 40, -40, coldCycle[1].massFlow, coldCycle[0].massFlow );
 			drawDirectionArrow( ctx, coldCycle[1], maxPressure*0.30, 15, coldCycle[1].isForward );
 			
@@ -2820,7 +3092,7 @@ console.log("pTransformer="+JSON.stringify(pTransformer));
 			y += 20;
 			const netWorkOut=hotCycle[0].workProduced-coldCycle[0].workConsumed;
 
-//district heating power "+Math.round(hotCycle[1].tIn)+" K - "+Math.round(hotCycle[0].tOut)+" K: 
+//District heating power "+Math.round(hotCycle[1].tIn)+" K - "+Math.round(hotCycle[0].tOut)+" K: 
  			const cyrogenicCooling = getBooleanParam('cyrogenicCooling');
 			const adjustedCompressorPlow = getBooleanParam('adjustedCompressorPlow');
 			ctx.fillStyle = 'red'; 
@@ -2846,16 +3118,18 @@ console.log("pTransformer="+JSON.stringify(pTransformer));
 				y += 20;
 			}
 			ctx.fillStyle = 'black';
-			textOnWhite( ctx, "=> Power restored as electricity "+Math.round(100*cycleData.efficiency)+" % and as district heat "+Math.round(cycleData.distictHeatPercent)+" %", x, y );
-			if (netWorkOut != cycleData.totalWork) {
+			textOnWhite( ctx, "=> Power restored as electricity "+Math.round(100*cycleData.efficiency)+" % and as District heat "+Math.round(cycleData.distictHeatPercent)+" %", x, y );
+			if (Math.abs(netWorkOut - cycleData.totalWork)>100) {
 				y += 20;
 				textOnWhite( ctx, "  Discharge power % of all motor/generator power: "
 					+Math.round(100*netWorkOut/cycleData.totalWork)+" % ("+Math.round(netWorkOut/1000)+" MW/ "+Math.round(cycleData.totalWork/1000)+" MW)", x, y );
 			}
 			y += 20;
-			textOnWhite( ctx, "  Stored electricity "+Math.round(cycleData.storedElectricity_kWh/1000000)+" GWh and stored district heat "+Math.round(cycleData.storedDistrictHeat_kWh/1000000)+" GWh", x, y );
+			textOnWhite( ctx, "  Stored electricity "+Math.round(cycleData.storedElectricity_kWh/1000000)+" GWh and stored District heat "+Math.round(cycleData.storedDistrictHeat_kWh/1000000)+" GWh", x, y );
 			y += 20;
-			textOnWhite( ctx, "  Cost of storage "+Math.round(cycleData.costOfStorage/1000000)+" MEur and cost of machinery "+Math.round(cycleData.costOfPower/1000000)+" MEur", x, y );
+			textOnWhite( ctx, "  Cost of storage "+myRound(cycleData.costOfStoragekWh,2)+" €/kWh and cost of power "+Math.round(cycleData.costOfPowerKW)+" €/kW", x, y );
+			y += 20;
+			textOnWhite( ctx, "  Total cost of storage "+Math.round(cycleData.costOfStorage/1000000)+" MEur and total cost of machinery "+Math.round(cycleData.costOfPower/1000000)+" MEur", x, y );
 		}
 	
 		// draw temp and temp lines, 

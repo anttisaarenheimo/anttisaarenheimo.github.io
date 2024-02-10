@@ -793,7 +793,7 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 	// Let's fix the dome rock temperature to approximately 300 or 750K, we assume insulation k value of cave top is 10 times of 10m gravel Insulation in the bottom lp storage
 	const	hpInsulationBoundaryTemp = isCone ? 750 : 300;
 	metrics.caveTopInsulation = (tHigh-hpInsulationBoundaryTemp)/(hpInsulationBoundaryTemp-70) * metrics.ins/(isCone ? 1 : 10);
-	metrics.insCaveBoottom = metrics.ins * (300-208)/(tHigh-300);
+	metrics.insCaveBottom = metrics.ins * (300-208)/(tHigh-300);
 	
 	// scale the low pressure insulation layer for its lower temps but check also the tLow temp diff between 70K and 300K
 	const lpInsForHighT = metrics.ins * (tHigh*400/1030-300)/(tHigh-300);
@@ -902,6 +902,7 @@ console.log("Actual dome width="+caveS+": "+caveVolume+"=> scaleLength="+dome.sc
 			// 1. Kartion halkaisija pienenee 2*10/sin(60)
 			dome.rTopI = dome.rTop - metrics.ins/Math.sin(Math.PI*dome.maxAngle/180);
 			//  dome.rBottomI = dome.rBottom - (dome.rTop-dome.rTopI);	// equal insulation everywhere
+			dome.hBottomI = isCone ? dome.hBottom - metrics.caveTopInsulation : dome.hBottom;
 			dome.rBottomI = dome.rBottom * dome.rTopI / dome.rTop;	// better insulation in the top
 			// Rock temperature about 300K,  bottom temp 200K => 100K diff, in the side the difference is tHigh-300 => bottom insulation should be ins*100/(tHigh-300)
 			// when h is the same => V1/V2=r1*r1/r2*r2 => V2 = V1*r2*r2/r1*r1
@@ -961,7 +962,7 @@ console.log("Actual dome width="+caveS+": "+caveVolume+"=> scaleLength="+dome.sc
 					function (h) { 
 						metrics.rGroundBelow = h;
 						metrics.hBelow = Math.tan(Math.PI*dome.maxAngle/180)*(metrics.rGroundBelow-metrics.rTop);
-console.log("metrics.rGroundBelow="+metrics.rGroundBelow+", metrics.hBelow="+metrics.hBelow);
+//console.log("metrics.rGroundBelow="+metrics.rGroundBelow+", metrics.hBelow="+metrics.hBelow);
 						return Math.PI/3*metrics.hBelow*(Math.pow(metrics.rGroundBelow,2)+metrics.rGroundBelow*metrics.rTop+Math.pow(metrics.rTop,2));
 					});
 
@@ -1910,7 +1911,7 @@ else console.log(loop+":expected="+expected+", result="+result+", testValue="+te
 		var title = "Metrics of "+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. gravel ton energy storage";
 		// let's keep this very simple, set scale 1 m == 2 px, 
 		dg.marginX = 30;
-		dg.marginTop = 180 + (title ? 20 : 0);	// for the facility and pipes
+		dg.marginTop = (isCone ? 40 : 180) + (title ? 20 : 0);	// for the facility and pipes
 		dg.marginBottom = 10 + (bottomLines ? bottomLines.length * 12 : 0);
 		dg.meterToPixels = 2;
 		const width = metrics.rGround*4*dg.meterToPixels + dg.marginX; // 4 means space for turbin pictures
@@ -2122,7 +2123,7 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px serif";
 			centerText( ctx, toCelsius(cycleData.hotCycle[0].tOut), toX(dg,0), 
-						toY(dg,isCone ? hGround+hLpHot : metrics.hAbove+hGround+metrics.dome.hTop-hLpHot) );
+						toY(dg, isCone ? (hGround+hLpHot) : (metrics.hAbove+hGround+metrics.dome.hTop-hLpHot) ));
 		}
 //if (!confirm("B")) return; 
 /*
@@ -2160,13 +2161,12 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 			if (cycleData) {
 				ctx.fillStyle = 'black'; 
 				ctx.font = "14px arial";
-				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn),toX(dg,0), toY(dg,hGround+hColdTop)-60);
-				centerText( ctx, Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in",toX(dg,0), toY(dg,hGround+hColdTop)-40);
-				centerText( ctx, "compacted fine-grained gravel", toX(dg,0), toY(dg,hGround+hColdTop)-20);
+				//centerText( ctx, ,toX(dg,0), toY(dg,hGround+hColdTop)-40);
+				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn) + " "+Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",toX(dg,0), toY(dg,hGround+hColdTop)-20);
 			}
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px arial";
-			centerText(ctx, "\u21D1 in charge", toX(dg,0), toY(dg, hGround+hColdTop));
+			centerText(ctx, "\u21D1 in charge", toX(dg,-40), toY(dg, hGround+hColdTop));
 
 			rLpWarmBottom = metrics.rGroundBelowActual;
 			hLpWarmFromGround = 0;
@@ -2208,12 +2208,11 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 				ctx.fillStyle = 'black'; 
 				ctx.font = "14px arial";
 				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn),toX(dg,0), toY(dg,hGround)-40);
-				centerText( ctx, Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in",toX(dg,0), toY(dg,hGround)-20);
-				centerText( ctx, "compacted fine-grained gravel", toX(dg,0), toY(dg,hGround));
+				centerText( ctx, Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",toX(dg,0), toY(dg,hGround)-20);
 			}
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px arial";
-			centerText(ctx, "\u21D1 in charge", toX(dg,0), toY(dg, hGround-hLpWarmFromGround));
+			centerText(ctx, "\u21D1 in charge", toX(dg,-40), toY(dg, hGround-hLpWarmFromGround));
 		}
 
 	//if (!confirm("D")) return; 
@@ -2229,7 +2228,7 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 		if (cycleData) {
 			ctx.fillStyle = 'white'; 
 			ctx.font = "14px serif";
-			centerText(ctx, toCelsius(cycleData.coldCycle[1].tOut), toX(dg,rLpWarmBottom/2), toY(dg,hGround-hLpWarmFromGround)+40 );
+			//centerText(ctx, toCelsius(cycleData.coldCycle[1].tOut), toX(dg,0), toY(dg,hGround-hLpWarmFromGround)+40 );
 		}
 //if (!confirm("E")) return; 
 		if (hLpWarmFromGround > 0) {
@@ -2240,7 +2239,7 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 		else {
 			ctx.font = "14px arial";
 			ctx.fillStyle = 'white'; 
-			centerText(ctx, "\u21D3 in uncharge", toX(dg,0), toY(dg,hGround+hColdTop)+20);
+			centerText(ctx, "\u21D3 in uncharge", toX(dg,-40), toY(dg,hGround+hColdTop)+20);
 		}
 
 		// always: V4 < V3 and all gravel-insulation in below ground in V3
@@ -2262,12 +2261,6 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 		region.closePath();
 		ctx.fillStyle = ctx.fillStyle = colorLiquidLpGravel;
 		ctx.fill(region);
-		{
-			ctx.font = "14px arial";
-			ctx.fillStyle = 'white'; 
-			const text = "Liquid "+gasName+" in the bottom";
-			ctx.fillText(text, toX(dg,rLiquid)-20, toY(dg,hGround-metrics.hBelowActual+hLiquid)+20);
-		}
 		if (isCone) {
 			region = new Path2D();
 			region.moveTo(toX(dg,-metrics.rOpenBottomActual), toY(dg,hGround-metrics.hBelowActual));
@@ -2282,6 +2275,17 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 			ctx.beginPath();
 			ctx.moveTo(toX(dg,-metrics.rOpenBottom), toY(dg,hGround-metrics.hBelow));
 			ctx.lineTo(toX(dg,metrics.rOpenBottom), toY(dg,hGround-metrics.hBelow));
+			ctx.strokeStyle = 'black'; 
+			ctx.stroke();
+
+			ctx.lineWidth = 1;
+			ctx.beginPath();
+			ctx.moveTo(toX(dg,-metrics.rGroundBelow), toY(dg,hGround));
+			ctx.lineTo(toX(dg,-metrics.rGroundBelowActual), toY(dg,hGround));
+			ctx.lineTo(toX(dg,-metrics.rOpenBottomActual), toY(dg,hGround-metrics.hBelowActual)+1);
+			ctx.lineTo(toX(dg,metrics.rOpenBottomActual), toY(dg,hGround-metrics.hBelowActual)+1);
+			ctx.lineTo(toX(dg,metrics.rGroundBelowActual), toY(dg,hGround));
+			ctx.lineTo(toX(dg,metrics.rGroundBelow), toY(dg,hGround));
 			ctx.strokeStyle = 'black'; 
 			ctx.stroke();
 		}
@@ -2327,15 +2331,21 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 			ctx.fillStyle = colorHotHpGravel; 
 			ctx.fill(region);
 		}
+		{
+			ctx.font = "14px arial";
+			ctx.fillStyle = 'white'; 
+			const text = toCelsius(cycleData.coldCycle[1].tOut)+" "+gasName+" gas in gravel, max "+Math.round(100*metrics.maxPartLiquid)+"% of volume liquid";
+			centerText(ctx, text, toX(dg,0), toY(dg,hGround-metrics.hBelowActual));
+		}
 
 		{
 //if (!confirm("G")) return; 
 			region = new Path2D();
-			region.moveTo(toX(dg,-metrics.dome.rTopI), toY(dg,metrics.dome.hBottom));
-			region.lineTo(toX(dg,-metrics.dome.rBottomI), toY(dg,metrics.insCaveBoottom));
-			region.lineTo(toX(dg,metrics.dome.rBottomI), toY(dg,metrics.insCaveBoottom));
-			region.lineTo(toX(dg,metrics.dome.rTopI), toY(dg,metrics.dome.hBottom));
-			region.lineTo(toX(dg,-metrics.dome.rTopI), toY(dg,metrics.dome.hBottom));
+			region.moveTo(toX(dg,-metrics.dome.rTopI), toY(dg,metrics.dome.hBottomI));
+			region.lineTo(toX(dg,-metrics.dome.rBottomI), toY(dg,metrics.insCaveBottom));
+			region.lineTo(toX(dg,metrics.dome.rBottomI), toY(dg,metrics.insCaveBottom));
+			region.lineTo(toX(dg,metrics.dome.rTopI), toY(dg,metrics.dome.hBottomI));
+			region.lineTo(toX(dg,-metrics.dome.rTopI), toY(dg,metrics.dome.hBottomI));
 			region.closePath();
 			ctx.fillStyle = colorHotHpGravel;
 			ctx.fill(region);
@@ -2369,28 +2379,27 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 				ctx.fillStyle = 'black'; 
 				ctx.strokeStyle = 'black'; 
 				ctx.font = "14px arial";
-				centerText( ctx, toCelsius(cycleData.hotCycle[0].tIn), toX(dg,0), toY(dg,metrics.dome.hBottom));
+				centerText( ctx, toCelsius(cycleData.hotCycle[0].tIn), toX(dg,0), toY(dg,metrics.dome.hBottomI-30));
 				centerText( ctx, "Gas flow "+Math.round(1000*cycleData.hotCycle[1].massFlow)+" kg/s in charge and "+Math.round(1000*cycleData.hotCycle[0].massFlow)+" kg/s in uncharge", 
-						toX(dg,0), toY(dg,metrics.dome.hBottom-10) );
+						toX(dg,0), toY(dg,metrics.dome.hBottomI-40) );
 				centerText( ctx, Math.round(cycleData.hotCycle[1].pOut/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",
-							toX(dg,0), toY(dg,metrics.dome.hBottom-20) );
+							toX(dg,0), toY(dg,metrics.dome.hBottomI-50) );
 			}
-		const hCutI = metrics.dome.hBottom * metrics.dome.rTopI / (metrics.dome.rTopI-metrics.dome.rBottomI);
-		// hX = borger of cold and hot gravel,  rX=rTopI*hX/hBottomI;
-		// highPressureStorageVolume/2 = 1/3*PI*(hX+hCutI)*rX^2-1/3*PI*hCutI*rBottomI^2;
-		const testVolume = metrics.highPressureStorageVolume/2+1/3*Math.PI*hCutI*metrics.dome.rBottomI*metrics.dome.rBottomI;
-//console.log(testVolume+" = "+metrics.highPressureStorageVolume+"/2+1/3*Math.PI*"+hCutI+"*"+(metrics.dome.rBottomI*metrics.dome.rBottomI));
-		const hColdHpGravel = testResult( testVolume, metrics.dome.hBottom/2, metrics.dome.hBottom, 0.01*testVolume,
-					function (hX) { 
-						const rX=metrics.dome.rTopI*(hX+hCutI)/(metrics.dome.hBottom+hCutI);
-						return 1/3*Math.PI*((hX+hCutI)*rX*rX - hCutI*(metrics.dome.rBottomI*metrics.dome.rBottomI));
+		var rColdHpGravel;
+		const testVolume = metrics.highPressureStorageVolume/2;
+		const hTemp = testResult( testVolume, 0, metrics.dome.hBottomI/2, 0.01*testVolume,
+					function (h) { 
+						const r = metrics.dome.rTopI - (h/Math.tan(Math.PI*metrics.dome.maxAngle/180));
+console.log("h="+h+", r="+r);
+						rColdHpGravel = r;
+						return 1/3*Math.PI*h*(r*r + r*metrics.dome.rTopI+  Math.pow(metrics.dome.rTopI,2));
 					});
-		const rColdHpGravel = metrics.dome.rBottomI + (metrics.dome.rTopI-metrics.dome.rBottomI)*(hColdHpGravel/metrics.dome.hBottom);
+		const hColdHpGravel = metrics.dome.hBottomI - hTemp;
 console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		region = new Path2D();
 		region.moveTo(toX(dg,-rColdHpGravel), 			toY(dg,hColdHpGravel));
-		region.lineTo(toX(dg,-metrics.dome.rBottomI), toY(dg,metrics.insCaveBoottom));
-		region.lineTo(toX(dg,metrics.dome.rBottomI), toY(dg,metrics.insCaveBoottom));
+		region.lineTo(toX(dg,-metrics.dome.rBottomI), toY(dg,metrics.insCaveBottom));
+		region.lineTo(toX(dg,metrics.dome.rBottomI), toY(dg,metrics.insCaveBottom));
 		region.lineTo(toX(dg,rColdHpGravel), 			toY(dg,hColdHpGravel));
 		region.lineTo(toX(dg,-rColdHpGravel), 			toY(dg,hColdHpGravel));
 		region.closePath();
@@ -2419,9 +2428,9 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 
 		const yLpTop = towerH, yLpBottom = 2+hTop, yHpTop = towerH-7.5, yHpBottom = hTop+7.5;
 		const ctWidth = 20*dg.meterToPixels;
-		const xTurbinLp = towerLeftX-ctWidth/2;
-		const xTurbinHp = xTurbinLp-ctWidth;
 		const hotCompHpX = towerRightX + ctWidth;
+		const xTurbinLp = towerLeftX;
+		const xTurbinHp = xTurbinLp-ctWidth;
 		ctx.beginPath();
 		ctx.lineWidth = 2;
 		ctx.strokeStyle = 'black';
@@ -2432,36 +2441,18 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		ctx.lineTo(towerRightX, toY(dg, yLpTop));
 		ctx.closePath();
 		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "14px serif";
-		ctx.fillText("\u2192  C", towerRightX-5, toY(dg, yLpBottom+4));
-/*
-  "diameterPipeFromColdExpander": 4.671124802092986,	9
-  "diameterPipeFromHotCompressor": 2.674133432823774,	5
-  "diameterPipeToHotCompressor": 7.859972449531066,		15
-  "diameterPipeToColdExpander": 2.119501593112965,		4
-*/
-$("#"+canvasId).css('display','block');
-return;
 
-
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = colorHotHpGravel;
+		ctx.lineWidth = 15;
+		ctx.strokeStyle = colorWarmLpGravel;
 		ctx.beginPath();
-		ctx.moveTo(hotCompHpX-3, toY(dg,yHpTop));
-		ctx.lineTo(hotCompHpX-3, y = toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, y = toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, hpStorageTopY );
+		ctx.moveTo(towerRightX+5, y = toY(dg,(yHpBottom+yHpTop)/2)-4);
+		ctx.lineTo(towerRightX-ctWidth-8, y);
 		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2191", hotCompHpX-7, toY(dg,yHpTop+1));
 
-		ctx.beginPath();
-		ctx.moveTo(xTurbinHp+3, toY(dg,yHpTop));
-		ctx.lineTo(xTurbinHp+3, toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, toY(dg, yLpTop+4));
-		ctx.stroke();
+		ctx.fillStyle = 'black'; 
+		ctx.font = "bold 18px serif";
+		ctx.fillText("\u2192", towerRightX-12, toY(dg, yLpBottom+6));
+		ctx.fillText("C", towerRightX+10, toY(dg, yLpBottom+4));
 
 		const xColdTurbinLp = x + ctWidth/2;
 		ctx.lineWidth = 5;
@@ -2470,6 +2461,26 @@ return;
 		ctx.moveTo(x, y = toY(dg, towerH-10 ));
 		ctx.lineTo(xColdTurbinLp, y);
 		ctx.stroke();
+
+/*
+  "diameterPipeFromColdExpander": 4.671124802092986,	9
+  "diameterPipeFromHotCompressor": 2.674133432823774,	5
+  "diameterPipeToHotCompressor": 7.859972449531066,		15
+  "diameterPipeToColdExpander": 2.119501593112965,		4
+*/
+		ctx.lineWidth = 5;
+		ctx.strokeStyle = colorHotHpGravel;
+		ctx.beginPath();
+		ctx.moveTo(hotCompHpX-3, toY(dg,yHpBottom));
+		ctx.lineTo(hotCompHpX-3, y = toY(dg, yHpBottom-10));
+		ctx.lineTo(toX(dg,metrics.rGroundBelow+2), y );
+		ctx.lineTo(toX(dg,metrics.dome.rTop+2), y=toY(dg,metrics.dome.hBottomI-4) );
+		ctx.lineTo(toX(dg,metrics.dome.rTopI-2),y);
+		ctx.stroke();
+		ctx.fillStyle = 'black'; 
+		ctx.font = "16px serif";
+		ctx.fillText("\u2193", hotCompHpX-6, toY(dg,yHpBottom)+16);
+
 		const xColdTurbinHp = xColdTurbinLp + ctWidth/2;
 		const yColdLpTop = towerH-5, yColdLpBottom = hTop+5, yColdHpTop = yLpTop-8, yColdHpBottom = yLpBottom+6;
 
@@ -2483,53 +2494,54 @@ return;
 		ctx.lineTo(xColdTurbinLp, toY(dg,yColdLpTop));
 		ctx.closePath();
 		ctx.stroke();
-		ctx.font = "12px serif";
+		ctx.font = "bold 12px serif";
 		ctx.fillText("T", xColdTurbinLp+4, toY(dg,yColdLpBottom+1));
 
 		ctx.lineWidth = 9;
 		ctx.strokeStyle = colorColdLpGravel;
 		ctx.beginPath();
-		ctx.moveTo(xColdTurbinLp+5, toY(dg,yColdLpTop-1));
-		ctx.lineTo(xColdTurbinLp+5, y = toY(dg,yColdLpTop+15));
-		ctx.lineTo(towerLeftX+6, y );
-		ctx.lineTo(towerLeftX+6, toY(dg, hTop -ins/2 - 0.5 * lpActH));
+		ctx.moveTo(xColdTurbinLp+4, toY(dg,yColdLpBottom+1));
+		ctx.lineTo(xColdTurbinLp+4, y = toY(dg, yHpBottom-10)+12);
+		ctx.lineTo(toX(dg,metrics.rGroundBelow+8), y );
+		const rPipeLpCold = metrics.rOpenBottom + (metrics.hBelow-metrics.hBelowActual)/Math.tan(Math.PI*metrics.dome.maxAngle/180);
+		ctx.lineTo(toX(dg,rPipeLpCold+13), y = toY(dg,hGround-metrics.hBelowActual+hLiquid*2+4));
+		ctx.lineTo(toX(dg,rPipeLpCold-10),y);
 		ctx.stroke();
 		ctx.fillStyle = 'white'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2191", xColdTurbinLp+2, toY(dg,yColdLpTop-1));
+		ctx.font = "bold 20px serif";
+		ctx.fillText("\u2193", xColdTurbinLp+1, toY(dg,yColdLpBottom-10));
 
 		ctx.lineWidth = 4;
 		ctx.strokeStyle = colorColdHpGravel;
 		ctx.beginPath();
-		ctx.moveTo(xColdTurbinHp-3, toY(dg,yColdHpTop-1));
-		ctx.lineTo(xColdTurbinHp-3, y = toY(dg,yColdLpTop+20));
-		ctx.lineTo(x = toX(dg, metrics.rCylinder*2-2), y );
-		ctx.lineTo(x, y = toY(dg, 1));
-		ctx.lineTo(x = toX(dg, metrics.rCylinder), y);
-		ctx.lineTo(x, toY(dg, ins/3));
+		ctx.moveTo(xColdTurbinHp-2, toY(dg,yColdHpBottom+1));
+		ctx.lineTo(xColdTurbinHp-2, y = toY(dg, yHpBottom-10)+20);
+		ctx.lineTo(toX(dg,metrics.rGroundBelow+12), y );
+		ctx.lineTo(toX(dg,metrics.dome.rBottom+12), y = toY(dg,0)-4);
+		ctx.lineTo(toX(dg,metrics.dome.rBottomI), y);
 		ctx.stroke();
 		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xColdTurbinHp-7, toY(dg,yColdLpTop-1));
-
+		ctx.font = "bold 16px serif";
+		ctx.fillText("\u2191", xColdTurbinHp-6, toY(dg,yColdHpBottom)+20);
 
 		var xGeneratorLeft = xColdTurbinHp + ctWidth/2;
 		var xGeneratorRight = xGeneratorLeft + ctWidth*2;
 		const xChargeGeneratorRight = xGeneratorRight;
 
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = 'white';
 		ctx.beginPath();
-		ctx.moveTo(xColdTurbinHp-7, toY(dg,yColdLpTop+7));
-		ctx.lineTo(xColdTurbinHp-7, y = toY(dg,yColdLpTop+19));
+		ctx.moveTo(xColdTurbinHp-7, toY(dg, yHpBottom-4-18));    
+		ctx.lineTo(xColdTurbinHp-7, y = toY(dg, yHpBottom-4-6));
 		ctx.lineTo(xGeneratorLeft+19, y );
-		ctx.lineTo(xGeneratorLeft+19, y = toY(dg,yColdLpTop+7));
+		ctx.lineTo(xGeneratorLeft+19, y = toY(dg, yHpBottom-4-18));
 		ctx.lineTo(xColdTurbinHp-7, y);
 		ctx.stroke();
-		ctx.font = "12px arial";
-		ctx.fillText("Cooler", xColdTurbinHp-5, toY(dg,yColdLpTop+12))
-		if (cycleData) ctx.fillText(workToMW(-cycleData.heatPumpCooling), xColdTurbinHp-7, toY(dg,yColdLpTop+6))
-		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatPumpHeating) : ''), xGeneratorLeft+13, toY(dg,yColdLpTop+12));
+		ctx.font = "bold 12px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("Cooler", xColdTurbinHp-5, toY(dg, yHpBottom-4-13))
+		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatPumpHeating) : ''), xGeneratorLeft+13, toY(dg, yHpBottom-4-13));
+		if (cycleData) ctx.fillText(workToMW(-cycleData.heatPumpCooling), xColdTurbinHp-7, toY(dg, yHpBottom-30));
 
 		ctx.beginPath();
 		ctx.lineWidth = 5;
@@ -2548,11 +2560,12 @@ return;
 		ctx.lineTo(xGeneratorLeft, y);
 		ctx.closePath();
 		ctx.stroke();
-		ctx.font = "13px arial";
+		ctx.fillStyle = 'black'; 
+		ctx.font = "bold 13px arial";
 		ctx.fillText("G / M", xGeneratorLeft+20, toY(dg,yLpBottom+8));
 		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkIn), xGeneratorLeft+10, toY(dg,yLpBottom+1));
 		ctx.fillText("Charge", xGeneratorRight+1, toY(dg,yLpBottom+10));
-		ctx.font = "20px serif";
+		ctx.font = "bold 20px serif";
 		ctx.fillText("\u21DC", xGeneratorRight+1, toY(dg, towerH-14));
 
 		ctx.lineWidth = 2;
@@ -2565,21 +2578,33 @@ return;
 		ctx.lineTo(xTurbinHp, toY(dg, yHpTop));
 		ctx.closePath();
 		ctx.stroke();
-		ctx.font = "14px serif";
+		ctx.font = "bold 16px serif";
 		ctx.fillText("T", xTurbinHp+15, toY(dg, yLpBottom+4));
 
+		ctx.lineWidth = 5;
+		ctx.strokeStyle = colorHotHpGravel;
+		ctx.beginPath();
+		ctx.moveTo(xTurbinHp+3, toY(dg,yHpBottom));
+		ctx.lineTo(xTurbinHp+3, y = toY(dg, yHpBottom-10));
+		ctx.lineTo(toX(dg,-metrics.rGroundBelow-2), y );
+		ctx.lineTo(toX(dg,-metrics.dome.rTop-2), y=toY(dg,metrics.dome.hBottomI-4) );
+		ctx.lineTo(toX(dg,-metrics.dome.rTopI+2),y);
+		ctx.stroke();
 		ctx.fillStyle = 'black'; 
 		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xTurbinHp-1, toY(dg,yHpTop+3));
+		ctx.fillText("\u2191", xTurbinHp-2, toY(dg,yHpBottom)+16);
 
-		ctx.beginPath();
-		ctx.lineWidth = 16;
+		ctx.lineWidth = 15;
 		ctx.strokeStyle = colorHotLpGravel;
-		ctx.moveTo(xTurbinLp+8, toY(dg, yLpTop));
-		ctx.lineTo(xTurbinLp+8, toY(dg, hTop - ins/2));
+		ctx.beginPath();
+		ctx.moveTo(towerLeftX-5, toY(dg,(yHpBottom+yHpTop)/2));
+		ctx.lineTo(toX(dg,-metrics.dome.rTop-xyAddRoof-16), y = toY(dg,metrics.hAbove+hGround));
+		ctx.lineTo(toX(dg,-metrics.dome.rTop-4), y);
 		ctx.stroke();
 
-		ctx.fillText("\u21B4", xTurbinLp+2, toY(dg,yLpBottom+4));
+		ctx.fillStyle = 'black'; 
+		ctx.font = "bold 20px serif";
+		ctx.fillText("\u2197", xTurbinLp+10, toY(dg,yHpTop+3));
 
 		const xColdCompressorLp = xTurbinHp - ctWidth/2;
 		ctx.beginPath();
@@ -2600,24 +2625,34 @@ return;
 		ctx.lineTo(xColdCompressorLp, toY(dg,yColdLpTop));
 		ctx.closePath();
 		ctx.stroke();
-		ctx.font = "12px serif";
+		ctx.font = "bold 12px serif";
 		ctx.fillText("C", xColdCompressorHp+5, toY(dg,yColdLpBottom+1));
 
 		ctx.lineWidth = 9;
 		ctx.strokeStyle = colorColdLpGravel;
 		ctx.beginPath();
-		ctx.moveTo(xColdCompressorLp-5, toY(dg,yColdLpTop-1));
-		ctx.lineTo(xColdCompressorLp-5, y = toY(dg,yColdLpTop+15));
-		ctx.lineTo(towerLeftX+6, y );
+		ctx.moveTo(xColdCompressorLp-4, toY(dg,yColdLpBottom+1));
+		ctx.lineTo(xColdCompressorLp-4, y = toY(dg, yHpBottom-10)+12);
+		ctx.lineTo(toX(dg,-metrics.rGroundBelow-8), y );
+		ctx.lineTo(toX(dg,-rPipeLpCold-13), y = toY(dg,hGround-metrics.hBelowActual+hLiquid*2+4));
+		ctx.lineTo(toX(dg,-rPipeLpCold+10),y);
 		ctx.stroke();
+		ctx.fillStyle = 'white'; 
+		ctx.font = "bold 20px serif";
+		ctx.fillText("\u2191", xColdCompressorLp-9, toY(dg,yColdLpBottom-10));
 
 		ctx.lineWidth = 4;
 		ctx.strokeStyle = colorColdHpGravel;
 		ctx.beginPath();
-		ctx.moveTo(xColdCompressorHp+3, toY(dg,yColdHpTop-1));
-		ctx.lineTo(xColdCompressorHp+3, y = toY(dg,yColdLpTop+20));
-		ctx.lineTo(xColdTurbinHp-3, y );
+		ctx.moveTo(xColdCompressorHp+2, toY(dg,yColdHpBottom+1));
+		ctx.lineTo(xColdCompressorHp+2, y = toY(dg, yHpBottom-10)+20);
+		ctx.lineTo(toX(dg,-metrics.rGroundBelow-12), y );
+		ctx.lineTo(toX(dg,-metrics.dome.rBottom-12), y = toY(dg,0)-4);
+		ctx.lineTo(toX(dg,-metrics.dome.rBottomI), y);
 		ctx.stroke();
+		ctx.fillStyle = 'black'; 
+		ctx.font = "bold 16px serif";
+		ctx.fillText("\u2193", xColdCompressorHp-2, toY(dg,yColdHpBottom)+20);
 
 		xGeneratorRight = xColdCompressorHp - ctWidth/2;
 		xGeneratorLeft = xGeneratorRight - 2*ctWidth;
@@ -2627,12 +2662,6 @@ return;
 		ctx.moveTo(xColdCompressorHp, y = toY(dg, towerH-10));
 		ctx.lineTo(xGeneratorRight, y);
 		ctx.stroke();
-
-		ctx.fillStyle = 'white'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xColdCompressorLp-9, toY(dg,yColdLpTop+1));
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u2191", xColdCompressorHp-1, toY(dg,yColdLpTop+1));
 
 		ctx.lineWidth = 1;
 		ctx.strokeStyle = 'black';
@@ -2644,49 +2673,65 @@ return;
 		ctx.lineTo(xGeneratorLeft, y);
 		ctx.closePath();
 		ctx.stroke();
-		ctx.font = "13px arial";
+		ctx.font = "bold 13px arial";
 		ctx.fillText("G / M", xGeneratorLeft+15, toY(dg,yLpBottom+8));
 		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkOut), xGeneratorLeft+10, toY(dg,yLpBottom+1));
 		ctx.fillText("Uncharge", xGeneratorLeft-1-ctx.measureText("Uncharge").width, toY(dg,yLpBottom+11));
-
-
+		ctx.font = "bold 20px serif";
+		ctx.fillText("\u21DC", xGeneratorLeft-19, toY(dg, towerH-14));
+		
 		ctx.font = "14px arial";
 		ctx.fillStyle = 'white'; 
-		ctx.fillText("bed-", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-10));
-		ctx.fillText("bed-",x = 2+toX(dg, metrics.rCylinder*2), y);
-		ctx.fillText("rock", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-17));
-		ctx.fillText("rock",x, y );
-		ctx.font = "11px serif";
+		ctx.fillText("bedrock", x = toX(dg,-metrics.rGround-20), y = toY(dg,hGround-25));
+		ctx.fillText("bedrock",x = toX(dg,metrics.rGround), y);
 		const depth = metrics.hBelow+metrics.hCylinder;
 //console.log( depthM+", yPx="+toY(dg,depth))
-		ctx.fillText( "-"+Math.round(depth)+"m", x, toY(dg,0));
-		ctx.fillText( "-"+Math.round(metrics.hBelow)+"m", x, toY(dg,metrics.hCylinder));
+		ctx.fillText( "-"+Math.round(metrics.hBelow)+" m", toX(dg,metrics.dome.rTop-22), toY(dg,metrics.hCylinder));
+		ctx.fillText( "-"+Math.round(depth)+" m", toX(dg,metrics.dome.rBottom+14), toY(dg,0));
 		ctx.fillStyle = 'black'; 
-		ctx.fillText( "+"+Math.round(metrics.hAbove)+"m", x, toY(dg,hTop));
+		ctx.fillText( "+"+Math.round(metrics.hAbove)+" m", toX(dg,metrics.dome.rTop+11), toY(dg,hGround+metrics.hAbove));
 
-		ctx.font = "40px serif";
-		ctx.fillText("\u21A6", toX(dg, metrics.rCylinder), toY(dg,metrics.hCylinder)+10);
+		ctx.font = "bold 14px arial";
+		ctx.fillStyle = 'black'; 
+		ctx.fillText("r="+Math.round(metrics.dome.rBottom)+" m \u21A6", toX(dg,0), toY(dg,0));
+
+		ctx.font = "bold 14px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("r="+Math.round(metrics.dome.rTop)+" m \u21A6", toX(dg,0), toY(dg,metrics.dome.hBottom));
+
+		ctx.font = "bold 14px arial";
+		ctx.fillStyle = 'white'; 
+		ctx.fillText("r="+Math.round(metrics.rGround)+" m \u21A6", toX(dg,0),toY(dg,hGround));
+
 		ctx.font = "14px arial";
 		ctx.fillStyle = 'white'; 
-		ctx.fillText(" Storage radius "+Math.round(metrics.rCylinder)+" m", toX(dg, metrics.rCylinder)+40, toY(dg,metrics.hCylinder)-4);
+		ctx.fillText("r="+Math.round(metrics.rGroundBelow)+" m \u21A6", toX(dg,0), toY(dg,hGround)+14);
+
+		ctx.font = "14px arial";
+		ctx.fillStyle = 'black'; 
+		ctx.fillText("r="+Math.round(metrics.dome.rTop)+" m \u21A6", toX(dg,0), toY(dg,hGround+metrics.hAbove+5));
 
 		ctx.font = "14px arial";
 		ctx.fillStyle = 'white'; 
-		ctx.fillText("Insulated by sorted gravel + biochar", toX(dg,2), toY(dg,metrics.hCylinder+2));
+		centerText(ctx,"Insulated by sorted gravel + biochar", toX(dg,0), toY(dg,hGround-metrics.hBelow+10));
 
 		ctx.beginPath();
-		ctx.moveTo(towerRightX, y = toY(dg, hTop-ins/2));
-		ctx.lineTo(towerRightX+15, y);
-		ctx.lineTo(towerRightX+15, y = toY(dg, hTop- ins/2 - 0.1 * lpActH));
-		ctx.lineTo(towerRightX, y);
+		ctx.moveTo(toX(dg,metrics.rTop), y = toY(dg,hGround+metrics.hAbove));
+		ctx.lineTo(toX(dg,metrics.rTop+xyAddRoof+3),y);
+		ctx.lineTo(toX(dg,metrics.rTop+xyAddRoof+13),y = toY(dg,hGround+metrics.hAbove-10));
+		ctx.lineTo( x=toX(dg,metrics.rTop+10),y );
+		ctx.closePath();
 		ctx.stroke();
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("\u21D0", towerRightX-7, y+2);
-		ctx.fillText("\u21D0", towerRightX+8, y-10);
+
+		ctx.font = "bold 20px arial";
+		ctx.fillStyle = colorHotLpGravel; 
+		ctx.fillText("\u21D8", toX(dg,metrics.rTop), toY(dg,hGround+metrics.hAbove-5));
+		ctx.fillStyle = colorWarmLpGravel; 
+		ctx.fillText("\u21D8", x-1, y+10);
+		ctx.font = "14px arial";
 		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatOutInDischarge) : ''), towerRightX+10, y-2);
-
-
+		ctx.fillText("\u2192 Heat exchange: district heat"+(cycleData ? workToMW(cycleData.heatOutInDischarge) : ''), toX(dg,metrics.rTop+xyAddRoof+10), toY(dg,hGround+metrics.hAbove-10));
+/*
 		ctx.font = "20px serif";
 		ctx.fillText("\u21DC", xGeneratorLeft-20, toY(dg, towerH-14));
 		ctx.fillStyle = 'white'; 
@@ -2696,10 +2741,11 @@ return;
 		ctx.fillText("\u21D4", towerLeftX-12, hMaxTopLiquid+4);
 		ctx.fillStyle = 'black'; 
 		ctx.fillText("\u21D5", toX(dg,metrics.rCylinder)-8, hpStorageTopY+6);
-
+*/
 
 $("#"+canvasId).css('display','block');
 return;
+
 /*
 ctx.beginPath();
 ctx.lineWidth = 1;

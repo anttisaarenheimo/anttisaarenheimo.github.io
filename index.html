@@ -23,7 +23,7 @@ td {
 	<SELECT id="name"><!--OPTION>Argon</OPTION><OPTION>CarbonDioxide</OPTION--><OPTION>Helium</OPTION><OPTION>Hydrogen</OPTION><!--OPTION>Methane</OPTION--><OPTION selected>Nitrogen</OPTION><!--OPTION>R134a</OPTION><OPTION>Water</OPTION-->
 	</SELECT><BUTTON onClick="drawTpDiagram()">Draw T-P diagram</BUTTON>  
 	<BUTTON onClick="drawJustStorage()">Redraw storage</BUTTON> 
-	<BUTTON onClick="calcDiagrams()">Draw diagrams</BUTTON> 
+	<BUTTON onClick="calcDiagrams()">Draw the selected diagrams</BUTTON> 
 
 	<!--<INPUT id="noDistrictHeat" checked type="checkbox" value="true"><LABEL>Use stored liqued nitrogen to maximize electric output</LABEL>-->
 	<!--BUTTON 
@@ -32,38 +32,38 @@ td {
 <DIV>
 	<LABEL>Turbin stage efficiency: </LABEL>
 	<INPUT size="6" title="88-92% is a typical efficiency range for a single axial turbin or compressor stage" id="tEfficiency" type="float" value="0.92"> 
-	<INPUT id="tEffRange" type="checkbox" checked><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="tEfficiencyFrom" type="float" value="0.87"> - <INPUT size="6" id="tEfficiencyTo" type="float" value="0.93"></Div>
+	<INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="tEfficiencyFrom" type="float" value="0.87"> - <INPUT size="6" id="tEfficiencyTo" type="float" value="0.94"></Div>
 <DIV>
 	<LABEL>Compressor efficiency: </LABEL>
 	<INPUT size="6" title="88-92% is a typical efficiency range for a single axial turbin or compressor stage." id="cEfficiency" type="float" value="0.92"> 
 	<!--INPUT size="6" id="cEfficiencyFrom" type="float" value="0.87"><INPUT size="6" id="cEfficiencyTo" type="float" value="0.93"-->
 </Div>
 <DIV>
-	<LABEL>T high (Kelvins): </LABEL><INPUT size="6" id="tHigh" type="float" value="1033"> 
-	<INPUT id="tHighRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="tHighFrom" type="float" value="800"> - <INPUT size="6" id="tHighTo" type="float" value="1400">
+	<LABEL>T high (Kelvins): </LABEL><INPUT size="6" id="tHigh" type="float" value="1400"> 
+	<INPUT id="tHighRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="tHighFrom" type="float" value="800"> - <INPUT size="6" id="tHighTo" type="float" value="1600">
 </DIV>
 <DIV>
-	<LABEL>P high/low: </LABEL><INPUT size="6" id="highToLowPressureRatio" type="float" value="25" onchange="metricsChanged()">
-	<LABEL>P low kPa: </LABEL><INPUT size="6" id="targetPLow" type="float" value="102" onchange="metricsChanged()">
-	<INPUT id="pRatioRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="pRatioFrom" type="float" value="10"> - <INPUT size="6" id="pRatioTo" type="float" value="50">
+	<LABEL>P high/low: </LABEL><INPUT size="6" id="highToLowPressureRatio" type="float" value="50" onchange="metricsChanged()">
+	<LABEL>P low kPa: </LABEL><INPUT size="6" id="targetPLow" type="float" value="25" onchange="metricsChanged()">
+	<INPUT id="pRatioRange" type="checkbox" checked><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="pRatioFrom" type="float" value="10"> - <INPUT size="6" id="pRatioTo" type="float" value="81">
 </DIV>
 <DIV>
-	<LABEL>High pressure storage size (Mm3): </LABEL><INPUT size="4" id="hpStorageSizeRockMm3" type="float" value="5" onchange="metricsChanged()">
+	<LABEL>High pressure storage size (Mm3): </LABEL><INPUT size="4" id="hpStorageSizeRockMm3" type="float" value="3.4" onchange="metricsChanged()">
 	<INPUT id="hpStorageSize" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="hpStorageSizeFrom" type="float" value="3"> - <INPUT size="4" id="hpStorageSizeTo" type="float" value="20">
 	<LABEL>Gross work out (MW): </LABEL><INPUT size="4" id="grossWorkOut" type="float" value="1400">
 	<LABEL>Max relative pressure drop in pipes: </LABEL><INPUT size="4" id="maxPressureDrop" type="float" value="0.01">
 </DIV>
 <DIV>
 	<LABEL>Rock density	(tn/m3): </LABEL><INPUT size="4" id="rockDensity" type="float" value="2.65" onchange="metricsChanged()">
-	<LABEL>Gravel density in the storage (tn/m3): </LABEL><INPUT size="4" id="gravelDensity" type="float" value="2.1" onchange="metricsChanged()">
-	<LABEL>Gravel density in the insulation layers (tn/m3): </LABEL><INPUT size="4" id="insGravelDensity" type="float" value="1.6" onchange="metricsChanged()">
-	<LABEL>Max open pit angle in the bottom: </LABEL><INPUT size="2" id="maxOpenPitAngle" type="float" value="75" onchange="metricsChanged()">
+	<!--LABEL>Gravel density in the storage (tn/m3): </LABEL><INPUT size="4" id="gravelDensity" type="float" value="2.1" onchange="metricsChanged()"-->
+	<LABEL>Sorted gravel density (in the insulation) (tn/m3): </LABEL><INPUT size="4" id="insGravelDensity" type="float" value="1.5" onchange="metricsChanged()">
+	<LABEL>Open pit angle: </LABEL><INPUT size="2" id="maxOpenPitAngle" type="float" value="70" onchange="metricsChanged()">
 </DIV>
 <DIV>
 	<LABEL id="storageDimensions"></LABEL>
 </DIV>
 <DIV>
-	<LABEL>Cost of surface €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1000">
+	<LABEL>Average cost of external surfaces €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1000">
 	<LABEL>Cost of mining €/m3: </LABEL><INPUT size="4" id="costOfMiningM3" type="float" value="12">
 </DIV>
 <DIV>
@@ -71,14 +71,21 @@ td {
 	<LABEL>Cost of turbin/compressor power €/kW: </LABEL><INPUT size="6" id="tcCostOfKW" type="float" value="50">
 	<LABEL>Cost of heat exchage €/kW: </LABEL><INPUT size="6" id="heCostOfKW" type="float" value="50">
 </DIV>
-<DIV>
+<!--DIV>
 	<INPUT id="cyrogenicCooling" checked title="pLow gas cooled to saturation temperature with heat pump" type="checkbox" value="true">
 	<LABEL>Set T low equal to Saturation temperature in P low with heat pump</LABEL>
 	<INPUT id="motorGenerator" checked title="Compressors and turbins share the same axle and motor-generator" type="checkbox" value="true">
 	<LABEL>Compressors and turbins share the same axle and motor-generator</LABEL>
 	<INPUT id="showEnthalpyAndInternalEnergy" title="" type="checkbox" value="true">
 	<LABEL>Show the mass specific enthalpy (J/g) and entropy (J/g/K) lines</LABEL>
+</DIV-->
+<DIV>
+	<LABEL>Low pressure gravel min/max:</LABEL><INPUT id="gravelMinLp" type="float" value="70" size="3" maxlength="3">/<INPUT id="gravelMaxLp" type="float" value="120" size="3" maxlength="3"><LABEL>Porosity:</LABEL><INPUT id="gravelPorosityLp" type="float" size="4" maxlength="4"><BUTTON onClick="calcPressureDropInGravel('Lp')">Pressure drop</BUTTON><LABEL id="expectedPDropLp"></LABEL>
 </DIV>
+<DIV>
+	<LABEL>High pressure gravel min/max:</LABEL><INPUT id="gravelMinHp" type="float" value="20" size="3" maxlength="3">/<INPUT id="gravelMaxHp" type="float" value="70" size="3" maxlength="3"><LABEL>Porosity:</LABEL><INPUT id="gravelPorosityHp" type="float" size="4" maxlength="4"><BUTTON onClick="calcPressureDropInGravel('Hp')">Pressure drop</BUTTON><LABEL id="expectedPDropHp"></LABEL>
+</DIV>
+
 <!-- these hidden old values are set based on the values of hpStorageSizeRockM3, highToLowPressureRatio, rockDensity, gravelDensity, insGravelDensity -->
 <INPUT size="6" id="radius" type="hidden" value="150">
 <INPUT size="6" id="pHigh_kPa" type="hidden" value="2500"> 
@@ -123,6 +130,73 @@ td {
 	var pTransformer = {};
 
 	drawJustStorage();
+
+	var porositySet = false;
+	function calcPressureDropInGravel(type, speed, visc, density, length ) {
+		var porosity = 0;
+		var gravelDensity;
+		const min = getFloatParam( "gravelMin"+type, 0 );
+		const max = getFloatParam( "gravelMax"+type, 0 );
+		if (metrics) metrics["gravelMin"+type] = min;
+		if (metrics) metrics["gravelMax"+type] = max;
+		const minPorosity = (2.65-2.2)/2.65;
+		const maxPorosity = 0.55;
+		porosity = porositySet ? 0 : getFloatParam( "gravelPorosity"+type, 0 );
+		if (porosity>0) {
+			if (porosity>maxPorosity || porosity < minPorosity) {
+				alert("Porosity must be in typical range for compacted gravel:"+minPorosity+"-"+maxPorosity);
+				porosity = 0;
+			}
+		}
+		if (porosity == 0) {
+			
+			gravelDensity = 1.5 + (2.1-1.5)*(1-min/max);
+			porosity = (2.65-gravelDensity)/2.65;
+			$("#gravelPorosity"+type).val(myRound(porosity,2));
+			porositySet = true;
+		}
+		else {
+			gravelDensity = 2.65*(1 - porosity);
+		}
+		if (metrics){
+			if (type == 'Hp') metrics.gravelDensity = gravelDensity;
+			else if (type == 'Lp') metrics.lpGravelDensity = gravelDensity;
+		}
+		// sort: 6/12, n=0.51 => (9.7±6.3)·10-8 m2
+		// sort: 20/40, n=0.40 => (9±6)·10-8 m2
+		// y=x*visc/k + x^2*c*visc/k = (1638±289)x²+(200±124)x   => 200 = 0.000018/0.00000009, c ~= 8.2
+		// sort 6/12: y=(2976±366)x²+(185±120)x => 187 = 0.000018/0.000000097, c = 2976/185 ~= 16.1
+		// Calclulated for 6/12, n=0.51: y=2141*x²+715*x, turbulent part quite near, but Laminar part 4*actual!
+		// => Calcluates too high pressure drops for small particle sizes and low speed
+		// deltaP/L = x*a + x^2*b
+		var a = 200;	// laminar flow part
+		var b = 1630;	// turbulent flow part
+if (min==0) min=0.0001; // 0.1mm
+console.log("min="+min+", max="+max+", porosity="+porosity+", gravelDensity="+gravelDensity);
+		// When v=inlet speed in free space (m/2), L=distance (m), Dp=smallest particle diameter (m), n=porosity, density=fluid density kg/m3
+		// wiki Ergun_equation:  deltaP=v*(150*visc*L/Dp^2)*(1-n)^2/n^3+v^2*(1.75*L*density/Dp)*(1-n)/n^3
+		// Darcy–Forchheimer equation is best for gravels, but its values k and c must be measured for each case.
+		// So we use Ergun equation extension for turbulent flows to scale the known values 
+		// https://www.researchgate.net/publication/322140487_Behaviour_study_of_airflow_through_gravels_based_on_laboratory_experimentation_and_contrast_with_FEM_models
+		// gravel sort: 20/40, n=0.40:  (1638±289)x²+(200±124)x
+		// Test: 
+		a = a *(Math.pow(0.02,2)/Math.pow(min/1000,2))*(Math.pow(0.4,3)/Math.pow(porosity,3))*(Math.pow(1-porosity,2)/Math.pow(1-0.4,2));
+		b = b *(0.02/(min/1000))*(Math.pow(0.4,3)/Math.pow(porosity,3))*((1-porosity)/(1-0.4));
+		if (visc) {
+			a = a*visc/0.000018;
+			b = b*visc/0.000018;
+		}
+		if (density) {
+			b = b*density/1.8;// air density 1.8 kg/m3
+		}
+		$("#expectedPDrop"+type).text("y="+Math.round(b)+"*x²+"+Math.round(a)+"*x");
+		if (speed) {
+			var ret = speed*a + speed*speed*b;	// pressure drop/L: Pa/m
+			if (length) ret = ret * length;
+console.log(type+" pressure drop="+ret+", (v:"+speed+",visc:"+visc+",d:"+density+",L:"+length+")=>a:"+a+", b:"+b);
+			return ret;
+		}
+	}
 	
 	// Steam saturation is not an adibatic process.  Instead the wetness and released enthalpy is calculated using constant entropy.
 	// It probably needs much higher pressure drop than abiabatic expansion with high cp/cv
@@ -182,6 +256,10 @@ td {
 		var ret = $('#'+id).val();
 //console.log("$('#"+id+"').val()="+ret+", default="+defValue+"=> ret="+(ret ? ret : defValue));
 		return ret ? parseFloat(ret) : defValue;
+	}
+	function getIntParam( id, defValue ) {
+		var ret = $('#'+id).val();
+		return ret ? parseInt(ret) : defValue;
 	}
 
 	function getBooleanParam( id, defValue ) {
@@ -518,7 +596,7 @@ td {
 	}
 
 	var pTriplePoint, tTriplePoint;
-	const motorGenerator = getBooleanParam('motorGenerator');
+	const motorGenerator = getBooleanParam('motorGenerator', true);
 
 	function drawTpDiagram() {
 		drawIt(true);
@@ -542,7 +620,7 @@ console.log("Waiting coolprop to init ...");
 		minTemp = tTriplePoint - 0.5;
 		minPressure =  000000; //pTriplePoint * 0.98;
 
-		const cyrogenicCooling = getBooleanParam('cyrogenicCooling');
+		const cyrogenicCooling = true; //getBooleanParam('cyrogenicCooling', true);
 		const adjustedCompressorPlow = false; //getBooleanParam('adjustedCompressorPlow');
 		var tHigh = getFloatParam('tHigh', 1033);
 		var tLow = getFloatParam('tLow', 273);
@@ -550,10 +628,10 @@ console.log("Waiting coolprop to init ...");
 		var cEfficiency = getFloatParam('cEfficiency', tEfficiency);
 		var hotCycle = []
 		var coldCycle = []
-		getMetrics();
+		if (getMetrics() == null) return;
 		var pHigh = metrics.pHigh; // getFloatParam('pHigh_kPa', 5000) *  1000;
 		var pLow = metrics.pLow; // getFloatParam('pLow_kPa', 25) * 1000;
-		maxPressure = pHigh + 500000;
+		maxPressure = pHigh * 18 / 14;
 		maxTemp = tHigh+100; //1100; // tCrit < 200 ? 400 : tCrit + 200;
 
 		const cycleData = doChargeDischargeCycle( hotCycle, coldCycle, tHigh, tLow, pHigh, pLow, tEfficiency, cEfficiency, cyrogenicCooling, adjustedCompressorPlow, true );
@@ -780,14 +858,17 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 		rockDensity : getFloatParam('rockDensity', 2.65 ), 
 		highToLowPressureRatio : (pRatio ? pRatio : getFloatParam('highToLowPressureRatio', 25 )),	
 		pRatioTolerance : getFloatParam('pRatioTolerance_kPa', 100)*1000,	// by default about 1 bar tolerance before the deck starts to rise by pressure
-		gravelDensity : getFloatParam('gravelDensity', 2.1 ),	// high density because it makes storage more compact and aboslute pressure drop does not matter in a high pressure
+		//gravelDensity : getFloatParam('gravelDensity', 2.1 ),	// high density because it makes storage more compact and aboslute pressure drop does not matter in a high pressure
+		//lpGravelDensity : getFloatParam('lpGravelDensity', 2.1 ),	// high density because it makes storage more compact and aboslute pressure drop does not matter in a high pressure
 		insGravelDensity : getFloatParam('insGravelDensity', 1.6 ),	// low density to minimize the pressure drop in low pressure
 		rockHeatCapasity : getFloatParam('rockHeatCapasity', 0.80 )*1000, // kJ/kg/K
 		maxPartLiquid : 0.03,   // spefic value is calculated later
 		concreteMaxStrengthMPa : 80	// for a very high quality rock-filled concrete could have >90 MPa
 	};
 	metrics = storageMetrics;
-	
+	calcPressureDropInGravel('Lp');
+	calcPressureDropInGravel('Hp');
+
 	if (metrics.ins == 10) metrics.ins = metrics.ins*tHigh/1030; // scale the Insulation layer to the default!
 	
 	// Let's fix the dome rock temperature to approximately 300 or 750K, we assume insulation k value of cave top is 10 times of 10m gravel Insulation in the bottom lp storage
@@ -809,8 +890,9 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 	// V1 = the high pressure cylider rock volume needed to contains pHigh pressure == 
 
 	// this estimation was based on radius=150 and insulation layer=10, 
-	metrics.hpExpectedAverageDensity = (metrics.gravelDensity * 4 + metrics.insGravelDensity) / 5;	// very near to the actual value when high pressure insulation layer is 10 m
-	var lpExpectedV3AverageGravelDensity = (metrics.gravelDensity * 7 + metrics.insGravelDensity) / 8;	// This applies below ground!
+	//Loop again: expected density=2 <> calclulated density=1.8343575910031746 or 1.973478029020575<>2.0375
+	metrics.hpExpectedAverageDensity = (metrics.gravelDensity * 3 + metrics.insGravelDensity) / 4;	// very near to the actual value when high pressure insulation layer is 10 m
+	var lpExpectedV3AverageGravelDensity = (metrics.gravelDensity * 6 + metrics.insGravelDensity) / 7;	// This applies below ground!
 	for (;;) {
 		metrics.V1 = metrics.hpStorageSizeRockM3;
 		// the mined volume in cylinder
@@ -823,6 +905,11 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 		// the mined volume above the high pressure cylinder
 		metrics.V3 = metrics.V1 - metrics.V2;
 
+		if (metrics.V2 < 0 || metrics.V3<0) {
+			console.log("Bad values:\r\n"+JSON.stringify(metrics, null, 2)); 
+			return null;
+		}
+		
 		// volume above ground
 
 		const targetPLow = getFloatParam( 'targetPLow', 102 ) * 1000;
@@ -884,7 +971,7 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 			// saadaan tasasivuinen puolesta välistä leikattu kartio, korkeus hS =  
 			// Tällöin sen tilavuus cV = (PI*s*s/4)*hS/3 - PI*s*s/16*hS/6
 			// s=2*r*cos(Math.PI/4) = r=s/(2*Math.cos(Math.PI/4), (PI/4 == 45 degrees)
-			if (dome300 == null) dome300 = getMetricsOfCaveDome45(300);
+			dome300 = getMetricsOfCaveDome45(300);
 			// pow(sActual,3)/because pow(s,3)=vActual/vCave => sActual=pow(pow(s,3)*vActual/vCave, 1/3)
 
 			var caveVolume = metrics.V1 * (metrics.rockDensity / metrics.hpExpectedAverageDensity);
@@ -929,15 +1016,18 @@ console.log("Actual dome width="+caveS+": "+caveVolume+"=> scaleLength="+dome.sc
 
 			// the mined volume above the high pressure cave
 			metrics.V3 = metrics.V1 - metrics.V2;
-
-			// the volume above ground has no insulation layer, so it density that of the compacted gravel density
+			if (metrics.V2 < 0 || metrics.V3<0) {
+				console.log("Bad values:\r\n"+JSON.stringify(metrics, null, 2)); 
+				return null;
+			}
+			// the volume above ground has no insulation layer, so its density that of the compacted gravel density
 			metrics.lpExpectedV3AverageGravelDensity = lpExpectedV3AverageGravelDensity;
 			metrics.V4 = ((metrics.V1-metrics.V3)  + metrics.V3 * (1 - lpExpectedV3AverageGravelDensity/metrics.rockDensity))
-						* metrics.rockDensity / metrics.gravelDensity;
+						* metrics.rockDensity / metrics.lpGravelDensity;
 /*console.log(metrics.V4+" = ("+metrics.V1+" * "+(1 - metrics.hpAverageGravelDensity/metrics.rockDensity)+" + "+metrics.V3+" * "+(1 - lpExpectedV3AverageGravelDensity/metrics.rockDensity)+")"+
-						"* "+(metrics.rockDensity / metrics.gravelDensity));*/
+						"* "+(metrics.rockDensity / metrics.lpGravelDensity));*/
 
-			metrics.hMin = (metrics.pHigh - dome.thickness*metrics.rockDensity*10000)/(metrics.gravelDensity*10000);
+			metrics.hMin = (metrics.pHigh - dome.thickness*metrics.rockDensity*10000)/(metrics.lpGravelDensity*10000);
 			// hMin = hBelow + hAbove;
 			// V3 = PI*rGround*rGround*hBelow/3 - ;
 			metrics.extDome = getExternalDome45( dome, metrics.dome.thickness2 );
@@ -1046,7 +1136,7 @@ console.log(x+"=("+metrics.rGroundBelow+"-"+sinX+"*"+metrics.insLpSides);
 				metrics.vLpInsulation = metrics.V3 - metrics.V3*Math.pow(x,3)/Math.pow(metrics.rGroundBelow,3) 
 					+ metrics.extDome.area*metrics.ins; // approximation, but good enough for us
 			}
-			metrics.lpV3AverageGravelDensity = (metrics.gravelDensity *(metrics.V3-metrics.vLpInsulation) + metrics.vLpInsulation*metrics.insGravelDensity) / metrics.V3;
+			metrics.lpV3AverageGravelDensity = (metrics.lpGravelDensity *(metrics.V3-metrics.vLpInsulation) + metrics.vLpInsulation*metrics.insGravelDensity) / metrics.V3;
 			metrics.highPressureStorageSurfaceArea = dome.topArea + Math.PI*dome.rBottomI*dome.rBottomI*Math.PI + dome.sideArea;
 			metrics.lowPressureStorageSurfaceArea = metrics.extDome.area + // area of top dome
 													Math.PI*metrics.sideAbove*(metrics.rGround+metrics.rTop) + // side above ground
@@ -1073,12 +1163,12 @@ else if (!metrics.hpExpectedAverageDensity) console.log("metrics.hpExpectedAvera
 else if (!metrics.lpV3AverageGravelDensity) console.log("metrics.lpV3AverageGravelDensity="+metrics.lpV3AverageGravelDensity);
 console.log("Bad values:"+JSON.stringify(storageMetrics, null, 2)); 
 alert("Internal error");
-return;
+return null;
 		}
 		else if (Math.abs(metrics.hpAverageGravelDensity-metrics.hpExpectedAverageDensity)<0.01 && Math.abs(metrics.lpV3AverageGravelDensity-lpExpectedV3AverageGravelDensity)) {
 			metrics.lowPressureStorageVolume = metrics.V4 + metrics.V3 - metrics.vLpInsulation;
 			metrics.lpAverageGravelDensity = 
-				(metrics.V4 * metrics.gravelDensity + metrics.gravelDensity *(metrics.V3-metrics.vLpInsulation) + metrics.vLpInsulation*metrics.insGravelDensity) / (metrics.V4 + metrics.V3);
+				(metrics.V4 * metrics.lpGravelDensity + metrics.lpGravelDensity *(metrics.V3-metrics.vLpInsulation) + metrics.vLpInsulation*metrics.insGravelDensity) / (metrics.V4 + metrics.V3);
 			break;
 		}
 		else {
@@ -1200,26 +1290,31 @@ console.log("lowPressureStorageSurfaceArea="+Math.round(metrics.lowPressureStora
 	return metrics;
 }	
 
-	function getColdStoragePressureDrop(partOfTotalLength, visc, gasDensity, flow) {
-		const x1 = flow / (metrics.rCylinder * metrics.rCylinder * Math.PI);	
-		const L1 = metrics.heightOfColdCompressorIn*partOfTotalLength;
-
+	function getColdStoragePressureDrop(partOfTotalLength, visc, gasDensity, flow, rActual) {
+		const r = rActual ? rActual : metrics.rCylinder;
+		const x1 = flow / (r * r * Math.PI);
+		const L1 = (metrics.hBelowActual+metrics.hAbove)*partOfTotalLength;
+		return calcPressureDropInGravel('Lp', x1, visc, gasDensity, L1 );
+/*
 		const porosity = 1 - metrics.hpAverageGravelDensity/metrics.rockDensity;	// free space in gravel between 0-1
 		const Re = gasDensity * x1 * 0.015 / (visc*porosity);
 //console.log("Reynold's number in low pressure storage:"+Re);
-
 		// Darcy's law: deltaP = L*Q*visc/(-k*A);	
-		return L1 * visc/18*(1927*x1*x1+324*x1)*gasDensity/1.2;	// scale air deinity 1.2 kg/m3 to the actual density
+		return L1 * visc/0.000018*(1927*x1*x1+324*x1)*gasDensity/1.2;	// scale air deinity 1.2 kg/m3 to the actual density
+*/
 	}
-	function getHotStoragePressureDrop(partOfTotalLength, visc, gasDensity, flow) {
-		const L1 = metrics.pHighStorageHeight*partOfTotalLength;
-		const x1 = flow / (metrics.rCylinder * metrics.rCylinder * Math.PI);
-
+	function getHotStoragePressureDrop(partOfTotalLength, visc, gasDensity, flow, rActual) {
+		const r = rActual ? rActual : (partOfTotalLength > 0.5 ? (metrics.dome.rTopI+2*metrics.dome.rBottomI)/3 : (metrics.dome.rTopI*2+metrics.dome.rBottomI)/3);  // worst case
+		const L1 = metrics.dome.hBottomI*partOfTotalLength;
+		const x1 = flow / (r * r * Math.PI);
+		return calcPressureDropInGravel('Hp', x1, visc, gasDensity, L1 );
+/*
 		const porosity = 1 - metrics.gravelDensity/metrics.rockDensity;	// free space in gravel between 0-1
 		const Re = gasDensity * x1 * 0.003 / (visc*porosity);
 console.log("Reynold's number in high pressure storage:"+Re);
 		// Darcy's law: deltaP = L*Q*visc/(-k*A);	
-		return L1 * visc/18*(3342*x1*x1+305*x1)*gasDensity/1.2;	// scale air density 1.2 kg/m3 to the actual density
+		return L1 * visc/0.000018*(3342*x1*x1+305*x1)*gasDensity/1.2;	// scale air density 1.2 kg/m3 to the actual density
+*/
 	}
 	function getPipePressureDrop(visc, density, flow, diameter, length, height, heightAbove, densityAbove ) {
 		const epsilon = getFloatParam("epsilon", 0.025); 	// for steel, structural or forged (0.0025 drawn tube, but pipe diameter is too big for that
@@ -1246,12 +1341,12 @@ if (densityAbove) console.log("9.81*"+densityAbove+"*"+heightAbove+"="+(9.81*den
 		return 9.81*density*height;
 	}
 	
-	function getPipeDiameterAndPressureDrop(visc, flow, density, length, maxPressureDrop, height, heightAbove, densityAbove ) {
+	function getPipeDiameterAndPressureDrop(visc, flow, density, length, maxPressureDrop,height, heightAbove, densityAbove, pipeDiameter)  { //  )
 		// Heuristic search of pipe diameter and pressure drop for a turbulent flow in a steel pipe having the diameter a few meters
 		const epsilon = getFloatParam("epsilon", 0.025); 	// for steel, structural or forged (0.0025 drawn tube, but pipe diameter is too big for that
 		var deltaP;
+		var diameter = pipeDiameter ? pipeDiameter : 4;	// start with 2m
 		var prevDiameter = 2;
-		var diameter = 4;	// start with 2m
 		var loop
 		for (loop = 1; loop < 50; loop++) {
 			const speed = flow / (Math.PI*diameter*diameter/4);
@@ -1263,7 +1358,7 @@ if (densityAbove) console.log("9.81*"+densityAbove+"*"+heightAbove+"="+(9.81*den
 			const f = Math.pow((8.128943+A1)/(8.128943*A0-0.86859209*A1*Math.log(A1/(3.7099535*Re))), 2);
 			// Pressure drop with Darcy–Weisbach friction factor f:  
 			deltaP=f*length/diameter*density*Math.pow(speed,2)/2;  // https://en.wikipedia.org/wiki/Darcy%E2%80%93Weisbach_equation
-
+			if (pipeDiameter) break; // the diameter is already set by the charge loop
 //console.log(loop+":diameter="+diameter+", length="+length+"=> deltaP="+deltaP);
 			if (Math.round(deltaP) == maxPressureDrop) break;
 			else if (deltaP < maxPressureDrop) {
@@ -1275,7 +1370,7 @@ if (densityAbove) console.log("9.81*"+densityAbove+"*"+heightAbove+"="+(9.81*den
 //if (height) console.log( "9.81*"+density+"*"+height+"="+ (9.81*density*height));
 //if (densityAbove) console.log("9.81*"+densityAbove+"*"+heightAbove+"="+(9.81*densityAbove*heightAbove));
 		ret.maxPressureDrop = maxPressureDrop;
-		ret.pressureDrop = deltaP
+		ret.pressureDrop = deltaP;
 				   + (height ? 9.81*density*height : 0) 		//	Head-loss form: deltaP=g*density*height 
 				   - (densityAbove ? 9.81*densityAbove*heightAbove : 0);
 		ret.diameter = diameter;
@@ -1296,7 +1391,7 @@ console.log(loop+": ret="+JSON.stringify(ret));
 		const hpStorageSizeTo = getFloatParam('hpStorageSizeTo', 50);
 		const tHighFrom = getFloatParam('tHighFrom', 800);
 		const tHighTo = getFloatParam('tHighTo', 900);
-		const cyrogenicCooling = getBooleanParam('cyrogenicCooling');
+		const cyrogenicCooling = true; // getBooleanParam('cyrogenicCooling');
 		const adjustedCompressorPlow = false; //getBooleanParam('adjustedCompressorPlow');
 
 		const tEfficiency= getFloatParam('tEfficiency', 0.92);
@@ -1352,8 +1447,10 @@ console.log(loop+": ret="+JSON.stringify(ret));
 			var i;
 			for (i = 0; i < extra.length; i++) arrayOfyVals[3].push(extra[i]);
 			for (i = 0; i < extra2.length; i++) arrayOfyVals[3].push(extra2[i]);
-console.log("extra2="+JSON.stringify(extra2));
-			drawDiagram4Y( 'diagram0', xVals, '', arrayOfyVals, yTitles, "1. Turbin/Compressor efficiency from "+tEfficiencyFrom+" to "+tEfficiencyTo, bottomLines );
+//console.log("extra2="+JSON.stringify(extra2));
+			drawDiagram4Y( 'diagram0', xVals, '', arrayOfyVals, yTitles, "1. Turbin and Compressor stage efficiency from "+tEfficiencyFrom+" to "+tEfficiencyTo
+					+", tHigh:"+tHigh+" K, pHigh/pLow:"+metrics.highToLowPressureRatio+", pLow:"+Math.round(metrics.pLow/1000)+" kPa, size:"+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. ton", bottomLines );
+			document.getElementById('tEffRange').checked = false;
 		}
 
 		if (document.getElementById('tHighRange').checked)
@@ -1384,7 +1481,9 @@ console.log("extra2="+JSON.stringify(extra2));
 			for (i = 0; i < extra.length; i++) arrayOfyVals[3].push(extra[i]);
 			for (i = 0; i < extra2.length; i++) arrayOfyVals[3].push(extra2[i]);
 console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.stringify(extra2));
-			drawDiagram4Y( 'diagram1', xVals, 'K', arrayOfyVals, yTitles, "2. Hot storage temperature from "+tHighFrom+" K to "+tHighTo+" K", bottomLines );
+			drawDiagram4Y( 'diagram1', xVals, 'K', arrayOfyVals, yTitles, "2. Hot storage temperature from "+tHighFrom+" K to "+tHighTo+" K"
+					+", pHigh/pLow:"+metrics.highToLowPressureRatio+", pLow:"+Math.round(metrics.pLow/1000)+" kPa, size:"+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. ton", bottomLines );
+			document.getElementById('tHighRange').checked = false;
 		}
 		var p;
 		if (document.getElementById('pRatioRange').checked)
@@ -1399,6 +1498,8 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 			extra = [];
 			extra2 = [];
 			xVals = [];
+			var sizeFrom = 0;
+			var log = '';
 			while (p <= pRatioTo) {
 				var hotCycle = []
 				var coldCycle = []
@@ -1406,6 +1507,7 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 				metrics = getMetrics(p);
 				if (!metrics) return;
 				const cycleData = doChargeDischargeCycle( hotCycle, coldCycle, tHigh, tLow, metrics.pHigh, metrics.pLow, tEfficiency, cEfficiency, cyrogenicCooling, adjustedCompressorPlow, false );
+				if (!sizeFrom) sizeFrom = Math.round(metrics.V1*2*metrics.rockDensity/1000000);
 				xVals.push(p);
 				arrayOfyVals[0].push(cycleData.costOfStoragekWh);
 				arrayOfyVals[1].push(cycleData.costOfPowerKW);
@@ -1413,14 +1515,22 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 				arrayOfyVals[3].push(cycleData.storedElectricity_kWh/1000000000);	// kWh => TWh
 				extra.push(cycleData.storedDistrictHeat_kWh/1000000000);	// kWh => TWh
 				extra2.push(cycleData.extraAvailableDistrictHeat_kWh/1000000000);
-				p += 2;
+//log += "pRatio:"+p+", size:"+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+"\n";
+				if (p == pRatioTo) break;
+				p *= 1.15;
+				if (p > pRatioTo) p = pRatioTo;
 			}
 			var i;
 			for (i = 0; i < extra.length; i++) arrayOfyVals[3].push(extra[i]);
 			for (i = 0; i < extra2.length; i++) arrayOfyVals[3].push(extra2[i]);
-			drawDiagram4Y( 'diagram2', xVals, 'pHigh/pLow', arrayOfyVals, yTitles, "3. High/Low pressure ratio from "+pRatioFrom+" to "+pRatioTo, bottomLines );
+//console.log("xVals="+JSON.stringify(xVals));
+//console.log("arrayOfyVals="+JSON.stringify(arrayOfyVals));
+			const sizeTo = Math.round(metrics.V1*2*metrics.rockDensity/1000000);
+			drawDiagram4Y( 'diagram2', xVals, 'pHigh/pLow', arrayOfyVals, yTitles, "3. High/Low pressure ratio from "+pRatioFrom+" to "+pRatioTo
+					+", tHigh:"+tHigh+" K, pLow:"+Math.round(metrics.pLow/1000)+" kPa, size:"+(sizeTo != sizeFrom ? (sizeFrom+" - "+sizeTo) : sizeTo)+" milj. ton", bottomLines );
 			metrics = {};
-			getMetrics();
+			document.getElementById('pRatioRange').checked = false;
+//console.log(log);
 		}
 		if (document.getElementById('hpStorageSize').checked)
 		{
@@ -1441,19 +1551,20 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 				const cycleData = doChargeDischargeCycle( hotCycle, coldCycle, tHigh, tLow, metrics.pHigh, metrics.pLow, tEfficiency, cEfficiency, cyrogenicCooling, adjustedCompressorPlow, false );
 				xVals.push(p);
 				arrayOfyVals[0].push(cycleData.costOfStoragekWh);
-				arrayOfyVals[1].push(cycleData.costOfPowerKW);
-				arrayOfyVals[2].push(cycleData.efficiency*100);
+				arrayOfyVals[1].push(null);
+				arrayOfyVals[2].push(null);
 				arrayOfyVals[3].push(cycleData.storedElectricity_kWh/1000000000);	// kWh => TWh
 				extra.push(cycleData.storedDistrictHeat_kWh/1000000000);	// kWh => TWh
 				extra2.push(cycleData.extraAvailableDistrictHeat_kWh/1000000000);
 				p += 2;	// increment by 500 000 m3
+				document.getElementById('hpStorageSize').checked = false;
 			}
 			var i;
 			for (i = 0; i < extra.length; i++) arrayOfyVals[3].push(extra[i]);
 			for (i = 0; i < extra2.length; i++) arrayOfyVals[3].push(extra2[i]);
-			drawDiagram4Y( 'diagram3', xVals, 'Mm3', arrayOfyVals, yTitles, "4. Hot storage size from "+hpStorageSizeFrom+" to "+hpStorageSizeTo+" Mm3", bottomLines );
+			drawDiagram4Y( 'diagram3', xVals, 'Mm3', arrayOfyVals, yTitles, "4. Hot storage size from "+hpStorageSizeFrom+" to "+hpStorageSizeTo+" Mm3"
+					+", tHigh:"+tHigh+" K, pHigh/pLow:"+metrics.highToLowPressureRatio+", pLow:"+Math.round(metrics.pLow/1000)+" kPa", bottomLines );
 			metrics = {};
-			getMetrics();
 		}
 	}
 	function getActualTempAtP( t, pFrom, pTo ) {
@@ -1468,6 +1579,7 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 		const ccEfficiency = cEfficiency;  
 		const grossWorkOut = getFloatParam('grossWorkOut', 2000);
 		const maxPressureDrop = getFloatParam('maxPressureDrop', 0.01);
+		const maxOutSpeed = getFloatParam('maxOutSpped', 25);
 
 /*
 		metrics.pipeToColdExpander = metrics.pipeFromColdCompressor; 
@@ -1481,7 +1593,9 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 	metrics.heightOfMainCompressorIn = metrics.heightOfMainTurbinOut;
 	metrics.pipeFromMainCompressor = metrics.pipeToMainTurbin;
 */
-		var pHighInTurbin = (pHigh+getHeadLossPT(pHigh, tHigh, metrics.heightOfMainTurbinIn )) * (1-maxPressureDrop);
+
+		var pHighInTurbin = pHigh*(1-maxPressureDrop)+getHeadLossPT(pHigh, tHigh, metrics.heightOfMainTurbinIn) ;
+		var pHighFromCompressor = pHigh*(1+maxPressureDrop)+getHeadLossPT(pHigh, tHigh, metrics.heightOfMainTurbinIn);
 		var pLowInTurbin = generatorLocation == 'TOP' || generatorLocation == 'GROUND' ? pLow : pLow * (1-maxPressureDrop);	// we do not know out density yet???
 		var tHighActual = getActualTempAtP( tHigh, pHigh, pHighInTurbin );
 		var mainTurbin = doAdiabaticProcessWithS( name, pHighInTurbin, pLowInTurbin, tHighActual, tEfficiency, showLog ? "Hot turbin" : null );
@@ -1498,7 +1612,7 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 		const compressorMassFlow = turbinMassFlow/1.255;/// APPROXIMATION TO CALC THE PRESSURE DROPS!!!
 		// Main charge process, the compression from warm pLow => hot pHigh calculated as reverse turbin, because we we know only the high temperature
 		if (cyrogenicCooling) {
-			var mainCompressor = doAdiabaticProcessWithS( name, pHighInTurbin, pLowInTurbin, tHighActual, 1/cEfficiency,showLog ? "Hot compressor" : null )
+			var mainCompressor = doAdiabaticProcessWithS( name, pHighFromCompressor, pLowInTurbin, tHighActual, 1/cEfficiency,showLog ? "Hot compressor" : null )
 			mainCompressor.massFlow = compressorMassFlow;
 			hotCycle.push(mainCompressor)
 
@@ -1542,7 +1656,13 @@ The first version produced bullshit:
 			ret = getPipeDiameterAndPressureDrop( mainTurbin.viscOut, mainTurbin.flowOut*mainTurbin.massFlow, mainTurbin.dOut, 
      											  metrics.pipeFromMainTurbin, 
 												  // we have to decrease the allowed pressure drom, because out pipe may be very short => out speed 160 m/s => 2% efficiency drop
-												  maxPressureDrop/10*pLow ); 
+												  maxPressureDrop/50*pLow);
+			if (ret.speed > maxOutSpeed) {
+				ret = getPipeDiameterAndPressureDrop( mainTurbin.viscOut, mainTurbin.flowOut*mainTurbin.massFlow, mainTurbin.dOut, 
+													  metrics.pipeFromMainTurbin, 
+													  // we have to decrease the allowed pressure drom, because out pipe may be very short => out speed 160 m/s => 2% efficiency drop
+													  maxPressureDrop/200*pLow);
+			}
 			unchargePDrops.diameterPipeFromHotTurbin = ret.diameter;
 			unchargePDrops.speedInPipeFromHotTurbin = ret.speed;
 			unchargePDrops.fromMainTurbin = ret.pressureDrop
@@ -1550,22 +1670,24 @@ The first version produced bullshit:
 
 			unchargePDrops.inColdStorage = getColdStoragePressureDrop(0.5, coldCompressor.viscIn, coldCompressor.dIn, coldCompressor.flowIn*coldCompressor.massFlow) +
 										   getColdStoragePressureDrop(0.5, mainTurbin.viscOut, mainTurbin.dOut, mainTurbin.flowOut*mainTurbin.massFlow);
-			unchargePDrops.inHotStorage = getHotStoragePressureDrop(0.5, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow) +
-										  getHotStoragePressureDrop(0.5, mainTurbin.viscIn, mainTurbin.dIn, mainTurbin.flowIn*mainTurbin.massFlow);
+			unchargePDrops.inHotStorage = getHotStoragePressureDrop(0.7, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow) +
+										  getHotStoragePressureDrop(0.3, mainTurbin.viscIn, mainTurbin.dIn, mainTurbin.flowIn*mainTurbin.massFlow);
 console.log("unchargePDrops:"+JSON.stringify(unchargePDrops, null, 2));
+			metrics.unchargePDrops = unchargePDrops;
 			var chargePDrops = {};
 			// same pipes, main turbin flow is bigger, so the uncharge flow defines the pipe diameters
 			chargePDrops.diameterPipeFromColdExpander = unchargePDrops.diameterPipeToColdCompressor;
+			chargePDrops.diameterPipeFromToColdExpander = unchargePDrops.diameterPipeFromColdCompressor;
 			chargePDrops.diameterPipeFromHotCompressor = unchargePDrops.diameterPipeToHotTurbin;
 			chargePDrops.diameterPipeToHotCompressor = unchargePDrops.diameterPipeFromHotTurbin;
 			chargePDrops.inColdStorage = getColdStoragePressureDrop(0.5, mainCompressor.viscIn, mainCompressor.dIn, mainCompressor.flowIn*mainCompressor.massFlow) +
 										 getColdStoragePressureDrop(0.5, mainTurbin.viscOut, mainTurbin.dOut, mainTurbin.flowOut*mainTurbin.massFlow);
-			chargePDrops.inHotStorage = getHotStoragePressureDrop(0.5, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow) +
-										getHotStoragePressureDrop(0.5, mainTurbin.viscIn, mainTurbin.dIn, mainTurbin.flowIn*mainTurbin.massFlow);
+			chargePDrops.inHotStorage = getHotStoragePressureDrop(0.7, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow) +
+										getHotStoragePressureDrop(0.3, mainTurbin.viscIn, mainTurbin.dIn, mainTurbin.flowIn*mainTurbin.massFlow);
 
 
 			ret = getPipeDiameterAndPressureDrop( coldExpander.viscIn, coldExpander.flowIn*coldExpander.massFlow, coldExpander.dIn,
-     											  metrics.pipeToColdExpander, maxPressureDrop*pHigh);
+     											  metrics.pipeToColdExpander, maxPressureDrop*pHigh, chargePDrops.diameterPipeFromToColdExpander);
 			chargePDrops.diameterPipeToColdExpander = ret.diameter;
 			chargePDrops.speedInPipeToColdExpander = ret.speed;
 			chargePDrops.toColdExpander = ret.pressureDrop
@@ -1575,7 +1697,7 @@ console.log("unchargePDrops:"+JSON.stringify(unchargePDrops, null, 2));
 																		
 			// coldCompressor out values apply to the cold side of high pressure storage
 			ret = getPipeDiameterAndPressureDrop( coldExpander.viscOut, coldExpander.flowOut*coldExpander.massFlow, coldExpander.dOut,
-     											  metrics.pipeFromColdExpander, maxPressureDrop*pLow);
+     											  metrics.pipeFromColdExpander, maxPressureDrop*pLow, chargePDrops.diameterPipeFromColdExpander);
 			chargePDrops.diameterPipeFromColdExpander = ret.diameter;
 			chargePDrops.speedInPipeFromColdExpander = ret.speed;
 			chargePDrops.fromColdExpander = ret.pressureDrop
@@ -1590,7 +1712,7 @@ console.log("unchargePDrops:"+JSON.stringify(unchargePDrops, null, 2));
 																  chargePDrops.diameterPipeToHotCompressor, metrics.heightOfMainCompressorIn) 
 											  + getHeadLoss( mainCompressor.dIn, metrics.heightOfMainCompressorIn );
 console.log("chargePDrops:"+JSON.stringify(chargePDrops, null, 2));
-
+			metrics.chargePDrops = chargePDrops;
 /*
 "rockDensity":2.65,"gravelDensity":2.1,"insGravelDensity":1.6,"rockHeatCapasity":0.8,"hpAverageGravelDensity":2.0019739765394906,*/
 			// gas budjet in turbin case: 
@@ -1603,9 +1725,9 @@ console.log("chargePDrops:"+JSON.stringify(chargePDrops, null, 2));
 			tc.hpGasUncharged = tc.hpGasVolume * coldCompressor.dOut;
 			tc.hpStorageChange = tc.hpGasVolume * (coldCompressor.dOut - hotCycle[0].dIn);
 			// We must assume, that extra heat of turbin out will sooner or later cooled to compressor in temperature, BUT low pressure may rise until then!!!
-			tc.lpGravelVolume = (hotCycle[1].hIn - coldCompressor.hIn) / (metrics.gravelDensity*metrics.rockHeatCapasity*(hotCycle[1].tIn-coldCompressor.tIn));
-			tc.lpGravelWeight = tc.lpGravelVolume * metrics.gravelDensity * metrics.rockDensity;
-			tc.lpGasVolume = tc.lpGravelVolume*(metrics.rockDensity-metrics.gravelDensity)/metrics.rockDensity;
+			tc.lpGravelVolume = (hotCycle[1].hIn - coldCompressor.hIn) / (metrics.lpGravelDensity*metrics.rockHeatCapasity*(hotCycle[1].tIn-coldCompressor.tIn));
+			tc.lpGravelWeight = tc.lpGravelVolume * metrics.lpGravelDensity * metrics.rockDensity;
+			tc.lpGasVolume = tc.lpGravelVolume*(metrics.rockDensity-metrics.lpGravelDensity)/metrics.rockDensity;
 			tc.lpGasUncharged = tc.lpGasVolume * hotCycle[1].dIn;
 			tc.lpGasCharged = tc.hpGasUncharged + tc.lpGasUncharged - tc.hpGasCharged;	
 			tc.lpDensityCharged = tc.lpGasCharged / tc.lpGasVolume;
@@ -1637,13 +1759,13 @@ console.log("cc="+JSON.stringify(cc));
 			
 			// The cold expander outP > cold compressor inP, but the low pressure cold storage tempreature must be that of compressor. 
 			// So we must increase the wetness of cold expander to have the same enthalpy  
-			const pLowColdCompressor = pLow - unchargePDrops.inColdStorage + unchargePDrops.toColdCompressor;
+			const pLowColdCompressor = pLow - unchargePDrops.inColdStorage - unchargePDrops.toColdCompressor;
 			const pHighColdCompressor = pHigh + unchargePDrops.inHotStorage + unchargePDrops.fromColdCompressor;
 			const pLowColdExpander = pLow + chargePDrops.inColdStorage + chargePDrops.fromColdExpander;
-			const pHighColdExpander = pHigh - chargePDrops.inHotStorage + chargePDrops.toColdExpander;
+			const pHighColdExpander = pHigh - chargePDrops.inHotStorage - chargePDrops.toColdExpander;
 
-			const wetness = Math.abs(tc.changeKg/1000);		// wetness in uncharge!  
-			const wetnessOfColdExpander = getWetnessOfExpanderOut( name, pLowColdCompressor, pLowColdExpander, wetness ); 
+			const wetness = Math.abs(tc.changeKg/1000);		// wetness in uncharge!
+			const wetnessOfColdExpander = getWetnessOfExpanderOut( name, pLowColdCompressor, pLowColdExpander, wetness );
 
 			coldExpander = doWetAdiabaticProcessWithS( name, pLowColdExpander, pHighColdExpander, wetnessOfColdExpander, 1/tEfficiency, showLog ? "Cold turbin" : null);
 			coldExpander.items[0].wetness = wetnessOfColdExpander;	// 1st because in reversed order!
@@ -1776,6 +1898,7 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 		cycleData.unchargeTimeS = cycleData.hpStorageHeatCapacity / ((hotCycle[0].hIn - coldCycle[0].hOut) * 1000 * hotCycle[0].massFlow); // 
 		cycleData.storedElectricity_kWh = cycleData.netWorkOut * cycleData.unchargeTimeS / 3600;
 		cycleData.storedDistrictHeat_kWh = cycleData.heatOutInDischarge * cycleData.unchargeTimeS / 3600;
+		cycleData.storedEnergy_kWh = cycleData.storedElectricity_kWh + cycleData.storedDistrictHeat_kWh;
 		cycleData.extraAvailableDistrictHeat_kWh = (hAt323K < hMinDistrictHeat ? (hMinDistrictHeat-hAt323K) : 0) * hotCycle[0].massFlow * cycleData.unchargeTimeS / 3600;
 		cycleData.costOfStoragekWh = cycleData.costOfStorage / (cycleData.storedElectricity_kWh + cycleData.storedDistrictHeat_kWh);
 		cycleData.costOfPowerKW = metrics.generatorCostOfKW + 
@@ -1869,8 +1992,8 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 	function workToMW( work ) {
 		return ' '+Math.round(work/1000)+' MW';
 	}
-	function toCelsius( t ) {
-		return Math.round(t - 273.15)+"\u2103";
+	function toCelsius( t, speed ) {
+		return Math.round(t - 273.15)+"\u2103" + (speed ? myRound(speed,2)+' m/s' : ''); 
 	}
 	function drawStorage( canvasId, metrics, cycleData, bottomLines ) {
 		if (metrics.isCylinder) {
@@ -1890,7 +2013,7 @@ return confirm(loop+":testValue="+testValue+",  min/max:"+min+"/"+max+", expecte
 			var result = calcResult(testValue);
 			if (loop > 10 || Math.abs(expected-result)<= maxError) {
 if (loop > 10) console.trace(loop+":expected="+expected+", result="+result+", testValue="+testValue+", min/max:"+from+"/"+to+", error:"+Math.abs(expected-result));
-else console.log(loop+":expected="+expected+", result="+result+", testValue="+testValue+", min/max:"+from+"/"+to+", error:"+Math.abs(expected-result));
+//else console.log(loop+":expected="+expected+", result="+result+", testValue="+testValue+", min/max:"+from+"/"+to+", error:"+Math.abs(expected-result));
 				return testValue;
 			}
 			if (result > expected) max = testValue;
@@ -1908,13 +2031,13 @@ else console.log(loop+":expected="+expected+", result="+result+", testValue="+te
 		const dg = {};
 		var gasName = getInputParam('name', 'Nitrogen' ).toLowerCase();
 		const canvas = document.getElementById(canvasId);
-		var title = "Metrics of "+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. gravel ton energy storage";
+		var title = "Metrics of "+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. gravel ton "+Math.round(cycleData.storedEnergy_kWh/1000000)+" GWh energy storage";
 		// let's keep this very simple, set scale 1 m == 2 px, 
 		dg.marginX = 30;
 		dg.marginTop = (isCone ? 40 : 180) + (title ? 20 : 0);	// for the facility and pipes
 		dg.marginBottom = 10 + (bottomLines ? bottomLines.length * 12 : 0);
 		dg.meterToPixels = 2;
-		const width = metrics.rGround*4*dg.meterToPixels + dg.marginX; // 4 means space for turbin pictures
+		const width = (200+metrics.rGround*2)*dg.meterToPixels + dg.marginX; // 280m == space for turbin pictures
 		const height = (metrics.hCylinder+metrics.hBelow+metrics.hAbove)*dg.meterToPixels+dg.marginTop+dg.marginBottom;
 		canvas.setAttribute("width", width ); 
 		canvas.setAttribute("height", height); 
@@ -1969,7 +2092,7 @@ console.log("x="+x+", title:"+title);
 		ctx.fillStyle = colorRock;
 		ctx.fill(region);
 		$("#"+canvasId).css('display','block');
-console.log("groundY="+groundY+", dg="+JSON.stringify(dg));
+//console.log("groundY="+groundY+", dg="+JSON.stringify(dg));
 		var y, x;
 		/*  Simple cylinder
   "hCylinder": 132.49328067269875,
@@ -1988,10 +2111,30 @@ console.log("groundY="+groundY+", dg="+JSON.stringify(dg));
 		region.lineTo(toX(dg,metrics.dome.rTop),toY(dg,metrics.dome.hBottom));
 		region.lineTo(toX(dg,metrics.rGroundBelow),groundY); 
 		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
+		//ctx.fillStyle = 'white';
+		//ctx.fill(region);
 		ctx.fillStyle = colorInsulation;
 		ctx.fill(region);
+
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,-metrics.rGround),groundY+2); 
+		ctx.lineTo(toX(dg,metrics.rGround),groundY+2); 
+		ctx.strokeStyle = colorInsulation;
+		ctx.lineWidth = 5;
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,-metrics.rGround),groundY+4); 
+		ctx.lineTo(toX(dg,-metrics.rGroundBelow),groundY+4); 
+		ctx.lineTo(toX(dg,-metrics.dome.rTop),toY(dg,metrics.dome.hBottom));
+		ctx.lineTo(toX(dg,-metrics.dome.rBottom), toY(dg,0));
+		ctx.lineTo(toX(dg,metrics.dome.rBottom), toY(dg,0));
+		ctx.lineTo(toX(dg,metrics.dome.rTop),toY(dg,metrics.dome.hBottom));
+		ctx.lineTo(toX(dg,metrics.rGroundBelow),groundY+4); 
+		ctx.lineTo(toX(dg,metrics.rGround),groundY+4); 
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = 1;
+		ctx.stroke();
 
 		// fill partially overwritten warm gravel in the grave dome in the top
 /*
@@ -2073,7 +2216,7 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 			// => rX = (rGound-rTop)*(hAbove-hX)/hAbove+rTop;
 			// 0.1*metrics.lowPressureStorageVolume
 			const vCut = Math.PI/3*Math.pow(metrics.rTop,2)*metrics.hAbove*(1-metrics.rTop/metrics.rGround);
-console.log("vCut="+vCut);
+//console.log("vCut="+vCut);
 			hLpHot = testResult( 0.1*metrics.lowPressureStorageVolume, 0, metrics.hAbove, 
 						0.001*metrics.lowPressureStorageVolume, 	// max error
 						function (h) { 
@@ -2083,7 +2226,7 @@ console.log("vCut="+vCut);
 						});
 			 rLpHot = hLpHot + metrics.rTop; // angle=45!
 			 hLpHot = metrics.hAbove - hLpHot;
-console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
+//console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 		}
 		else if (0.1*metrics.lowPressureStorageVolume > metrics.dome.vCaveTop) {
 			hLpHot = metrics.dome.hTop;	// ignore the volume in cone
@@ -2122,7 +2265,7 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 		if (cycleData) {
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px serif";
-			centerText( ctx, toCelsius(cycleData.hotCycle[0].tOut), toX(dg,0), 
+			centerText( ctx, toCelsius(cycleData.hotCycle[0].tOut)+', '+getGasFlow('Lp', cycleData.hotCycle[0],LAST_ITEM,rLpHot,metrics.dome.rTop), toX(dg,0), 
 						toY(dg, isCone ? (hGround+hLpHot) : (metrics.hAbove+hGround+metrics.dome.hTop-hLpHot) ));
 		}
 //if (!confirm("B")) return; 
@@ -2162,7 +2305,7 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 				ctx.fillStyle = 'black'; 
 				ctx.font = "14px arial";
 				//centerText( ctx, ,toX(dg,0), toY(dg,hGround+hColdTop)-40);
-				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn) + " "+Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",toX(dg,0), toY(dg,hGround+hColdTop)-20);
+				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn) + " "+Math.round(metrics.pLow/1000)+" kPa "+gasName+" gas in "+metrics.gravelMinLp+"/"+metrics.gravelMaxLp+" gravel",toX(dg,0), toY(dg,hGround+hColdTop)-20);
 			}
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px arial";
@@ -2208,12 +2351,41 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 				ctx.fillStyle = 'black'; 
 				ctx.font = "14px arial";
 				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn),toX(dg,0), toY(dg,hGround)-40);
-				centerText( ctx, Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",toX(dg,0), toY(dg,hGround)-20);
+				centerText( ctx, Math.round(metrics.pHigh/1000)+" kPa "+gasName+" gas in "+metrics.gravelMinLp+"/"+metrics.gravelMaxLp+" gravel",toX(dg,0), toY(dg,hGround)-20);
 			}
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px arial";
 			centerText(ctx, "\u21D1 in charge", toX(dg,-40), toY(dg, hGround-hLpWarmFromGround));
 		}
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,metrics.dome.rTop-1), toY(dg, hGround+metrics.hAbove));
+		ctx.lineTo(toX(dg,metrics.rGround-1), toY(dg,hGround));
+		ctx.lineTo(toX(dg,metrics.rGround-1), toY(dg,hGround)+5);
+		ctx.strokeStyle = colorInsulation;
+		ctx.lineWidth = 4;
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,-metrics.dome.rTop+1), toY(dg, hGround+metrics.hAbove));
+		ctx.lineTo(toX(dg,-metrics.rGround+1), toY(dg,hGround));
+		ctx.lineTo(toX(dg,-metrics.rGround+1), toY(dg,hGround)+5);
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,metrics.dome.rTop), toY(dg, hGround+metrics.hAbove));
+		ctx.lineTo(toX(dg,metrics.rGround), toY(dg,hGround));
+		ctx.lineTo(toX(dg,metrics.rGround), toY(dg,hGround)+5);
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = 1;
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,-metrics.dome.rTop), toY(dg, hGround+metrics.hAbove));
+		ctx.lineTo(toX(dg,-metrics.rGround), toY(dg,hGround));
+		ctx.lineTo(toX(dg,-metrics.rGround), toY(dg,hGround)+5);
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = 1;
+		ctx.stroke();
 
 	//if (!confirm("D")) return; 
 		region = new Path2D();
@@ -2235,11 +2407,13 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 			ctx.font = "14px arial";
 			ctx.fillStyle = 'white'; 
 			centerText(ctx, "\u21D3 in uncharge", toX(dg,0), toY(dg,hGround-hLpWarmFromGround)+20);
+			centerText(ctx,getGasFlow('Lp', cycleData.coldCycle[0],LAST_ITEM,rLpWarmBottom,metrics.rOpenBottomActual), toX(dg,-60), toY(dg,hGround-hLpWarmFromGround)+40);
 		}
 		else {
 			ctx.font = "14px arial";
 			ctx.fillStyle = 'white'; 
 			centerText(ctx, "\u21D3 in uncharge", toX(dg,-40), toY(dg,hGround+hColdTop)+20);
+			centerText(ctx,getGasFlow('Lp', cycleData.coldCycle[0],LAST_ITEM,rLpWarmBottom,metrics.rOpenBottomActual), toX(dg,-60), toY(dg,hGround+hColdTop)+40);
 		}
 
 		// always: V4 < V3 and all gravel-insulation in below ground in V3
@@ -2280,12 +2454,14 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 
 			ctx.lineWidth = 1;
 			ctx.beginPath();
-			ctx.moveTo(toX(dg,-metrics.rGroundBelow), toY(dg,hGround));
+			ctx.moveTo(toX(dg,-metrics.rGround), toY(dg,hGround));
+			ctx.lineTo(toX(dg,-metrics.rGroundBelow), toY(dg,hGround));
 			ctx.lineTo(toX(dg,-metrics.rGroundBelowActual), toY(dg,hGround));
 			ctx.lineTo(toX(dg,-metrics.rOpenBottomActual), toY(dg,hGround-metrics.hBelowActual)+1);
 			ctx.lineTo(toX(dg,metrics.rOpenBottomActual), toY(dg,hGround-metrics.hBelowActual)+1);
 			ctx.lineTo(toX(dg,metrics.rGroundBelowActual), toY(dg,hGround));
 			ctx.lineTo(toX(dg,metrics.rGroundBelow), toY(dg,hGround));
+			ctx.lineTo(toX(dg,metrics.rGround), toY(dg,hGround));
 			ctx.strokeStyle = 'black'; 
 			ctx.stroke();
 		}
@@ -2334,7 +2510,7 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 		{
 			ctx.font = "14px arial";
 			ctx.fillStyle = 'white'; 
-			const text = toCelsius(cycleData.coldCycle[1].tOut)+" "+gasName+" gas in gravel, max "+Math.round(100*metrics.maxPartLiquid)+"% of volume liquid";
+			const text = toCelsius(cycleData.coldCycle[1].tOut)+" "+gasName+" gas in gravel, liquid "+gasName+" max "+Math.round(100*metrics.maxPartLiquid)+"% of volume";
 			centerText(ctx, text, toX(dg,0), toY(dg,hGround-metrics.hBelowActual));
 		}
 
@@ -2375,27 +2551,38 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot);
 		}
 //if (!confirm("H")) return; 
 
-			if (cycleData) {
-				ctx.fillStyle = 'black'; 
-				ctx.strokeStyle = 'black'; 
-				ctx.font = "14px arial";
-				centerText( ctx, toCelsius(cycleData.hotCycle[0].tIn), toX(dg,0), toY(dg,metrics.dome.hBottomI-30));
-				centerText( ctx, "Gas flow "+Math.round(1000*cycleData.hotCycle[1].massFlow)+" kg/s in charge and "+Math.round(1000*cycleData.hotCycle[0].massFlow)+" kg/s in uncharge", 
-						toX(dg,0), toY(dg,metrics.dome.hBottomI-40) );
-				centerText( ctx, Math.round(cycleData.hotCycle[1].pOut/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",
-							toX(dg,0), toY(dg,metrics.dome.hBottomI-50) );
-			}
 		var rColdHpGravel;
 		const testVolume = metrics.highPressureStorageVolume/2;
 		const hTemp = testResult( testVolume, 0, metrics.dome.hBottomI/2, 0.01*testVolume,
 					function (h) { 
 						const r = metrics.dome.rTopI - (h/Math.tan(Math.PI*metrics.dome.maxAngle/180));
-console.log("h="+h+", r="+r);
+//console.log("h="+h+", r="+r);
 						rColdHpGravel = r;
 						return 1/3*Math.PI*h*(r*r + r*metrics.dome.rTopI+  Math.pow(metrics.dome.rTopI,2));
 					});
+
+			if (cycleData) {
+				ctx.fillStyle = 'black'; 
+				ctx.strokeStyle = 'black'; 
+				const text2 = "Gas flow "+Math.round(1000*cycleData.hotCycle[1].massFlow)+" kg/s in charge and "+Math.round(1000*cycleData.hotCycle[0].massFlow)+" kg/s in uncharge";
+				ctx.font = "14px arial";
+				if (ctx.measureText(text2).width/2 > (metrics.dome.rTopI+rColdHpGravel)) {
+					ctx.font = "13px arial";
+					if (ctx.measureText(text2).width/2 > (metrics.dome.rTopI+rColdHpGravel)) {
+						ctx.font = "12px arial";
+						if (ctx.measureText(text2).width/2 > (metrics.dome.rTopI+rColdHpGravel)) {
+							ctx.font = "11px arial";
+						}
+					}
+				}
+				centerText( ctx, toCelsius(cycleData.hotCycle[0].tIn)+', '+getGasFlow('Hp', cycleData.hotCycle[0],FIRST_ITEM,metrics.dome.rTopI,rColdHpGravel), toX(dg,0), toY(dg,metrics.dome.hBottomI-10));
+				centerText( ctx, text2, toX(dg,0), toY(dg,metrics.dome.hBottomI-20) );
+				centerText( ctx, Math.round(metrics.pHigh/1000)+" kPa "+gasName+" gas in compacted "+metrics.gravelMinHp+"/"+metrics.gravelMaxHp+" gravel",
+							toX(dg,0), toY(dg,metrics.dome.hBottomI-30) );
+			}
+
 		const hColdHpGravel = metrics.dome.hBottomI - hTemp;
-console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
+//console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		region = new Path2D();
 		region.moveTo(toX(dg,-rColdHpGravel), 			toY(dg,hColdHpGravel));
 		region.lineTo(toX(dg,-metrics.dome.rBottomI), toY(dg,metrics.insCaveBottom));
@@ -2411,7 +2598,7 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 			ctx.fillStyle = 'black'; 
 			ctx.strokeStyle = 'black'; 
 			ctx.font = "14px serif";
-			centerText( ctx, toCelsius(cycleData.coldCycle[0].tOut),toX(dg,0), toY(dg,hColdHpGravel/2));
+			centerText( ctx, toCelsius(cycleData.coldCycle[0].tOut)+', '+getGasFlow('Hp', cycleData.coldCycle[0],FIRST_ITEM,rColdHpGravel,metrics.dome.rBottomI),toX(dg,0), toY(dg,hColdHpGravel/2));
 		}
 		ctx.font = "14px arial";
 		ctx.fillStyle = 'black'; 
@@ -2472,10 +2659,14 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		ctx.strokeStyle = colorHotHpGravel;
 		ctx.beginPath();
 		ctx.moveTo(hotCompHpX-3, toY(dg,yHpBottom));
-		ctx.lineTo(hotCompHpX-3, y = toY(dg, yHpBottom-10));
-		ctx.lineTo(toX(dg,metrics.rGroundBelow+2), y );
-		ctx.lineTo(toX(dg,metrics.dome.rTop+2), y=toY(dg,metrics.dome.hBottomI-4) );
-		ctx.lineTo(toX(dg,metrics.dome.rTopI-2),y);
+		ctx.lineTo(hotCompHpX-3, y = toY(dg, yHpBottom-11));
+		ctx.lineTo(x = toX(dg,metrics.rGroundBelow+2), y );
+		{
+			const y2 = toY(dg,metrics.dome.hBottomI-1.5);
+			const x2 = x - Math.cos(Math.PI*metrics.dome.maxAngle/180)*(y2-y);
+			ctx.lineTo(x2, y2 );
+			ctx.lineTo(toX(dg,metrics.dome.rTopI-2),y2);
+		}
 		ctx.stroke();
 		ctx.fillStyle = 'black'; 
 		ctx.font = "16px serif";
@@ -2540,7 +2731,8 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		ctx.font = "bold 12px arial";
 		ctx.fillStyle = 'white'; 
 		ctx.fillText("Cooler", xColdTurbinHp-5, toY(dg, yHpBottom-4-13))
-		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatPumpHeating) : ''), xGeneratorLeft+13, toY(dg, yHpBottom-4-13));
+		ctx.fillText("\u21AA District heat", xGeneratorLeft+13, toY(dg, yHpBottom-4-13));
+		if (cycleData) ctx.fillText(workToMW(cycleData.heatPumpHeating), xGeneratorLeft+25, toY(dg, yHpBottom-4-19));
 		if (cycleData) ctx.fillText(workToMW(-cycleData.heatPumpCooling), xColdTurbinHp-7, toY(dg, yHpBottom-30));
 
 		ctx.beginPath();
@@ -2564,7 +2756,8 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		ctx.font = "bold 13px arial";
 		ctx.fillText("G / M", xGeneratorLeft+20, toY(dg,yLpBottom+8));
 		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkIn), xGeneratorLeft+10, toY(dg,yLpBottom+1));
-		ctx.fillText("Charge", xGeneratorRight+1, toY(dg,yLpBottom+10));
+		ctx.fillText("Charge", xGeneratorLeft+20, toY(dg,yLpTop+1));
+//		ctx.fillText("Charge", xGeneratorRight+1, toY(dg,yLpBottom+10));
 		ctx.font = "bold 20px serif";
 		ctx.fillText("\u21DC", xGeneratorRight+1, toY(dg, towerH-14));
 
@@ -2585,10 +2778,14 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		ctx.strokeStyle = colorHotHpGravel;
 		ctx.beginPath();
 		ctx.moveTo(xTurbinHp+3, toY(dg,yHpBottom));
-		ctx.lineTo(xTurbinHp+3, y = toY(dg, yHpBottom-10));
-		ctx.lineTo(toX(dg,-metrics.rGroundBelow-2), y );
-		ctx.lineTo(toX(dg,-metrics.dome.rTop-2), y=toY(dg,metrics.dome.hBottomI-4) );
-		ctx.lineTo(toX(dg,-metrics.dome.rTopI+2),y);
+		ctx.lineTo(xTurbinHp+3, y = toY(dg, yHpBottom-11));
+		ctx.lineTo(x = toX(dg,-metrics.rGroundBelow-2), y );
+		{
+			const y2 = toY(dg,metrics.dome.hBottomI-1.5);
+			const x2 = x + Math.cos(Math.PI*metrics.dome.maxAngle/180)*(y2-y);
+			ctx.lineTo(x2, y2 );
+			ctx.lineTo(toX(dg,metrics.dome.rTopI+2),y2);
+		}
 		ctx.stroke();
 		ctx.fillStyle = 'black'; 
 		ctx.font = "16px serif";
@@ -2676,7 +2873,8 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		ctx.font = "bold 13px arial";
 		ctx.fillText("G / M", xGeneratorLeft+15, toY(dg,yLpBottom+8));
 		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkOut), xGeneratorLeft+10, toY(dg,yLpBottom+1));
-		ctx.fillText("Uncharge", xGeneratorLeft-1-ctx.measureText("Uncharge").width, toY(dg,yLpBottom+11));
+		ctx.fillText("Uncharge", xGeneratorLeft+15, toY(dg,yLpTop+1));
+		//ctx.fillText("Uncharge", xGeneratorLeft-1-ctx.measureText("Uncharge").width, toY(dg,yLpBottom+11));
 		ctx.font = "bold 20px serif";
 		ctx.fillText("\u21DC", xGeneratorLeft-19, toY(dg, towerH-14));
 		
@@ -2691,29 +2889,25 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 		ctx.fillStyle = 'black'; 
 		ctx.fillText( "+"+Math.round(metrics.hAbove)+" m", toX(dg,metrics.dome.rTop+11), toY(dg,hGround+metrics.hAbove));
 
-		ctx.font = "bold 14px arial";
+		ctx.font = "bold 12px arial";
 		ctx.fillStyle = 'black'; 
 		ctx.fillText("r="+Math.round(metrics.dome.rBottom)+" m \u21A6", toX(dg,0), toY(dg,0));
 
-		ctx.font = "bold 14px arial";
 		ctx.fillStyle = 'white'; 
 		ctx.fillText("r="+Math.round(metrics.dome.rTop)+" m \u21A6", toX(dg,0), toY(dg,metrics.dome.hBottom));
 
-		ctx.font = "bold 14px arial";
 		ctx.fillStyle = 'white'; 
-		ctx.fillText("r="+Math.round(metrics.rGround)+" m \u21A6", toX(dg,0),toY(dg,hGround));
+		ctx.fillText("r="+Math.round(metrics.rGround)+" m \u21A6", toX(dg,0),toY(dg,hGround+4));
 
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("r="+Math.round(metrics.rGroundBelow)+" m \u21A6", toX(dg,0), toY(dg,hGround)+14);
+		ctx.fillStyle = 'white';
+		ctx.fillText("r="+Math.round(metrics.rGroundBelow)+" m \u21A6", toX(dg,0), toY(dg,hGround-3));
 
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'black'; 
+		ctx.fillStyle = 'black';
 		ctx.fillText("r="+Math.round(metrics.dome.rTop)+" m \u21A6", toX(dg,0), toY(dg,hGround+metrics.hAbove+5));
 
 		ctx.font = "14px arial";
 		ctx.fillStyle = 'white'; 
-		centerText(ctx,"Insulated by sorted gravel + biochar", toX(dg,0), toY(dg,hGround-metrics.hBelow+10));
+		centerText(ctx,"Insulated with sorted gravel + biochar, ~0 kPa", toX(dg,0), toY(dg,hGround-metrics.hBelow+6));
 
 		ctx.beginPath();
 		ctx.moveTo(toX(dg,metrics.rTop), y = toY(dg,hGround+metrics.hAbove));
@@ -2745,942 +2939,7 @@ console.log("rColdHpGravel="+rColdHpGravel+", hColdHpGravel="+hColdHpGravel);
 
 $("#"+canvasId).css('display','block');
 return;
-
-/*
-ctx.beginPath();
-ctx.lineWidth = 1;
-ctx.strokeStyle = 'red';
-ctx.arc(toX(dg,0),toY(dg,metrics.dome.hBottom-(metrics.dome.r-metrics.dome.hTop)),
-					metrics.extDomeIns.r*dg.meterToPixels, 
-					Math.PI+Math.PI/4, 
-					2*Math.PI-Math.PI/4);
-ctx.stroke();
-
-ctx.strokeStyle = 'black';
-ctx.beginPath();
-ctx.arc(toX(dg,0),toY(dg,metrics.dome.hBottom-(metrics.dome.r-metrics.dome.hTop)),
-					(metrics.extDomeIns.r)*dg.meterToPixels, Math.PI+metrics.extDomeIns.rads, 2*Math.PI-metrics.extDomeIns.rads);
-ctx.stroke();
-
-ctx.beginPath();
-ctx.moveTo(toX(dg,-metrics.dome.s/2),toY(dg,metrics.dome.hBottom));
-ctx.lineTo(toX(dg,0),toY(dg,metrics.dome.hBottom-(metrics.dome.r-metrics.dome.hTop)));
-ctx.lineTo(toX(dg,metrics.dome.s/2),toY(dg,metrics.dome.hBottom));
-ctx.stroke();
-ctx.beginPath();
-ctx.strokeStyle = 'red';
-ctx.arc(toX(dg,0),toY(dg,metrics.dome.hBottom-(metrics.dome.r-metrics.dome.hTop)),
-					metrics.dome.r*dg.meterToPixels, 
-					Math.PI+Math.PI/4, 
-					2*Math.PI-Math.PI/4);
-ctx.stroke();
-
-traceXY = true;		
-ctx.beginPath();
-ctx.moveTo(toX(dg,-metrics.extDomeIns.rTopActual),toY(dg,metrics.dome.hBottom+metrics.dome.hTop-metrics.dome.r+metrics.extDomeIns.r-metrics.extDomeIns.hActual));
-ctx.lineTo(toX(dg,0),toY(dg,metrics.dome.hBottom-(metrics.dome.r-metrics.dome.hTop)));
-ctx.lineTo(toX(dg,metrics.extDomeIns.rTopActual),toY(dg,metrics.dome.hBottom+metrics.dome.hTop-metrics.dome.r+metrics.extDomeIns.r-metrics.extDomeIns.hActual));
-ctx.stroke();
-console.log(xyLog);
-traceXY = false; xyLog = '';
-$("#"+canvasId).css('display','block');
-return;
-
-
-		const hpStorageTopY = toY( dg, metrics.hCylinder - ins );
-		const hpStorageBottomY = toY( dg, ins/3);
-		const hpStorageMiddleY = toY( dg, 0.5*metrics.pHighStorageHeight + ins/3 );
-		region = new Path2D();
-		region.moveTo(x=toX(dg,ins), hpStorageTopY );
-		region.lineTo(x, y = hpStorageMiddleY);
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = hpStorageTopY);
-		region.lineTo(x=toX(dg,ins), y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorHotHpGravel;
-		ctx.fill(region);
-		if (cycleData) {
-			ctx.fillStyle = 'black'; 
-			ctx.font = "14px arial";
-			ctx.fillText(toCelsius(cycleData.hotCycle[0].tIn),toX(dg,ins)+10, y = hpStorageTopY+20 );
-			ctx.fillText("Gas flow "+Math.round(1000*cycleData.hotCycle[1].massFlow)+" kg/s in charge and "+Math.round(1000*cycleData.hotCycle[0].massFlow)+" kg/s in uncharge", 
-					toX(dg,ins)+80, y);
-			ctx.fillText(Math.round(cycleData.hotCycle[1].pOut/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",toX(dg,ins)+10, toY( dg, 0.75*metrics.pHighStorageHeight + ins/2 ));
-		}
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21D1 in uncharge", toX(dg,ins)+80, hpStorageMiddleY);
-
-		region = new Path2D();
-		region.moveTo(x=toX(dg,ins), hpStorageMiddleY );
-		region.lineTo(x, y = hpStorageBottomY);
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = hpStorageMiddleY);
-		region.lineTo(x=toX(dg,ins), y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorColdHpGravel;
-		ctx.fill(region);
-		if (cycleData) {
-			ctx.fillStyle = 'black'; 
-			ctx.font = "14px serif";
-			ctx.fillText(toCelsius(cycleData.coldCycle[0].tOut),toX(dg,ins)+10, hpStorageMiddleY+20 );
-		}
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21D3 in charge", toX(dg,ins)+60, hpStorageMiddleY+18);
-
-
-		const yVoidTop = toY(dg, hTop -ins/2 - 0.6 * lpActH)
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(toX(dg,0), yVoidTop);
-		ctx.lineTo(x = toX(dg,ins), yVoidTop );
-		ctx.lineTo(x, y = toY(dg, hTop -ins/2 - lpActH) );
-		ctx.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		ctx.lineTo(x, yVoidTop );
-		ctx.lineTo(toX(dg, metrics.rCylinder*2), yVoidTop);
-		ctx.stroke();
-
-		// next turbins, compressors and pipes, middle pipe diameter about 10m?
-		// draw first the middle tower with correct color
-		const towerH = hTop + 20;
-		const towerLeftX = toX( dg, metrics.rCylinder - 8 ); 
-		const towerRightX = toX( dg, metrics.rCylinder + 8 ); 
-
-		region = new Path2D();
-		region.moveTo(x = towerLeftX, y = toY(dg, towerH));
-		region.lineTo(x, y = toY(dg, hTop-ins/2 - 0.1 * lpActH));
-		region.lineTo(x = towerRightX, y);
-		region.lineTo(x, y = toY(dg, towerH));
-		region.lineTo(towerLeftX, y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorWarmLpGravel;
-		ctx.fill(region);
-
-		ctx.beginPath();
-		ctx.moveTo(x = towerLeftX, y = toY(dg, towerH));
-		ctx.lineTo(x, y = toY(dg, hTop-ins/2 - lpActH));
-		ctx.lineTo(x = towerRightX, y);
-		ctx.lineTo(x, y = toY(dg, towerH));
-		ctx.lineTo(towerLeftX, y);
-		ctx.closePath();
-		ctx.stroke();
-
-		const yLpTop = towerH, yLpBottom = 2+hTop, yHpTop = towerH-7.5, yHpBottom = hTop+7.5;
-		const ctWidth = 20*dg.meterToPixels;
-		const xTurbinLp = towerLeftX-ctWidth/2;
-		const xTurbinHp = xTurbinLp-ctWidth;
-		const hotCompHpX = towerRightX + ctWidth;
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		//ctx.moveTo(x = towerRightX, y = toY(dg, yLpTop));
-		ctx.moveTo(x = towerRightX, toY(dg, yLpBottom));
-		ctx.lineTo(x = hotCompHpX, toY(dg,yHpBottom));
-		ctx.lineTo(x, toY(dg,yHpTop));
-		ctx.lineTo(towerRightX, toY(dg, yLpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "14px serif";
-		ctx.fillText("\u2192  C", towerRightX-5, toY(dg, yLpBottom+4));
-
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = colorHotHpGravel;
-		ctx.beginPath();
-		ctx.moveTo(hotCompHpX-3, toY(dg,yHpTop));
-		ctx.lineTo(hotCompHpX-3, y = toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, y = toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, hpStorageTopY );
-		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2191", hotCompHpX-7, toY(dg,yHpTop+1));
-
-		ctx.beginPath();
-		ctx.moveTo(xTurbinHp+3, toY(dg,yHpTop));
-		ctx.lineTo(xTurbinHp+3, toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, toY(dg, yLpTop+4));
-		ctx.stroke();
-
-		const xColdTurbinLp = x + ctWidth/2;
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(x, y = toY(dg, towerH-10 ));
-		ctx.lineTo(xColdTurbinLp, y);
-		ctx.stroke();
-		const xColdTurbinHp = xColdTurbinLp + ctWidth/2;
-		const yColdLpTop = towerH-5, yColdLpBottom = hTop+5, yColdHpTop = yLpTop-8, yColdHpBottom = yLpBottom+6;
-
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xColdTurbinLp, y = toY(dg,yColdLpTop));
-		ctx.lineTo(x, toY(dg, yColdLpBottom));
-		ctx.lineTo(x = xColdTurbinHp, toY(dg,yColdHpBottom));
-		ctx.lineTo(x, toY(dg,yColdHpTop));
-		ctx.lineTo(xColdTurbinLp, toY(dg,yColdLpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "12px serif";
-		ctx.fillText("T", xColdTurbinLp+4, toY(dg,yColdLpBottom+1));
-
-		ctx.lineWidth = 9;
-		ctx.strokeStyle = colorColdLpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdTurbinLp+5, toY(dg,yColdLpTop-1));
-		ctx.lineTo(xColdTurbinLp+5, y = toY(dg,yColdLpTop+15));
-		ctx.lineTo(towerLeftX+6, y );
-		ctx.lineTo(towerLeftX+6, toY(dg, hTop -ins/2 - 0.5 * lpActH));
-		ctx.stroke();
-		ctx.fillStyle = 'white'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2191", xColdTurbinLp+2, toY(dg,yColdLpTop-1));
-
-		ctx.lineWidth = 4;
-		ctx.strokeStyle = colorColdHpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdTurbinHp-3, toY(dg,yColdHpTop-1));
-		ctx.lineTo(xColdTurbinHp-3, y = toY(dg,yColdLpTop+20));
-		ctx.lineTo(x = toX(dg, metrics.rCylinder*2-2), y );
-		ctx.lineTo(x, y = toY(dg, 1));
-		ctx.lineTo(x = toX(dg, metrics.rCylinder), y);
-		ctx.lineTo(x, toY(dg, ins/3));
-		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xColdTurbinHp-7, toY(dg,yColdLpTop-1));
-
-
-		var xGeneratorLeft = xColdTurbinHp + ctWidth/2;
-		var xGeneratorRight = xGeneratorLeft + ctWidth*2;
-		const xChargeGeneratorRight = xGeneratorRight;
-
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(xColdTurbinHp-7, toY(dg,yColdLpTop+7));
-		ctx.lineTo(xColdTurbinHp-7, y = toY(dg,yColdLpTop+19));
-		ctx.lineTo(xGeneratorLeft+19, y );
-		ctx.lineTo(xGeneratorLeft+19, y = toY(dg,yColdLpTop+7));
-		ctx.lineTo(xColdTurbinHp-7, y);
-		ctx.stroke();
-		ctx.font = "12px arial";
-		ctx.fillText("Cooler", xColdTurbinHp-5, toY(dg,yColdLpTop+12))
-		if (cycleData) ctx.fillText(workToMW(-cycleData.heatPumpCooling), xColdTurbinHp-7, toY(dg,yColdLpTop+6))
-		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatPumpHeating) : ''), xGeneratorLeft+13, toY(dg,yColdLpTop+12));
-
-		ctx.beginPath();
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xColdTurbinHp, y = toY(dg, towerH-10));
-		ctx.lineTo(xGeneratorLeft, y);
-		ctx.stroke();
-
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xGeneratorLeft, toY(dg,yLpTop));
-		ctx.lineTo(x, y = toY(dg, yLpBottom));
-		ctx.lineTo(x = xGeneratorRight, y);
-		ctx.lineTo(x, y = toY(dg, yLpTop));
-		ctx.lineTo(xGeneratorLeft, y);
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "13px arial";
-		ctx.fillText("G / M", xGeneratorLeft+20, toY(dg,yLpBottom+8));
-		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkIn), xGeneratorLeft+10, toY(dg,yLpBottom+1));
-		ctx.fillText("Charge", xGeneratorRight+1, toY(dg,yLpBottom+10));
-		ctx.font = "20px serif";
-		ctx.fillText("\u21DC", xGeneratorRight+1, toY(dg, towerH-14));
-
-		ctx.lineWidth = 2;
-		ctx.beginPath();
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xTurbinHp, y = toY(dg, yHpTop));
-		ctx.lineTo(x, toY(dg,yHpBottom));
-		ctx.lineTo(x = xTurbinLp, toY(dg,yLpBottom));
-		ctx.lineTo(x, toY(dg,yLpTop));
-		ctx.lineTo(xTurbinHp, toY(dg, yHpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "14px serif";
-		ctx.fillText("T", xTurbinHp+15, toY(dg, yLpBottom+4));
-
-		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xTurbinHp-1, toY(dg,yHpTop+3));
-
-		ctx.beginPath();
-		ctx.lineWidth = 16;
-		ctx.strokeStyle = colorHotLpGravel;
-		ctx.moveTo(xTurbinLp+8, toY(dg, yLpTop));
-		ctx.lineTo(xTurbinLp+8, toY(dg, hTop - ins/2));
-		ctx.stroke();
-
-		ctx.fillText("\u21B4", xTurbinLp+2, toY(dg,yLpBottom+4));
-
-		const xColdCompressorLp = xTurbinHp - ctWidth/2;
-		ctx.beginPath();
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(xTurbinHp, y = toY(dg, towerH-10));
-		ctx.lineTo(xColdCompressorLp, y);
-		ctx.stroke();
-		const xColdCompressorHp = xColdCompressorLp - ctWidth/2;
-
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(x = xColdCompressorLp, y = toY(dg,yColdLpTop));
-		ctx.lineTo(x, toY(dg, yColdLpBottom));
-		ctx.lineTo(x = xColdCompressorHp, toY(dg,yColdHpBottom));
-		ctx.lineTo(x, toY(dg,yColdHpTop));
-		ctx.lineTo(xColdCompressorLp, toY(dg,yColdLpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "12px serif";
-		ctx.fillText("C", xColdCompressorHp+5, toY(dg,yColdLpBottom+1));
-
-		ctx.lineWidth = 9;
-		ctx.strokeStyle = colorColdLpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdCompressorLp-5, toY(dg,yColdLpTop-1));
-		ctx.lineTo(xColdCompressorLp-5, y = toY(dg,yColdLpTop+15));
-		ctx.lineTo(towerLeftX+6, y );
-		ctx.stroke();
-
-		ctx.lineWidth = 4;
-		ctx.strokeStyle = colorColdHpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdCompressorHp+3, toY(dg,yColdHpTop-1));
-		ctx.lineTo(xColdCompressorHp+3, y = toY(dg,yColdLpTop+20));
-		ctx.lineTo(xColdTurbinHp-3, y );
-		ctx.stroke();
-
-		xGeneratorRight = xColdCompressorHp - ctWidth/2;
-		xGeneratorLeft = xGeneratorRight - 2*ctWidth;
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(xColdCompressorHp, y = toY(dg, towerH-10));
-		ctx.lineTo(xGeneratorRight, y);
-		ctx.stroke();
-
-		ctx.fillStyle = 'white'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xColdCompressorLp-9, toY(dg,yColdLpTop+1));
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u2191", xColdCompressorHp-1, toY(dg,yColdLpTop+1));
-
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(x = xGeneratorLeft, toY(dg,yLpTop));
-		ctx.lineTo(x, y = toY(dg, yLpBottom));
-		ctx.lineTo(x = xGeneratorRight, y);
-		ctx.lineTo(x, y = toY(dg, yLpTop));
-		ctx.lineTo(xGeneratorLeft, y);
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "13px arial";
-		ctx.fillText("G / M", xGeneratorLeft+15, toY(dg,yLpBottom+8));
-		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkOut), xGeneratorLeft+10, toY(dg,yLpBottom+1));
-		ctx.fillText("Uncharge", xGeneratorLeft-1-ctx.measureText("Uncharge").width, toY(dg,yLpBottom+11));
-
-
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("bed-", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-10));
-		ctx.fillText("bed-",x = 2+toX(dg, metrics.rCylinder*2), y);
-		ctx.fillText("rock", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-17));
-		ctx.fillText("rock",x, y );
-		ctx.font = "11px serif";
-		const depth = metrics.hBelow+metrics.hCylinder;
-//console.log( depthM+", yPx="+toY(dg,depth))
-		ctx.fillText( "-"+Math.round(depth)+"m", x, toY(dg,0));
-		ctx.fillText( "-"+Math.round(metrics.hBelow)+"m", x, toY(dg,metrics.hCylinder));
-		ctx.fillStyle = 'black'; 
-		ctx.fillText( "+"+Math.round(metrics.hAbove)+"m", x, toY(dg,hTop));
-
-		ctx.font = "40px serif";
-		ctx.fillText("\u21A6", toX(dg, metrics.rCylinder), toY(dg,metrics.hCylinder)+10);
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText(" Storage radius "+Math.round(metrics.rCylinder)+" m", toX(dg, metrics.rCylinder)+40, toY(dg,metrics.hCylinder)-4);
-
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("Insulated by sorted gravel + biochar", toX(dg,2), toY(dg,metrics.hCylinder+2));
-
-		ctx.beginPath();
-		ctx.moveTo(towerRightX, y = toY(dg, hTop-ins/2));
-		ctx.lineTo(towerRightX+15, y);
-		ctx.lineTo(towerRightX+15, y = toY(dg, hTop- ins/2 - 0.1 * lpActH));
-		ctx.lineTo(towerRightX, y);
-		ctx.stroke();
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("\u21D0", towerRightX-7, y+2);
-		ctx.fillText("\u21D0", towerRightX+8, y-10);
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatOutInDischarge) : ''), towerRightX+10, y-2);
-
-
-		ctx.font = "20px serif";
-		ctx.fillText("\u21DC", xGeneratorLeft-20, toY(dg, towerH-14));
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.2 * lpActH));
-		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.3 * lpActH));
-		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.4 * lpActH));
-		ctx.fillText("\u21D4", towerLeftX-12, hMaxTopLiquid+4);
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21D5", toX(dg,metrics.rCylinder)-8, hpStorageTopY+6);
-		$("#"+canvasId).css('display','block');
-	}
-
-
-	function drawCylinderStorage( canvasId, metrics, cycleData, bottomLines ) {
-		const dg = {};
-		var gasName = getInputParam('name', 'Nitrogen' ).toLowerCase();
-		const canvas = document.getElementById(canvasId);
-		var title = "Metrics of "+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. gravel ton energy storage";
-		// let's keep this very simple, set scale 1 m == 2 px, 
-		dg.ySign = 1;
-		dg.marginX = 30;
-		dg.marginTop = 80 + (title ? 20 : 0);	// for the facility and pipes
-		dg.marginBottom = 10 + (bottomLines ? bottomLines.length * 12 : 0);
-		dg.meterToPixels = 2;
-		const width = metrics.rCylinder*2*dg.meterToPixels + dg.marginX;
-		const height = (metrics.hCylinder+metrics.hBelow+metrics.hAbove)*dg.meterToPixels+dg.marginTop+dg.marginBottom;
-		canvas.setAttribute("width", width ); 
-		canvas.setAttribute("height", height); 
-console.log("width="+width+", height="+height);
-		const ctx = canvas.getContext("2d");
-
-		dg.maxX = metrics.rGround*2;
-		dg.minX = 0;
-		dg.maxY = metrics.hCylinder+metrics.hBelow+metrics.hAbove;
-		dg.minY = 0;
-		dg.baseX = 0;
-		dg.baseY = 0;
-
-		ctx.textAlign = "start";
-		ctx.textBaseline = "bottom";
-		ctx.fillStyle = 'black';
-		dg.ctx = ctx;
-		ctx.font = "10px Arial";
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		dg.width = canvas.getAttribute("width");
-		dg.cWidth = dg.width - 2 * dg.marginX;
-		dg.height = canvas.getAttribute("height");
-		dg.cheight = dg.height - dg.marginTop - dg.marginBottom;
-		if (title) {
-			ctx.font = "16px arial";
-			ctx.fillStyle = 'black'; 
-			var x = toX(dg,metrics.rCylinder)-ctx.measureText(title).width/2;
-console.log("x="+x+", title:"+title);			
-			if (x < 0) x = 2;
-			ctx.fillText(title, x, 20);
-		}
-		// Start with rock, https://www.w3schools.com/colors/colors_shades.asp
-		const colorRock = '#A9A9A9'; //	
-		const colorInsulation = '#808080'; // gray, 
-		const colorHotHpGravel = '#FFFF00'; //#FFCC00'; 
-		const colorColdHpGravel = '#66FFFF';
-		const colorHotLpGravel = '#FF9900'; 
-		const colorWarmLpGravel = '#FFCC99'; 
-		const colorColdLpGravel = '#6666FF'; 
-		const colorLiquidLpGravel = '#0000FF'; 
-
-		// draw first the base rock
-		const groundY = toY(dg, metrics.hBelow+metrics.hCylinder);
-		var region = new Path2D();
-
-		region.moveTo(0, groundY); 
-		region.lineTo(dg.width, groundY); 
-		region.lineTo(dg.width, dg.height);
-		region.lineTo(0, dg.height);
-		region.lineTo(0, groundY); 
-		region.closePath();
-		ctx.fillStyle = colorRock;
-		ctx.fill(region);
-		$("#"+canvasId).css('display','block');
-		var y, x;
-		region = new Path2D();
-		// Insulation layer
-		region.moveTo(x=toX(dg,0),toY(dg,0)); 
-		region.lineTo(x, y = toY(dg, metrics.hCylinder+metrics.hBelow+metrics.hAbove));
-		region.lineTo(x = toX(dg, metrics.rCylinder*2), y);
-		region.lineTo(x, y = toY(dg,0));
-		region.lineTo(toX(dg,0), y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorInsulation;
-		ctx.fill(region);
-
-		// Gas isolation
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x=toX(dg,0),toY(dg,0)); 
-		ctx.lineTo(x, y = toY(dg, metrics.hCylinder+metrics.hBelow+metrics.hAbove));
-		ctx.lineTo(x = toX(dg, metrics.rCylinder*2), y);
-		ctx.lineTo(x, y = toY(dg,0));
-		ctx.lineTo(toX(dg,0), y);
-		ctx.stroke();
-
-		ctx.moveTo(x=toX(dg,0),y=toY(dg,metrics.hCylinder)); 
-		ctx.lineTo(toX(dg, metrics.rCylinder*2), y);
-		ctx.closePath();
-		ctx.stroke();
-	
-		// 50% charged, 10% turbin out heat => 10% + 40% + 50 - 10m insulation + 
-		const ins = 10;
-		const lpActH = metrics.hBelow+metrics.hAbove - 2 * ins;
-		const hTop = metrics.hCylinder+metrics.hBelow+metrics.hAbove;
-	
-		region = new Path2D();
-		region.moveTo(x=toX(dg,ins),y = toY(dg,hTop-ins/2)); 
-		region.lineTo(x, y = toY(dg, hTop- ins/2 - 0.1 * lpActH));
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = toY(dg, hTop-ins/2));
-		region.lineTo(x=toX(dg,ins),y); 
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorHotLpGravel;
-		ctx.fill(region);
-//console.log(x+','+y);
-		if (cycleData) {
-			ctx.fillStyle = 'black'; 
-			ctx.font = "14px serif";
-			ctx.fillText(toCelsius(cycleData.hotCycle[0].tOut),toX(dg,ins)+10, toY(dg,hTop-ins/2)+20 );
-		}
-		region = new Path2D();
-		region.moveTo(x=toX(dg,ins), y = toY(dg, hTop -ins/2 - 0.1 * lpActH));
-		region.lineTo(x, y = toY(dg, hTop -ins/2 - 0.5 * lpActH));
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = toY(dg, hTop -ins/2 - 0.1 * lpActH));
-		region.lineTo(x=toX(dg,ins), y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorWarmLpGravel;
-		ctx.fill(region);
-		if (cycleData) {
-			ctx.fillStyle = 'black'; 
-			ctx.font = "14px arial";
-			ctx.fillText(toCelsius(cycleData.hotCycle[1].tIn),toX(dg,ins)+10, y = toY(dg,hTop -ins/2 - 0.1 * lpActH)+20 );
-			ctx.fillText(Math.round(cycleData.hotCycle[1].pIn/1000)+" kPa "+gasName+" gas in",toX(dg,ins)+10, toY(dg,hTop -ins/2 - 0.30 * lpActH) );
-			ctx.fillText("compacted fine-grained gravel",toX(dg,ins)+10, toY(dg,hTop -ins/2 - 0.30 * lpActH)+14 );
-		}
-		ctx.fillStyle = 'black'; 
-		ctx.font = "14px arial";
-		ctx.fillText("\u21D1 in charge", toX(dg,ins)+60, toY(dg, hTop -ins/2 - 0.5 * lpActH));
-
-		region = new Path2D();
-		region.moveTo(x=toX(dg,ins), y = toY(dg, hTop -ins/2 - 0.5 * lpActH));
-		region.lineTo(x, y = toY(dg, hTop -ins/2 - lpActH));
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = toY(dg, hTop -ins/2 - 0.5 * lpActH));
-		region.lineTo(x=toX(dg,ins), y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorColdLpGravel;
-		ctx.fill(region);
-		if (cycleData) {
-			ctx.fillStyle = 'white'; 
-			ctx.font = "14px serif";
-			ctx.fillText(toCelsius(cycleData.coldCycle[1].tOut),toX(dg,ins)+10, toY(dg,hTop -ins/2 - 0.5 * lpActH)+20 );
-		}
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("\u21D3 in uncharge", toX(dg,ins)+80, toY(dg, hTop -ins/2 - 0.5 * lpActH)+18);
-
-		const hpStorageTopY = toY( dg, metrics.hCylinder - ins );
-		const hpStorageBottomY = toY( dg, ins/3);
-		const hpStorageMiddleY = toY( dg, 0.5*metrics.pHighStorageHeight + ins/3 );
-		region = new Path2D();
-		region.moveTo(x=toX(dg,ins), hpStorageTopY );
-		region.lineTo(x, y = hpStorageMiddleY);
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = hpStorageTopY);
-		region.lineTo(x=toX(dg,ins), y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorHotHpGravel;
-		ctx.fill(region);
-		if (cycleData) {
-			ctx.fillStyle = 'black'; 
-			ctx.font = "14px arial";
-			ctx.fillText(toCelsius(cycleData.hotCycle[0].tIn),toX(dg,ins)+10, y = hpStorageTopY+20 );
-			ctx.fillText("Gas flow "+Math.round(1000*cycleData.hotCycle[1].massFlow)+" kg/s in charge and "+Math.round(1000*cycleData.hotCycle[0].massFlow)+" kg/s in uncharge", 
-					toX(dg,ins)+80, y);
-			ctx.fillText(Math.round(cycleData.hotCycle[1].pOut/1000)+" kPa "+gasName+" gas in compacted fine-grained gravel",toX(dg,ins)+10, toY( dg, 0.75*metrics.pHighStorageHeight + ins/2 ));
-		}
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21D1 in uncharge", toX(dg,ins)+80, hpStorageMiddleY);
-
-		region = new Path2D();
-		region.moveTo(x=toX(dg,ins), hpStorageMiddleY );
-		region.lineTo(x, y = hpStorageBottomY);
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, y = hpStorageMiddleY);
-		region.lineTo(x=toX(dg,ins), y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorColdHpGravel;
-		ctx.fill(region);
-		if (cycleData) {
-			ctx.fillStyle = 'black'; 
-			ctx.font = "14px serif";
-			ctx.fillText(toCelsius(cycleData.coldCycle[0].tOut),toX(dg,ins)+10, hpStorageMiddleY+20 );
-		}
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21D3 in charge", toX(dg,ins)+60, hpStorageMiddleY+18);
-
-		// liquid nitrogen
-		region = new Path2D();
-		const hTopLiquid = toY(dg, hTop -ins/2 - (1-metrics.maxPartLiquid/2) * lpActH);
-		const hMaxTopLiquid = toY(dg, hTop -ins/2 - (1-metrics.maxPartLiquid) * lpActH);
-		region.moveTo(x=toX(dg,ins), hTopLiquid);
-		region.lineTo(x, y = toY(dg, hTop -ins/2 - lpActH));
-		region.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		region.lineTo(x, hTopLiquid);
-		region.lineTo(x=toX(dg,ins), hTopLiquid);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorLiquidLpGravel;
-		ctx.fill(region);
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("Liquid "+gasName+" in the bottom", toX(dg,ins)+10, toY(dg, hTop -ins/2 - lpActH));
-
-		const yVoidTop = toY(dg, hTop -ins/2 - 0.6 * lpActH)
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(toX(dg,0), yVoidTop);
-		ctx.lineTo(x = toX(dg,ins), yVoidTop );
-		ctx.lineTo(x, y = toY(dg, hTop -ins/2 - lpActH) );
-		ctx.lineTo(x = toX(dg, metrics.rCylinder*2 - ins), y);
-		ctx.lineTo(x, yVoidTop );
-		ctx.lineTo(toX(dg, metrics.rCylinder*2), yVoidTop);
-		ctx.stroke();
-
-		// next turbins, compressors and pipes, middle pipe diameter about 10m?
-		// draw first the middle tower with correct color
-		const towerH = hTop + 20;
-		const towerLeftX = toX( dg, metrics.rCylinder - 8 ); 
-		const towerRightX = toX( dg, metrics.rCylinder + 8 ); 
-
-		region = new Path2D();
-		region.moveTo(x = towerLeftX, y = toY(dg, towerH));
-		region.lineTo(x, y = toY(dg, hTop-ins/2 - 0.1 * lpActH));
-		region.lineTo(x = towerRightX, y);
-		region.lineTo(x, y = toY(dg, towerH));
-		region.lineTo(towerLeftX, y);
-		region.closePath();
-		ctx.fillStyle = 'white';
-		ctx.fill(region);
-		ctx.fillStyle = colorWarmLpGravel;
-		ctx.fill(region);
-
-		ctx.beginPath();
-		ctx.moveTo(x = towerLeftX, y = toY(dg, towerH));
-		ctx.lineTo(x, y = toY(dg, hTop-ins/2 - lpActH));
-		ctx.lineTo(x = towerRightX, y);
-		ctx.lineTo(x, y = toY(dg, towerH));
-		ctx.lineTo(towerLeftX, y);
-		ctx.closePath();
-		ctx.stroke();
-
-		const yLpTop = towerH, yLpBottom = 2+hTop, yHpTop = towerH-7.5, yHpBottom = hTop+7.5;
-		const ctWidth = 20*dg.meterToPixels;
-		const xTurbinLp = towerLeftX-ctWidth/2;
-		const xTurbinHp = xTurbinLp-ctWidth;
-		const hotCompHpX = towerRightX + ctWidth;
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		//ctx.moveTo(x = towerRightX, y = toY(dg, yLpTop));
-		ctx.moveTo(x = towerRightX, toY(dg, yLpBottom));
-		ctx.lineTo(x = hotCompHpX, toY(dg,yHpBottom));
-		ctx.lineTo(x, toY(dg,yHpTop));
-		ctx.lineTo(towerRightX, toY(dg, yLpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "14px serif";
-		ctx.fillText("\u2192  C", towerRightX-5, toY(dg, yLpBottom+4));
-
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = colorHotHpGravel;
-		ctx.beginPath();
-		ctx.moveTo(hotCompHpX-3, toY(dg,yHpTop));
-		ctx.lineTo(hotCompHpX-3, y = toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, y = toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, hpStorageTopY );
-		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2191", hotCompHpX-7, toY(dg,yHpTop+1));
-
-		ctx.beginPath();
-		ctx.moveTo(xTurbinHp+3, toY(dg,yHpTop));
-		ctx.lineTo(xTurbinHp+3, toY(dg, yLpTop+4));
-		ctx.lineTo(towerLeftX+13, toY(dg, yLpTop+4));
-		ctx.stroke();
-
-		const xColdTurbinLp = x + ctWidth/2;
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(x, y = toY(dg, towerH-10 ));
-		ctx.lineTo(xColdTurbinLp, y);
-		ctx.stroke();
-		const xColdTurbinHp = xColdTurbinLp + ctWidth/2;
-		const yColdLpTop = towerH-5, yColdLpBottom = hTop+5, yColdHpTop = yLpTop-8, yColdHpBottom = yLpBottom+6;
-
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xColdTurbinLp, y = toY(dg,yColdLpTop));
-		ctx.lineTo(x, toY(dg, yColdLpBottom));
-		ctx.lineTo(x = xColdTurbinHp, toY(dg,yColdHpBottom));
-		ctx.lineTo(x, toY(dg,yColdHpTop));
-		ctx.lineTo(xColdTurbinLp, toY(dg,yColdLpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "12px serif";
-		ctx.fillText("T", xColdTurbinLp+4, toY(dg,yColdLpBottom+1));
-
-		ctx.lineWidth = 9;
-		ctx.strokeStyle = colorColdLpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdTurbinLp+5, toY(dg,yColdLpTop-1));
-		ctx.lineTo(xColdTurbinLp+5, y = toY(dg,yColdLpTop+15));
-		ctx.lineTo(towerLeftX+6, y );
-		ctx.lineTo(towerLeftX+6, toY(dg, hTop -ins/2 - 0.5 * lpActH));
-		ctx.stroke();
-		ctx.fillStyle = 'white'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2191", xColdTurbinLp+2, toY(dg,yColdLpTop-1));
-
-		ctx.lineWidth = 4;
-		ctx.strokeStyle = colorColdHpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdTurbinHp-3, toY(dg,yColdHpTop-1));
-		ctx.lineTo(xColdTurbinHp-3, y = toY(dg,yColdLpTop+20));
-		ctx.lineTo(x = toX(dg, metrics.rCylinder*2-2), y );
-		ctx.lineTo(x, y = toY(dg, 1));
-		ctx.lineTo(x = toX(dg, metrics.rCylinder), y);
-		ctx.lineTo(x, toY(dg, ins/3));
-		ctx.stroke();
-		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xColdTurbinHp-7, toY(dg,yColdLpTop-1));
-
-
-		var xGeneratorLeft = xColdTurbinHp + ctWidth/2;
-		var xGeneratorRight = xGeneratorLeft + ctWidth*2;
-		const xChargeGeneratorRight = xGeneratorRight;
-
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(xColdTurbinHp-7, toY(dg,yColdLpTop+7));
-		ctx.lineTo(xColdTurbinHp-7, y = toY(dg,yColdLpTop+19));
-		ctx.lineTo(xGeneratorLeft+19, y );
-		ctx.lineTo(xGeneratorLeft+19, y = toY(dg,yColdLpTop+7));
-		ctx.lineTo(xColdTurbinHp-7, y);
-		ctx.stroke();
-		ctx.font = "12px arial";
-		ctx.fillText("Cooler", xColdTurbinHp-5, toY(dg,yColdLpTop+12))
-		if (cycleData) ctx.fillText(workToMW(-cycleData.heatPumpCooling), xColdTurbinHp-7, toY(dg,yColdLpTop+6))
-		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatPumpHeating) : ''), xGeneratorLeft+13, toY(dg,yColdLpTop+12));
-
-		ctx.beginPath();
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xColdTurbinHp, y = toY(dg, towerH-10));
-		ctx.lineTo(xGeneratorLeft, y);
-		ctx.stroke();
-
-		ctx.beginPath();
-		ctx.lineWidth = 2;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xGeneratorLeft, toY(dg,yLpTop));
-		ctx.lineTo(x, y = toY(dg, yLpBottom));
-		ctx.lineTo(x = xGeneratorRight, y);
-		ctx.lineTo(x, y = toY(dg, yLpTop));
-		ctx.lineTo(xGeneratorLeft, y);
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "13px arial";
-		ctx.fillText("G / M", xGeneratorLeft+20, toY(dg,yLpBottom+8));
-		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkIn), xGeneratorLeft+10, toY(dg,yLpBottom+1));
-		ctx.fillText("Charge", xGeneratorRight+1, toY(dg,yLpBottom+10));
-		ctx.font = "20px serif";
-		ctx.fillText("\u21DC", xGeneratorRight+1, toY(dg, towerH-14));
-
-		ctx.lineWidth = 2;
-		ctx.beginPath();
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(x = xTurbinHp, y = toY(dg, yHpTop));
-		ctx.lineTo(x, toY(dg,yHpBottom));
-		ctx.lineTo(x = xTurbinLp, toY(dg,yLpBottom));
-		ctx.lineTo(x, toY(dg,yLpTop));
-		ctx.lineTo(xTurbinHp, toY(dg, yHpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "14px serif";
-		ctx.fillText("T", xTurbinHp+15, toY(dg, yLpBottom+4));
-
-		ctx.fillStyle = 'black'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xTurbinHp-1, toY(dg,yHpTop+3));
-
-		ctx.beginPath();
-		ctx.lineWidth = 16;
-		ctx.strokeStyle = colorHotLpGravel;
-		ctx.moveTo(xTurbinLp+8, toY(dg, yLpTop));
-		ctx.lineTo(xTurbinLp+8, toY(dg, hTop - ins/2));
-		ctx.stroke();
-
-		ctx.fillText("\u21B4", xTurbinLp+2, toY(dg,yLpBottom+4));
-
-		const xColdCompressorLp = xTurbinHp - ctWidth/2;
-		ctx.beginPath();
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.moveTo(xTurbinHp, y = toY(dg, towerH-10));
-		ctx.lineTo(xColdCompressorLp, y);
-		ctx.stroke();
-		const xColdCompressorHp = xColdCompressorLp - ctWidth/2;
-
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(x = xColdCompressorLp, y = toY(dg,yColdLpTop));
-		ctx.lineTo(x, toY(dg, yColdLpBottom));
-		ctx.lineTo(x = xColdCompressorHp, toY(dg,yColdHpBottom));
-		ctx.lineTo(x, toY(dg,yColdHpTop));
-		ctx.lineTo(xColdCompressorLp, toY(dg,yColdLpTop));
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "12px serif";
-		ctx.fillText("C", xColdCompressorHp+5, toY(dg,yColdLpBottom+1));
-
-		ctx.lineWidth = 9;
-		ctx.strokeStyle = colorColdLpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdCompressorLp-5, toY(dg,yColdLpTop-1));
-		ctx.lineTo(xColdCompressorLp-5, y = toY(dg,yColdLpTop+15));
-		ctx.lineTo(towerLeftX+6, y );
-		ctx.stroke();
-
-		ctx.lineWidth = 4;
-		ctx.strokeStyle = colorColdHpGravel;
-		ctx.beginPath();
-		ctx.moveTo(xColdCompressorHp+3, toY(dg,yColdHpTop-1));
-		ctx.lineTo(xColdCompressorHp+3, y = toY(dg,yColdLpTop+20));
-		ctx.lineTo(xColdTurbinHp-3, y );
-		ctx.stroke();
-
-		xGeneratorRight = xColdCompressorHp - ctWidth/2;
-		xGeneratorLeft = xGeneratorRight - 2*ctWidth;
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(xColdCompressorHp, y = toY(dg, towerH-10));
-		ctx.lineTo(xGeneratorRight, y);
-		ctx.stroke();
-
-		ctx.fillStyle = 'white'; 
-		ctx.font = "16px serif";
-		ctx.fillText("\u2193", xColdCompressorLp-9, toY(dg,yColdLpTop+1));
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u2191", xColdCompressorHp-1, toY(dg,yColdLpTop+1));
-
-		ctx.lineWidth = 1;
-		ctx.strokeStyle = 'black';
-		ctx.beginPath();
-		ctx.moveTo(x = xGeneratorLeft, toY(dg,yLpTop));
-		ctx.lineTo(x, y = toY(dg, yLpBottom));
-		ctx.lineTo(x = xGeneratorRight, y);
-		ctx.lineTo(x, y = toY(dg, yLpTop));
-		ctx.lineTo(xGeneratorLeft, y);
-		ctx.closePath();
-		ctx.stroke();
-		ctx.font = "13px arial";
-		ctx.fillText("G / M", xGeneratorLeft+15, toY(dg,yLpBottom+8));
-		if (cycleData) ctx.fillText(workToMW(cycleData.netWorkOut), xGeneratorLeft+10, toY(dg,yLpBottom+1));
-		ctx.fillText("Uncharge", xGeneratorLeft-1-ctx.measureText("Uncharge").width, toY(dg,yLpBottom+11));
-
-
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("bed-", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-10));
-		ctx.fillText("bed-",x = 2+toX(dg, metrics.rCylinder*2), y);
-		ctx.fillText("rock", 1, y = toY(dg,metrics.hBelow+metrics.hCylinder-17));
-		ctx.fillText("rock",x, y );
-		ctx.font = "11px serif";
-		const depth = metrics.hBelow+metrics.hCylinder;
-//console.log( depthM+", yPx="+toY(dg,depth))
-		ctx.fillText( "-"+Math.round(depth)+"m", x, toY(dg,0));
-		ctx.fillText( "-"+Math.round(metrics.hBelow)+"m", x, toY(dg,metrics.hCylinder));
-		ctx.fillStyle = 'black'; 
-		ctx.fillText( "+"+Math.round(metrics.hAbove)+"m", x, toY(dg,hTop));
-
-		ctx.font = "40px serif";
-		ctx.fillText("\u21A6", toX(dg, metrics.rCylinder), toY(dg,metrics.hCylinder)+10);
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText(" Storage radius "+Math.round(metrics.rCylinder)+" m", toX(dg, metrics.rCylinder)+40, toY(dg,metrics.hCylinder)-4);
-
-		ctx.font = "14px arial";
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("Insulated by sorted gravel + biochar", toX(dg,2), toY(dg,metrics.hCylinder+2));
-
-		ctx.beginPath();
-		ctx.moveTo(towerRightX, y = toY(dg, hTop-ins/2));
-		ctx.lineTo(towerRightX+15, y);
-		ctx.lineTo(towerRightX+15, y = toY(dg, hTop- ins/2 - 0.1 * lpActH));
-		ctx.lineTo(towerRightX, y);
-		ctx.stroke();
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("\u21D0", towerRightX-7, y+2);
-		ctx.fillText("\u21D0", towerRightX+8, y-10);
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21AA District heat"+(cycleData ? workToMW(cycleData.heatOutInDischarge) : ''), towerRightX+10, y-2);
-
-
-		ctx.font = "20px serif";
-		ctx.fillText("\u21DC", xGeneratorLeft-20, toY(dg, towerH-14));
-		ctx.fillStyle = 'white'; 
-		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.2 * lpActH));
-		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.3 * lpActH));
-		ctx.fillText("\u21D4", towerRightX-11, toY(dg, hTop- ins/2 - 0.4 * lpActH));
-		ctx.fillText("\u21D4", towerLeftX-12, hMaxTopLiquid+4);
-		ctx.fillStyle = 'black'; 
-		ctx.fillText("\u21D5", toX(dg,metrics.rCylinder)-8, hpStorageTopY+6);
-		$("#"+canvasId).css('display','block');
-	}
+}
 	
 	function drawDiagram4Y( canvasId, xVals, xTitle, arrayOfyVals, yTitles, topTitle, bottomLines ) {
 //console.log("X lines...");
@@ -3694,7 +2953,7 @@ console.log("x="+x+", title:"+title);
 		dg.ySign = 1;
 		ctx.font = "8px Arial";
 		dg.marginX = ctx.measureText(yTitles[0]).width + 6;
-		dg.marginTop = topTitle ? 30 : 10;
+		dg.marginTop = topTitle ? (topTitle.indexOf(',')>0 ? 50 : 30) : 10;
 		dg.baseX = 0;
 		dg.baseY = 0;
 		dg.marginBottom = 10 + (bottomLines ? bottomLines.length * 10 : 0);
@@ -3705,7 +2964,16 @@ console.log("x="+x+", title:"+title);
 		dg.cheight = dg.height - dg.marginTop - dg.marginBottom;
 		if (topTitle) {
 			ctx.font = "15px serif";
+			var subTitle = null;
+			const iPos = topTitle.indexOf(',');
+			if (iPos>0) {
+				subTitle = topTitle.substring(iPos+1);
+				topTitle = topTitle.substring(0, iPos);
+			}
 			textOnWhite(ctx, topTitle, (dg.width-ctx.measureText(topTitle).width) / 2, 17);
+			if (subTitle) {
+				textOnWhite(ctx, subTitle, (dg.width-ctx.measureText(subTitle).width) / 2, 37);
+			}
 		}
 		const xMinMax = minMaxVal( dg, xVals );
 		var yMinMax = minMaxVal( dg, arrayOfyVals[0] );
@@ -3757,6 +3025,7 @@ console.log("dg:"+JSON.stringify(dg));
 		for (i = 0; i < arrayOfyVals.length; i++) {
 			ctx.font = "10px Arial";
 			const yVals = arrayOfyVals[i];
+			if (yVals[0] == null) continue;
 			yMinMax = minMaxVal( dg, yVals );
 			
 //console.log("yMinMax="+JSON.stringify(yMinMax)); 
@@ -3882,7 +3151,6 @@ console.log("dg:"+JSON.stringify(dg));
 			}
 		}
 		$("#"+canvasId).css('display','block');
-*/
 	}
 	
 	function iDrawBraytonCycle( canvasId, hotCycle, coldCycle, cycleData ) 
@@ -4372,8 +3640,10 @@ console.log("Saturation curve ...");
 			});
 			ctx.strokeStyle = 'red';
 			ctx.stroke();
-			drawDirectionArrow( ctx, hotCycle[0], hotCycle[0].pIn*0.50, 15, false, "Gas flow in discharge "+Math.round(hotCycle[0].massFlow*1000)+" kg" );
-			showPointData(ctx, hotCycle[0], FIRST_ITEM, -300, -30, hotCycle[1].massFlow, hotCycle[0].massFlow );
+			drawDirectionArrow( ctx, hotCycle[0], hotCycle[0].pIn*0.50, 15, false, "Gas flow in discharge "+Math.round(hotCycle[0].massFlow*1000)+" kg/s" );
+			//showPointData(ctx, hotCycle[0], FIRST_ITEM, -300, -30, hotCycle[1].massFlow, hotCycle[0].massFlow );
+			showPointData(ctx, hotCycle[0], FIRST_ITEM, -300, 30, hotCycle[0].massFlow);
+			showPointData(ctx, hotCycle[1], FIRST_ITEM, -300, -35, hotCycle[1].massFlow);
 			showPointData(ctx, hotCycle[0], LAST_ITEM, 10, 10, hotCycle[0].massFlow );
 			ctx.beginPath();
 			hotCycle[1].items.forEach( function(item) {
@@ -4387,8 +3657,8 @@ console.log("Saturation curve ...");
 			});
 			ctx.strokeStyle = 'green';
 			ctx.stroke();
-			drawDirectionArrow( ctx, hotCycle[1], hotCycle[1].pOut*0.45, 15, true, "Gas flow in charge "+Math.round(hotCycle[1].massFlow*1000)+" kg" );
-			showPointData(ctx, hotCycle[1], LAST_ITEM, 23, 23, hotCycle[1].massFlow );
+			drawDirectionArrow( ctx, hotCycle[1], hotCycle[1].pOut*0.45, 15, true, "Gas flow in charge "+Math.round(hotCycle[1].massFlow*1000)+" kg/s" );
+			showPointData(ctx, hotCycle[1], LAST_ITEM, 16, -16, hotCycle[1].massFlow );
 		}
 		if (coldCycle) {
 			ctx.beginPath();
@@ -4420,7 +3690,7 @@ console.log("Saturation curve ...");
 			ctx.strokeStyle = 'green';
 			ctx.stroke();
 			showPointData(ctx, coldCycle[1], FIRST_ITEM, -15, -15, coldCycle[1].massFlow  );
-			showPointData(ctx, coldCycle[1], LAST_ITEM, 40, -40, coldCycle[1].massFlow, coldCycle[0].massFlow );
+			showPointData(ctx, coldCycle[1], LAST_ITEM, 40, -40, coldCycle[1].massFlow, coldCycle[0].massFlow, coldCycle[0].items[0].p );
 			drawDirectionArrow( ctx, coldCycle[1], maxPressure*0.30, 15, coldCycle[1].isForward );
 			
 			if (cycleData.heatPumpNetWorkIn) {
@@ -4433,8 +3703,9 @@ console.log("pTransformer="+JSON.stringify(pTransformer));
 				pTransformer = {};
 				pTransformer.highFrom = coldCycle[2].pIn;
 				pTransformer.lowFrom = coldCycle[2].pOut;
-				pTransformer.lowTo = hotCycle[0].pIn+250000;
-				pTransformer.highTo = hotCycle[0].pIn+450000;
+//		maxPressure = pHigh * 18 / 12.5;
+				pTransformer.lowTo = maxPressure / 18 * 15;
+				pTransformer.highTo = maxPressure / 18 * 17;
 
 				ctx.fillStyle = fillStyle;
 				ctx.strokeStyle = 'green';
@@ -4491,7 +3762,7 @@ console.log("pTransformer="+JSON.stringify(pTransformer));
 			ctx.moveTo( tToX(coldCycle[0].tOut), pToY(coldCycle[0].pOut));
 			drawPressureDropInPipe( ctx, coldCycle[0].pOut, hotCycle[1].pOut, coldCycle[0].tOut )
 			drawPressureDropInPipe( ctx, coldCycle[0].pOut, hotCycle[1].pOut, coldCycle[0].tOut )
-			ctx.lineTo( tToX(hotCycle[1].tOut), pToY(hotCycle[1].pOut));
+			ctx.lineTo( tToX(hotCycle[0].tIn), pToY(hotCycle[0].pIn));
 			ctx.strokeStyle = 'red';
 			ctx.stroke();
 
@@ -4500,7 +3771,7 @@ console.log("pTransformer="+JSON.stringify(pTransformer));
 			ctx.lineDashOffset = 5;
 			ctx.moveTo( tToX(coldCycle[1].tIn), pToY(coldCycle[1].pIn) );
 			drawPressureDropInPipe( ctx, coldCycle[1].pIn, hotCycle[0].pIn, coldCycle[1].tIn )
-			ctx.lineTo( tToX(hotCycle[0].tIn), pToY(hotCycle[0].pIn));
+			ctx.lineTo( tToX(hotCycle[1].tOut), pToY(hotCycle[1].pOut));
 			ctx.strokeStyle = 'green';
 			ctx.stroke();
 			
@@ -4524,14 +3795,16 @@ console.log("pTransformer="+JSON.stringify(pTransformer));
 
 			ctx.font = "15px serif";
 			x = width/5;
-			y = height/3;
+			y = height/2.5;
 			ctx.fillStyle = 'black'; 
 			textOnWhite( ctx, "Energy storage charge/discharge power for "+name+" gas flow "+Math.round(hotCycle[1].massFlow*1000)+"/"+Math.round(hotCycle[0].massFlow*1000)+" kg/s and turbin/compressor stage efficiency "+getFloatParam('tEfficiency', 0.90), x, y );
 			y += 20;
+			var title = "Metrics of "+Math.round(metrics.V1*2*metrics.rockDensity/1000000)+" milj. gravel ton "+Math.round(cycleData.storedEnergy_kWh/1000000)+" GWh energy storage";
+			
 			const netWorkOut=hotCycle[0].workProduced-coldCycle[0].workConsumed;
 
 //District heating power "+Math.round(hotCycle[1].tIn)+" K - "+Math.round(hotCycle[0].tOut)+" K: 
- 			const cyrogenicCooling = getBooleanParam('cyrogenicCooling');
+ 			const cyrogenicCooling = true;// getBooleanParam('cyrogenicCooling');
 			const adjustedCompressorPlow = getBooleanParam('adjustedCompressorPlow');
 			ctx.fillStyle = 'red'; 
 			textOnWhite( ctx, "Discharge cycle: gross output "+Math.round(hotCycle[0].workProduced/1000)+" MW - cold gas compression "
@@ -4556,18 +3829,20 @@ console.log("pTransformer="+JSON.stringify(pTransformer));
 				y += 20;
 			}
 			ctx.fillStyle = 'black';
-			textOnWhite( ctx, "=> Power restored as electricity "+Math.round(100*cycleData.efficiency)+" % and as District heat "+Math.round(cycleData.distictHeatPercent)+" %", x, y );
+			textOnWhite( ctx, "=> Electric power return efficiency "+Math.round(100*cycleData.efficiency)+" % + district heat "+Math.round(cycleData.distictHeatPercent)+" %", x, y );
 			if (Math.abs(netWorkOut - cycleData.totalWork)>100) {
 				y += 20;
 				textOnWhite( ctx, "  Discharge power % of all motor/generator power: "
 					+Math.round(100*netWorkOut/cycleData.totalWork)+" % ("+Math.round(netWorkOut/1000)+" MW/ "+Math.round(cycleData.totalWork/1000)+" MW)", x, y );
 			}
 			y += 20;
-			textOnWhite( ctx, "  Stored electricity "+Math.round(cycleData.storedElectricity_kWh/1000000)+" GWh and stored District heat "+Math.round(cycleData.storedDistrictHeat_kWh/1000000)+" GWh", x, y );
+			textOnWhite( ctx, "Stored electricity "+Math.round(cycleData.storedElectricity_kWh/1000000)+" GWh and stored District heat "+Math.round(cycleData.storedDistrictHeat_kWh/1000000)+" GWh", x, y );
 			y += 20;
-			textOnWhite( ctx, "  Cost of storage "+myRound(cycleData.costOfStoragekWh,2)+" €/kWh and cost of ePower "+Math.round(cycleData.costOfPowerKW)+" €/kW", x, y );
+			textOnWhite( ctx, "Cost of storage "+myRound(cycleData.costOfStoragekWh,2)+" €/kWh and cost of ePower "+Math.round(cycleData.costOfPowerKW)+" €/kW", x, y );
 			y += 20;
-			textOnWhite( ctx, "  Total cost of storage "+Math.round(cycleData.costOfStorage/1000000)+" MEur and total cost of machinery "+Math.round(cycleData.costOfPower/1000000)+" MEur", x, y );
+			textOnWhite( ctx, "Total cost "+Math.round((cycleData.costOfStorage+cycleData.costOfPower)/1000000)+" milj.Eur (storage: "+Math.round(cycleData.costOfStorage/1000000)+" and machinery: "+Math.round(cycleData.costOfPower/1000000)+")", x, y );
+			y += 20;
+			textOnWhite( ctx, "Storage size "+myRound(metrics.V1*2*metrics.rockDensity/1000000,1)+" milj. ton gravel", x, y );
 		}
 	
 		// draw temp and temp lines, 
@@ -4583,17 +3858,22 @@ console.log("drawBraytonCycle done");
 	}
 	function drawPressureDropInPipe( ctx, pFrom, pTo, t )
 	{
-		var pStep = pFrom > pTo ? 0.96 : 1.04;
-		const h = Module.PropsSI('H', 'P', pFrom, 'T', t, name);  // constant enthalpy inside pipe
 		var p = pFrom;
-		for (;;) {
-			p = p * pStep;
-			if (pFrom > pTo && p < pTo) p = pTo;
-			else if (pFrom < pTo && p > pTo) p = pTo;
+		if (pFrom == pTo) {
+			ctx.lineTo( tToX(t), pToY(pTo));
+		}
+		else {
+			var pStep = pFrom > pTo ? 0.96 : 1.04;
+			const h = Module.PropsSI('H', 'P', pFrom, 'T', t, name);  // constant enthalpy inside pipe
+			for (;;) {
+				p = p * pStep;
+				if (pFrom > pTo && p < pTo) p = pTo;
+				else if (pFrom < pTo && p > pTo) p = pTo;
 
-			t = Module.PropsSI('T', 'P', p, 'H', h, name);  // constant enthalpy inside pipe
-			ctx.lineTo( tToX(t), pToY(p));
-			if (p == pTo) break;
+				t = Module.PropsSI('T', 'P', p, 'H', h, name);  // constant enthalpy inside pipe
+				ctx.lineTo( tToX(t), pToY(p));
+				if (p == pTo) break;
+			}
 		}
 		var v = {};
 		v.p = p;
@@ -4687,7 +3967,34 @@ console.log("drawBraytonCycle done");
 		}
 		ctx.fillStyle = ctx.fillStyle;
 	}
-	function showPointData( ctx, data, isFirst, xDiff, yDiff, massFlow, massFlow2) 
+	function getGasFlow( type, data, isFirst, r1, r2 ) 
+	{	
+		if (!data.isForward) {
+			if (isFirst) isFirst = false;
+			else isFirst = true;
+		}
+		const item = isFirst ? data.items[data.items.length-1] : data.items[0];
+		const flow = Math.round(data.massFlow * 1000/item.d)*metrics.rockDensity/(metrics.rockDensity-(type == 'Hp' ? metrics.gravelDensity : metrics.lpGravelDensity));
+
+		if (typeof item.visc === 'undefined') item.visc = Module.PropsSI('V', 'P', item.p, 'H', item.h, name);
+	
+		var speed = Math.round(data.massFlow * 1000/item.d)/(r1*r1*Math.PI);
+		var pDrop = Math.round(calcPressureDropInGravel(type, speed, item.visc, item.d, 1 ));
+		var pDropText = ",  \u0394P: "+pDrop;
+		if (r2) {
+			speed = Math.round(data.massFlow * 1000/item.d)/(r2*r2*Math.PI);
+			var pDrop2 = Math.round(calcPressureDropInGravel(type, speed, item.visc, item.d, 1 ));
+			if (pDrop2 != pDrop) {
+				pDropText = pDropText+" - "+pDrop2;
+			}
+		}
+		pDropText += " Pa/m"
+		var speed1 = myRound(flow/(r1*r1*Math.PI),2);
+		var speed2 = r2 ? myRound(flow/(r2*r2*Math.PI),2) : speed1;
+		return 'gas speed: '+speed1+(speed1 && speed1!=speed2 ? ' - '+speed2 : '')+' m/s'+pDropText;
+	}
+
+	function showPointData( ctx, data, isFirst, xDiff, yDiff, massFlow, massFlow2, p1) 
 	{	
 		if (!data.isForward) {
 			if (isFirst) isFirst = false;
@@ -4700,7 +4007,7 @@ console.log("drawBraytonCycle done");
 		const strokeStyle = ctx.strokeStyle;
 		const v = Module.PropsSI('V', 'P', item.p, 'H', item.h, name); // viscosity
 		if (typeof massFlow === 'undefined') massFlow = data.massFlow;
-		const text = myRound(item.t,1)+" K"+", "+Math.round(item.p/1000)+" kPa: enthalpy="+Math.round(item.h/1000)+" J/g, flow="+
+		const text = myRound(item.t,1)+" K"+", "+(p1 ? Math.round(p1/1000)+'/':'')+Math.round(item.p/1000)+" kPa: enthalpy="+Math.round(item.h/1000)+" J/g, flow="+
 					(massFlow2 ? Math.round(massFlow * 1000/item.d)+"/"+Math.round(massFlow2 * 1000/item.d)+" m3/s, "+Math.round(massFlow*1000)+"/"+Math.round(massFlow2 * 1000)+" kg ":
 					 massFlow ? Math.round(massFlow * 1000/item.d)+" m3/s, "+Math.round(massFlow*1000)+" kg" : Math.round(1000/item.d)+" m3/s") 
 						+", visc="+Math.round(v*1000000)+"μPa*s" // Mass specific entropy="+myRound((item.s/1000),2)+" J/g/K,

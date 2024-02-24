@@ -22,7 +22,7 @@ td {
 <DIV><LABEL>FluidName:</LABEL>
 	<SELECT id="name"><!--OPTION>Argon</OPTION><OPTION>CarbonDioxide</OPTION--><OPTION>Helium</OPTION><OPTION>Hydrogen</OPTION><!--OPTION>Methane</OPTION--><OPTION selected>Nitrogen</OPTION><!--OPTION>R134a</OPTION><OPTION>Water</OPTION-->
 	</SELECT><BUTTON onClick="drawTpDiagram()">Draw T-P diagram</BUTTON>  
-	<BUTTON onClick="drawJustStorage()">Redraw storage</BUTTON> 
+	<BUTTON onClick="drawOnlyStorage()">Redraw storage</BUTTON> 
 	<BUTTON onClick="calcDiagrams()">Draw the selected diagrams</BUTTON> 
 
 	<!--<INPUT id="noDistrictHeat" checked type="checkbox" value="true"><LABEL>Use stored liqued nitrogen to maximize electric output</LABEL>-->
@@ -32,10 +32,14 @@ td {
 <DIV>
 	<LABEL>Turbin stage efficiency: </LABEL>
 	<INPUT size="6" title="88-92% is a typical efficiency range for a single axial turbin or compressor stage" id="tEfficiency" type="float" value="0.92"> 
+	<LABEL>Stage efficiency of cyrogenic compressor: </LABEL>
+	<INPUT size="6" title="88-92% is a typical efficiency range for a single axial turbin or compressor stage" id="cLowEfficiency" type="float" value="0.94"> 
 	<INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="tEfficiencyFrom" type="float" value="0.87"> - <INPUT size="6" id="tEfficiencyTo" type="float" value="0.94"></Div>
 <DIV>
 	<LABEL>Compressor efficiency: </LABEL>
 	<INPUT size="6" title="88-92% is a typical efficiency range for a single axial turbin or compressor stage." id="cEfficiency" type="float" value="0.92"> 
+	<LABEL>Stage efficiency of cyrogenic turbine: </LABEL>
+	<INPUT size="6" title="88-92% is a typical efficiency range for a single axial turbin or compressor stage" id="tLowEfficiency" type="float" value="0.94"> 
 	<!--INPUT size="6" id="cEfficiencyFrom" type="float" value="0.87"><INPUT size="6" id="cEfficiencyTo" type="float" value="0.93"-->
 </Div>
 <DIV>
@@ -50,26 +54,28 @@ td {
 <DIV>
 	<LABEL>High pressure storage size (Mm3): </LABEL><INPUT size="4" id="hpStorageSizeRockMm3" type="float" value="3.4" onchange="metricsChanged()">
 	<INPUT id="hpStorageSize" type="checkbox"><LABEL>Draw diagram for range:</LABEL><INPUT size="6" id="hpStorageSizeFrom" type="float" value="3"> - <INPUT size="4" id="hpStorageSizeTo" type="float" value="20">
-	<LABEL>Gross work out (MW): </LABEL><INPUT size="4" id="grossWorkOut" type="float" value="1400">
-	<LABEL>Max relative pressure drop in pipes: </LABEL><INPUT size="4" id="maxPressureDrop" type="float" value="0.01">
+	<LABEL>Gross work out (MW): </LABEL><INPUT size="4" id="grossWorkOut" type="float" value="1400" onchange="metricsChanged()">
+	<LABEL>Max relative pressure drop in pipes: </LABEL><INPUT size="4" id="maxPressureDrop" type="float" value="0.01" onchange="metricsChanged()">
 </DIV>
 <DIV>
 	<LABEL>Rock density	(tn/m3): </LABEL><INPUT size="4" id="rockDensity" type="float" value="2.65" onchange="metricsChanged()">
 	<!--LABEL>Gravel density in the storage (tn/m3): </LABEL><INPUT size="4" id="gravelDensity" type="float" value="2.1" onchange="metricsChanged()"-->
-	<LABEL>Sorted gravel density (in the insulation) (tn/m3): </LABEL><INPUT size="4" id="insGravelDensity" type="float" value="1.5" onchange="metricsChanged()">
+	<LABEL>Sorted gravel density (in the insulation) (tn/m3): </LABEL><INPUT size="4" id="insGravelDensity" type="float" value="1.4" onchange="metricsChanged()">
 	<LABEL>Open pit angle: </LABEL><INPUT size="2" id="maxOpenPitAngle" type="float" value="70" onchange="metricsChanged()">
+	<LABEL>Top fill angle: </LABEL><INPUT size="2" id="topFillAngle" type="float" value="50" onchange="metricsChanged()">
 </DIV>
 <DIV>
 	<LABEL id="storageDimensions"></LABEL>
 </DIV>
 <DIV>
-	<LABEL>Average cost of external surfaces €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1000">
-	<LABEL>Cost of mining €/m3: </LABEL><INPUT size="4" id="costOfMiningM3" type="float" value="12">
+	<LABEL>Number of power units: </LABEL><INPUT id="numberOfUnits" type="text" value="12" size="2" maxlength="2" onchange="metricsChanged()">
+	<LABEL>Average cost of external surfaces €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1000" onchange="metricsChanged()">
+	<LABEL>Cost of mining €/m3: </LABEL><INPUT size="4" id="costOfMiningM3" type="float" value="12" onchange="metricsChanged()">
 </DIV>
 <DIV>
-	<LABEL>Cost of generator €/kW: </LABEL><INPUT size="6" id="generatorCostOfKW" type="float" value="250">
-	<LABEL>Cost of turbin/compressor power €/kW: </LABEL><INPUT size="6" id="tcCostOfKW" type="float" value="50">
-	<LABEL>Cost of heat exchage €/kW: </LABEL><INPUT size="6" id="heCostOfKW" type="float" value="50">
+	<LABEL>Cost of generator €/kW: </LABEL><INPUT size="6" id="generatorCostOfKW" type="float" value="250" onchange="metricsChanged()">
+	<LABEL>Cost of turbin/compressor power €/kW: </LABEL><INPUT size="6" id="tcCostOfKW" type="float" value="50" onchange="metricsChanged()">
+	<LABEL>Cost of heat exchage €/kW: </LABEL><INPUT size="6" id="heCostOfKW" type="float" value="50" onchange="metricsChanged()">
 </DIV>
 <!--DIV>
 	<INPUT id="cyrogenicCooling" checked title="pLow gas cooled to saturation temperature with heat pump" type="checkbox" value="true">
@@ -80,10 +86,16 @@ td {
 	<LABEL>Show the mass specific enthalpy (J/g) and entropy (J/g/K) lines</LABEL>
 </DIV-->
 <DIV>
-	<LABEL>Low pressure gravel min/max:</LABEL><INPUT id="gravelMinLp" type="float" value="70" size="3" maxlength="3">/<INPUT id="gravelMaxLp" type="float" value="120" size="3" maxlength="3"><LABEL>Porosity:</LABEL><INPUT id="gravelPorosityLp" type="float" size="4" maxlength="4"><BUTTON onClick="calcPressureDropInGravel('Lp')">Pressure drop</BUTTON><LABEL id="expectedPDropLp"></LABEL>
+	<LABEL>Low pressure gravel min/max:</LABEL><INPUT id="gravelMinLp" type="float" value="70" size="3" maxlength="3"onchange="metricsChanged()">/
+	<INPUT id="gravelMaxLp" type="float" value="120" size="3" maxlength="3"onchange="metricsChanged()">
+	<LABEL>Porosity:</LABEL><INPUT id="gravelPorosityLp" onfocus="porositySet=true" type="float" size="4" maxlength="4" onchange="metricsChanged()">
+	<BUTTON onClick="metricsChanged(); calcPressureDropInGravel('Lp')">Pressure drop</BUTTON><LABEL id="expectedPDropLp"></LABEL>
 </DIV>
 <DIV>
-	<LABEL>High pressure gravel min/max:</LABEL><INPUT id="gravelMinHp" type="float" value="20" size="3" maxlength="3">/<INPUT id="gravelMaxHp" type="float" value="70" size="3" maxlength="3"><LABEL>Porosity:</LABEL><INPUT id="gravelPorosityHp" type="float" size="4" maxlength="4"><BUTTON onClick="calcPressureDropInGravel('Hp')">Pressure drop</BUTTON><LABEL id="expectedPDropHp"></LABEL>
+	<LABEL>High pressure gravel min/max:</LABEL><INPUT id="gravelMinHp" type="float" value="10" size="3" maxlength="3"onchange="metricsChanged()">/
+	<INPUT id="gravelMaxHp" type="float" value="70" size="3" maxlength="3" onchange="metricsChanged()">
+	<LABEL>Porosity:</LABEL><INPUT id="gravelPorosityHp" type="float" onfocus="porositySet=true" size="4" maxlength="4" onchange="metricsChanged()">
+	<BUTTON onClick="metricsChanged(); calcPressureDropInGravel('Hp')">Pressure drop</BUTTON><LABEL id="expectedPDropHp"></LABEL>
 </DIV>
 
 <!-- these hidden old values are set based on the values of hpStorageSizeRockM3, highToLowPressureRatio, rockDensity, gravelDensity, insGravelDensity -->
@@ -129,7 +141,7 @@ td {
 	var impulseTurbineEffciency = 0.90;
 	var pTransformer = {};
 
-	drawJustStorage();
+	drawOnlyStorage();
 
 	var porositySet = false;
 	function calcPressureDropInGravel(type, speed, visc, density, length ) {
@@ -141,19 +153,17 @@ td {
 		if (metrics) metrics["gravelMax"+type] = max;
 		const minPorosity = (2.65-2.2)/2.65;
 		const maxPorosity = 0.55;
-		porosity = porositySet ? 0 : getFloatParam( "gravelPorosity"+type, 0 );
+		porosity = getFloatParam( "gravelPorosity"+type, 0 );
 		if (porosity>0) {
 			if (porosity>maxPorosity || porosity < minPorosity) {
 				alert("Porosity must be in typical range for compacted gravel:"+minPorosity+"-"+maxPorosity);
 				porosity = 0;
 			}
+			porositySet = false;
 		}
 		if (porosity == 0) {
-			
 			gravelDensity = 1.5 + (2.1-1.5)*(1-min/max);
 			porosity = (2.65-gravelDensity)/2.65;
-			$("#gravelPorosity"+type).val(myRound(porosity,2));
-			porositySet = true;
 		}
 		else {
 			gravelDensity = 2.65*(1 - porosity);
@@ -172,7 +182,7 @@ td {
 		var a = 200;	// laminar flow part
 		var b = 1630;	// turbulent flow part
 if (min==0) min=0.0001; // 0.1mm
-console.log("min="+min+", max="+max+", porosity="+porosity+", gravelDensity="+gravelDensity);
+//console.log("min="+min+", max="+max+", porosity="+porosity+", gravelDensity="+gravelDensity);
 		// When v=inlet speed in free space (m/2), L=distance (m), Dp=smallest particle diameter (m), n=porosity, density=fluid density kg/m3
 		// wiki Ergun_equation:  deltaP=v*(150*visc*L/Dp^2)*(1-n)^2/n^3+v^2*(1.75*L*density/Dp)*(1-n)/n^3
 		// Darcy–Forchheimer equation is best for gravels, but its values k and c must be measured for each case.
@@ -180,8 +190,10 @@ console.log("min="+min+", max="+max+", porosity="+porosity+", gravelDensity="+gr
 		// https://www.researchgate.net/publication/322140487_Behaviour_study_of_airflow_through_gravels_based_on_laboratory_experimentation_and_contrast_with_FEM_models
 		// gravel sort: 20/40, n=0.40:  (1638±289)x²+(200±124)x
 		// Test: 
-		a = a *(Math.pow(0.02,2)/Math.pow(min/1000,2))*(Math.pow(0.4,3)/Math.pow(porosity,3))*(Math.pow(1-porosity,2)/Math.pow(1-0.4,2));
-		b = b *(0.02/(min/1000))*(Math.pow(0.4,3)/Math.pow(porosity,3))*((1-porosity)/(1-0.4));
+		const dE = 0.03; // (0.02+0.04) / 2
+		const dEfective = (min + max)/2000;	// https://publications.vtt.fi/julkaisut/muut/2013/VTT-R-00257-13.pdf: 0.25-10mm => efective particle size: 0.65mmm
+		a = a *(Math.pow(dE,2)/Math.pow(dEfective,2))*(Math.pow(0.4,3)/Math.pow(porosity,3))*(Math.pow(1-porosity,2)/Math.pow(1-0.4,2));
+		b = b *(dE/dEfective)*(Math.pow(0.4,3)/Math.pow(porosity,3))*((1-porosity)/(1-0.4));
 		if (visc) {
 			a = a*visc/0.000018;
 			b = b*visc/0.000018;
@@ -189,11 +201,13 @@ console.log("min="+min+", max="+max+", porosity="+porosity+", gravelDensity="+gr
 		if (density) {
 			b = b*density/1.8;// air density 1.8 kg/m3
 		}
-		$("#expectedPDrop"+type).text("y="+Math.round(b)+"*x²+"+Math.round(a)+"*x");
-		if (speed) {
+		if (typeof speed === 'undefined') {
+			$("#expectedPDrop"+type).text("y="+Math.round(b)+"*x²+"+Math.round(a)+"*x, (porosity: "+myRound(porosity,2)+")");
+		}
+		else if (speed) {
 			var ret = speed*a + speed*speed*b;	// pressure drop/L: Pa/m
 			if (length) ret = ret * length;
-console.log(type+" pressure drop="+ret+", (v:"+speed+",visc:"+visc+",d:"+density+",L:"+length+")=>a:"+a+", b:"+b);
+//console.log(type+" pressure drop="+ret+", (v:"+speed+",visc:"+visc+",d:"+density+",L:"+length+")=>a:"+a+", b:"+b+", effective diameter:"+dEfective);
 			return ret;
 		}
 	}
@@ -601,10 +615,10 @@ console.log(type+" pressure drop="+ret+", (v:"+speed+",visc:"+visc+",d:"+density
 	function drawTpDiagram() {
 		drawIt(true);
 	}
-	function drawJustStorage() {
+	function drawOnlyStorage() {
 		if (typeof Module.PropsSI === 'undefined') {
 console.log("Waiting coolprop to init ...");		
-			setTimeout( drawJustStorage, 300 );
+			setTimeout( drawOnlyStorage, 300 );
 		}
 		else {
 			drawIt(false);
@@ -626,8 +640,11 @@ console.log("Waiting coolprop to init ...");
 		var tLow = getFloatParam('tLow', 273);
 		var tEfficiency = getFloatParam('tEfficiency', 0.90);
 		var cEfficiency = getFloatParam('cEfficiency', tEfficiency);
+		var tLowEfficiency = getFloatParam('tLowEfficiency', tEfficiency);
+		var cLowEfficiency = getFloatParam('cLowEfficiency', cEfficiency);
 		var hotCycle = []
 		var coldCycle = []
+		metricsChanged();
 		if (getMetrics() == null) return;
 		var pHigh = metrics.pHigh; // getFloatParam('pHigh_kPa', 5000) *  1000;
 		var pLow = metrics.pLow; // getFloatParam('pLow_kPa', 25) * 1000;
@@ -741,7 +758,7 @@ console.log("metricsChanged()..");
 }
 
 // Metrics of cave of a dome on top and cone below it.  The diameter of cone bottom is half that of cone top (and diameter of dome segment) 
-function getMetricsOfCaveDome45( s, concreteMaxStrengthMPa, weightMPa )
+function getMetricsOfCaveDome45( s )//, concreteMaxStrengthMPa, weightMPa )
 {
 	// Pyörähdys-paraboloidin tilavuus:	V = (1 / 2) π (s/2)^2*h
 	// https://tigerprints.clemson.edu/cgi/viewcontent.cgi?article=2449&context=all_theses
@@ -778,7 +795,7 @@ function getMetricsOfCaveDome45( s, concreteMaxStrengthMPa, weightMPa )
 	if (isCone) {
 		ret.thickness = ret.thickness2 = 0;
 	}
-	else if (concreteMaxStrengthMPa) {
+	/*else if (concreteMaxStrengthMPa) {
 		// scale thickness from a known example:
 		// thickness=0.1m, r=6,51, total weight=5 kN => Max 0.16MPa
 		// Bebause Constant * pressure1 =  weight1*r1 / thickness1
@@ -792,7 +809,7 @@ function getMetricsOfCaveDome45( s, concreteMaxStrengthMPa, weightMPa )
 		// in crown:
 		ret.thickness2 = ret.r*weightMPa/concreteMaxStrengthMPa;
 		// actually ret.thickness2 = ret.r*weightMPa/concreteMaxStrengthMPa
-	}
+	}*/
 console.log("Cave dome45("+s+")="+JSON.stringify(ret));
 	return ret;
 }
@@ -837,6 +854,26 @@ console.log("dome45("+volume+")="+JSON.stringify(ret));
 var scaleToActualVolume = null;
 var dome300 = null;
 
+function getAverageRockHeatCapasity(tLow, tHigh )
+{
+	// Measured specific heat capacities for nonporous rock samples seems to decrease linearily between 293-773 K and to be constant above it
+	// we assume the the decrease continue in same rate below 293 K
+	// rockHeatCapasityAt293K : getFloatParam('rockHeatCapasityAt293K', 0.8)*1000, // kJ/kg/K  at 293K !!!
+	// rockHeatCapasityAbove773K : getFloatParam('rockHeatCapasityAbove773K', 1.3 )*1000, // kJ/kg/K  (Cp increases from 20C to 500C and then stabilize 
+	const rockHeatCapasityDecreaseBy1K = (metrics.rockHeatCapasityAbove773K - metrics.rockHeatCapasityAt293K) / (773-293);
+	const tLowRockHeatCapasity = metrics.rockHeatCapasityAt293K + (tLow-293)*rockHeatCapasityDecreaseBy1K;
+	
+	if (tHigh > 773) {
+		ret = (((tLowRockHeatCapasity+metrics.rockHeatCapasityAbove773K)/2)*(773-tLow) + (tHigh - 773)*metrics.rockHeatCapasityAbove773K) / (tHigh - tLow);
+	}
+	else {
+		const tHighRockHeatCapasity = metrics.rockHeatCapasityAt293K + (tHigh-293)*rockHeatCapasityDecreaseBy1K;
+		ret = (tLowRockHeatCapasity+tHighRockHeatCapasity)/2;
+	}
+console.log("getAverageRockHeatCapasity("+tLow+","+tHigh+")="+ret);
+	return ret;
+}
+
 function getMetrics(pRatio, hpStorageSizeRockMm3) {
 	if (metrics && metrics.rGround && typeof pRatio === 'undefined' && typeof hpStorageSizeRockMm3 === 'undefined') return metrics;
 	const tHigh = getFloatParam('tHigh', 1033);
@@ -861,9 +898,10 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 		//gravelDensity : getFloatParam('gravelDensity', 2.1 ),	// high density because it makes storage more compact and aboslute pressure drop does not matter in a high pressure
 		//lpGravelDensity : getFloatParam('lpGravelDensity', 2.1 ),	// high density because it makes storage more compact and aboslute pressure drop does not matter in a high pressure
 		insGravelDensity : getFloatParam('insGravelDensity', 1.6 ),	// low density to minimize the pressure drop in low pressure
-		rockHeatCapasity : getFloatParam('rockHeatCapasity', 0.80 )*1000, // kJ/kg/K
+		rockHeatCapasityAt293K : getFloatParam('rockHeatCapasityAt293K', 0.8)*1000, // kJ/kg/K  at 293K !!!
+		rockHeatCapasityAbove773K : getFloatParam('rockHeatCapasityAbove773K', 1.3 )*1000, // kJ/kg/K  (Cp increases from 20C to 500C and then stabilize 
 		maxPartLiquid : 0.03,   // spefic value is calculated later
-		concreteMaxStrengthMPa : 80	// for a very high quality rock-filled concrete could have >90 MPa
+		//concreteMaxStrengthMPa : 80	// for a very high quality rock-filled concrete could have >90 MPa
 	};
 	metrics = storageMetrics;
 	calcPressureDropInGravel('Lp');
@@ -872,14 +910,15 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 	if (metrics.ins == 10) metrics.ins = metrics.ins*tHigh/1030; // scale the Insulation layer to the default!
 	
 	// Let's fix the dome rock temperature to approximately 300 or 750K, we assume insulation k value of cave top is 10 times of 10m gravel Insulation in the bottom lp storage
-	const	hpInsulationBoundaryTemp = isCone ? 750 : 300;
-	metrics.caveTopInsulation = (tHigh-hpInsulationBoundaryTemp)/(hpInsulationBoundaryTemp-70) * metrics.ins/(isCone ? 1 : 10);
+	const	hpInsulationBoundaryTemp = isCone ? tHigh : 300;
+	metrics.caveTopInsulation = (tHigh-hpInsulationBoundaryTemp)/(tHigh-70) * metrics.ins/(isCone ? 1 : 10);
 	metrics.insCaveBottom = metrics.ins * (300-208)/(tHigh-300);
 	
 	// scale the low pressure insulation layer for its lower temps but check also the tLow temp diff between 70K and 300K
 	const lpInsForHighT = metrics.ins * (tHigh*400/1030-300)/(tHigh-300);
 	const lpInsForLowT = metrics.ins * (300-70)/(tHigh-300);
-	const lpInsForLowTBottom = metrics.ins * (hpInsulationBoundaryTemp-70)/(tHigh-hpInsulationBoundaryTemp);
+	const lpInsForLowTBottom = metrics.ins * (hpInsulationBoundaryTemp-70)/(tHigh-70);
+	metrics.lpInsForLowTBottom = lpInsForLowTBottom;
 	metrics.insLpSides = lpInsForHighT > lpInsForLowT ? lpInsForHighT : lpInsForLowT;
 
 	var h, loop = 0;
@@ -893,6 +932,7 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 	//Loop again: expected density=2 <> calclulated density=1.8343575910031746 or 1.973478029020575<>2.0375
 	metrics.hpExpectedAverageDensity = (metrics.gravelDensity * 3 + metrics.insGravelDensity) / 4;	// very near to the actual value when high pressure insulation layer is 10 m
 	var lpExpectedV3AverageGravelDensity = (metrics.gravelDensity * 6 + metrics.insGravelDensity) / 7;	// This applies below ground!
+	
 	for (;;) {
 		metrics.V1 = metrics.hpStorageSizeRockM3;
 		// the mined volume in cylinder
@@ -912,12 +952,11 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 		
 		// volume above ground
 
-		const targetPLow = getFloatParam( 'targetPLow', 102 ) * 1000;
-		metrics.pLow = targetPLow; 
+		metrics.pLow = getFloatParam( 'targetPLow', 102 ) * 1000;
 		metrics.pHigh = metrics.pLow * metrics.highToLowPressureRatio;
 		metrics.isCylinder = isCylinder;
 		
-		if (isCylinder) {
+		/*if (isCylinder) {
 			// The shape is almost complete cylinder extended only by the 1:5 driving slopes 
 			// Let's keep this very simple: we want pLow to be just above air pressure, lets say 105 kPa =>
 			const dBars = (metrics.pHigh/1000) / 10;
@@ -961,7 +1000,8 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 				+ Math.PI * (metrics.rTop*metrics.rTop + metrics.rGround * Math.sqrt(metrics.rGround*metrics.rGround*2) 
 					  - metrics.rTop * Math.sqrt(metrics.rTop*metrics.rTop*2));
 		}
-		else {
+		else 
+		*/{
 			// Let's a model dimensions for high pressure dome and scale it to the 
 			// Scaled from the example https://www.scribd.com/document/123738870/RCC-Domes 
 			// Dome has max pressure 30 MPa with weight 2.5MN/m2, when its width s=300m, inner radius r=214m, dome thickess 12,5m and max angle of the inner circle 45 astetta. 
@@ -977,7 +1017,7 @@ function getMetrics(pRatio, hpStorageSizeRockMm3) {
 			var caveVolume = metrics.V1 * (metrics.rockDensity / metrics.hpExpectedAverageDensity);
 			scaleToActualVolume = caveVolume / dome300.vCave;
 			const caveS = Math.pow(Math.pow(300,3)*scaleToActualVolume, 1/3);
-			metrics.dome = getMetricsOfCaveDome45(caveS, metrics.concreteMaxStrengthMPa, metrics.pHigh/1000000 );
+			metrics.dome = getMetricsOfCaveDome45(caveS); //, metrics.concreteMaxStrengthMPa, metrics.pHigh/1000000 );
 			const dome = metrics.dome;
 
 			dome.scaleLength = dome.s/300;
@@ -1009,7 +1049,6 @@ console.log("Actual dome width="+caveS+": "+caveVolume+"=> scaleLength="+dome.sc
 			metrics.actualV1 = dome.vCave;
 			metrics.totalMiningVolume = metrics.actualV1 + metrics.V3;
 
-
 			// V2 = the rock volume to contain the expansion of gravel in the high pressure cylinder,
 			// 		== the volume exceeding the high pressure storage because of gravel fill
 			metrics.V2 = metrics.actualV1 - metrics.V1;
@@ -1027,12 +1066,12 @@ console.log("Actual dome width="+caveS+": "+caveVolume+"=> scaleLength="+dome.sc
 /*console.log(metrics.V4+" = ("+metrics.V1+" * "+(1 - metrics.hpAverageGravelDensity/metrics.rockDensity)+" + "+metrics.V3+" * "+(1 - lpExpectedV3AverageGravelDensity/metrics.rockDensity)+")"+
 						"* "+(metrics.rockDensity / metrics.lpGravelDensity));*/
 
-			metrics.hMin = (metrics.pHigh - dome.thickness*metrics.rockDensity*10000)/(metrics.lpGravelDensity*10000);
 			// hMin = hBelow + hAbove;
 			// V3 = PI*rGround*rGround*hBelow/3 - ;
 			metrics.extDome = getExternalDome45( dome, metrics.dome.thickness2 );
 			metrics.extDomeIns = getExternalDome45( dome, metrics.dome.thickness2+metrics.ins );
-			metrics.rTop = metrics.rOpenBottom = metrics.extDome.s / 2; 
+			metrics.rOpenBottom = metrics.extDome.s / 2; 
+			metrics.rTop = metrics.dome.rTopI;
 			
 			// 1. Calc first rGround and hTop from the size V2 
 			// because of 45 angle:  rGround = ;
@@ -1047,23 +1086,16 @@ console.log("Actual dome width="+caveS+": "+caveVolume+"=> scaleLength="+dome.sc
 			// V3 + extDome.volume = (PI/3*rGround*rGround*rGround/(rGround-rTop) - PI/3*rTop*rTop*rGround/rTop)*hBelow;
 			// hBelow = (V3 + extDome.volume) / (PI/3*(rGround*rGround*rGround/(rGround-rTop) - rTop*rTop*rGround/rTop));
 			const V3 = metrics.V3 + metrics.extDome.volume;
-			metrics.rTop = dome.rTop;
-			testResult( V3, metrics.rTop, metrics.rTop*2, 0.005*V3,
+			testResult( V3, metrics.rTop, dome.rTop*2, 0.005*V3,
 					function (h) { 
 						metrics.rGroundBelow = h;
-						metrics.hBelow = Math.tan(Math.PI*dome.maxAngle/180)*(metrics.rGroundBelow-metrics.rTop);
+						metrics.hBelow = Math.tan(Math.PI*dome.maxAngle/180)*(metrics.rGroundBelow-dome.rTop);
 //console.log("metrics.rGroundBelow="+metrics.rGroundBelow+", metrics.hBelow="+metrics.hBelow);
-						return Math.PI/3*metrics.hBelow*(Math.pow(metrics.rGroundBelow,2)+metrics.rGroundBelow*metrics.rTop+Math.pow(metrics.rTop,2));
+						return Math.PI/3*metrics.hBelow*(Math.pow(metrics.rGroundBelow,2)+metrics.rGroundBelow*dome.rTop+Math.pow(dome.rTop,2));
 					});
-
-			if (metrics.hBelow < (metrics.hMin - metrics.hAbove)) {
-				if (!scaledToVolume) {
-					metrics.hpStorageSizeRockM3 = metrics.V1 * Math.pow(metrics.hMin/(metrics.hBelow+metrics.hAbove), 3);
-console.log("Scaled size from "+metrics.V1+" to "+metrics.hpStorageSizeRockM3);
-					scaledToVolume = true;
-					continue;	// retry the loop
-				}
-				const hBelow  = (metrics.hMin - metrics.hAbove);
+			metrics.pHighMax = (metrics.lpGravelDensity*10000)*(metrics.hAbove+metrics.hBelow - lpInsForLowTBottom)+(metrics.insGravelDensity*10000)*(metrics.caveTopInsulation+lpInsForLowTBottom);
+			if (metrics.pHighMax < metrics.pHigh && scaledToVolume) {
+				const hBelow  = (metrics.pHigh-(metrics.insGravelDensity*10000)*(metrics.caveTopInsulation+lpInsForLowTBottom))/(metrics.lpGravelDensity*10000)+lpInsForLowTBottom-metrics.hAbove;
 				const rGroundBelow = metrics.rTop + (hBelow/Math.tan(Math.PI*dome.maxAngle/180));
 				// V3 + extDome.volume = PI/3*rGround*rGround*hBelow*rGround/(rGround-rTop) - PI/3*rTop*rTop*hBelow*rGround/rTop
 				const V3 = hBelow * Math.PI/3*(rGroundBelow*rGroundBelow + rGroundBelow*metrics.rTop + metrics.rTop*metrics.rTop) - metrics.extDome.volume;
@@ -1072,6 +1104,7 @@ console.log("Adjusted V3:"+metrics.V3+"=>"+V3+", hBelow:"+metrics.hBelow+"=>"+hB
 				metrics.hBelow = hBelow;
 				metrics.rGroundBelow = rGroundBelow;
 			}
+
 /*
 			metrics.topDome = getMetricsOfDome45(metrics.V4);
 			metrics.sideAbove = metrics.topDome.r*Math.PI / 4;	// path from 45 to 90
@@ -1166,6 +1199,17 @@ alert("Internal error");
 return null;
 		}
 		else if (Math.abs(metrics.hpAverageGravelDensity-metrics.hpExpectedAverageDensity)<0.01 && Math.abs(metrics.lpV3AverageGravelDensity-lpExpectedV3AverageGravelDensity)) {
+//console.log("metrics.pHighMax="+metrics.pHighMax+"="+(metrics.lpGravelDensity*10000)+"*("+metrics.hAbove+"+"+metrics.hBelow+"-"+lpInsForLowTBottom+")+"+(metrics.insGravelDensity*10000)+"*("+metrics.caveTopInsulation+"+"+lpInsForLowTBottom);
+		
+			if (metrics.pHighMax < metrics.pHigh) {
+console.log(metrics.pHighMax+" < "+metrics.pHigh);
+				if (!scaledToVolume) {
+					metrics.hpStorageSizeRockM3 = metrics.V1 * Math.pow(metrics.pHigh/metrics.pHighMax, 3);
+console.log("Scaled size from "+metrics.V1+" to "+metrics.hpStorageSizeRockM3);
+					scaledToVolume = true;
+					continue;	// retry the loop
+				}
+			}
 			metrics.lowPressureStorageVolume = metrics.V4 + metrics.V3 - metrics.vLpInsulation;
 			metrics.lpAverageGravelDensity = 
 				(metrics.V4 * metrics.lpGravelDensity + metrics.lpGravelDensity *(metrics.V3-metrics.vLpInsulation) + metrics.vLpInsulation*metrics.insGravelDensity) / (metrics.V4 + metrics.V3);
@@ -1576,7 +1620,8 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 	{
 		const metrics = getMetrics();
 		if (!metrics) return;
-		const ccEfficiency = cEfficiency;  
+		const ctEfficiency= getFloatParam('tLowEfficiency', tEfficiency);
+		const ccEfficiency= getFloatParam('cLowEfficiency', cEfficiency);
 		const grossWorkOut = getFloatParam('grossWorkOut', 2000);
 		const maxPressureDrop = getFloatParam('maxPressureDrop', 0.01);
 		const maxOutSpeed = getFloatParam('maxOutSpped', 25);
@@ -1618,13 +1663,13 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 
 			// First the rough approximations of cold expansion and compression 
 			const tSatInMinP = Module.PropsSI('T', 'P', pLow, 'Q', 0, name);
-			var coldExpander = doAdiabaticProcessWithS( name, pLow, pHigh, tSatInMinP+0.1, 1/tEfficiency, showLog ? "Cold turbin" : null);
+			var coldExpander = doAdiabaticProcessWithS( name, pLow, pHigh, tSatInMinP+0.1, 1/ctEfficiency, showLog ? "Cold turbin" : null);
 			coldExpander.massFlow = compressorMassFlow;
 			var coldCompressor = doAdiabaticProcessWithS( name, pLow, pHigh, tSatInMinP+0.1, ccEfficiency, showLog ? "Cold compressor" : null); //, null, null, coldExpander.tIn );
 			coldCompressor.massFlow = turbinMassFlow;
 
 			var unchargePDrops = {};
-/*
+/*  
 The first version produced bullshit:
   "diameterPipeToColdCompressor": 0.07152092219983532,
   "diameterPipeFromColdCompressor": 142.74082452368916,
@@ -1668,10 +1713,14 @@ The first version produced bullshit:
 			unchargePDrops.fromMainTurbin = ret.pressureDrop
 										  + getHeadLoss( mainTurbin.dOut, metrics.heightOfMainTurbinOut )
 
-			unchargePDrops.inColdStorage = getColdStoragePressureDrop(0.5, coldCompressor.viscIn, coldCompressor.dIn, coldCompressor.flowIn*coldCompressor.massFlow) +
-										   getColdStoragePressureDrop(0.5, mainTurbin.viscOut, mainTurbin.dOut, mainTurbin.flowOut*mainTurbin.massFlow);
-			unchargePDrops.inHotStorage = getHotStoragePressureDrop(0.7, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow) +
-										  getHotStoragePressureDrop(0.3, mainTurbin.viscIn, mainTurbin.dIn, mainTurbin.flowIn*mainTurbin.massFlow);
+			unchargePDrops.inColdStorage = getColdStoragePressureDrop(0.45, coldCompressor.viscIn, coldCompressor.dIn, coldCompressor.flowIn*coldCompressor.massFlow, metrics.rGroundBelowActual) +
+											// most of distance mainCompressor dIn and viscIn applies: 
+										   getColdStoragePressureDrop(0.55, mainCompressor.viscIn, mainCompressor.dIn, mainTurbin.flowOut*mainTurbin.massFlow, 
+												(metrics.rGround+3*metrics.rTop)/4);
+			unchargePDrops.inHotStorage = getHotStoragePressureDrop(0.7, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow, 
+												(metrics.dome.rTopI+2*metrics.dome.rBottomI)/3) +	// approximation
+										  getHotStoragePressureDrop(0.3, mainTurbin.viscIn, mainTurbin.dIn, mainTurbin.flowIn*mainTurbin.massFlow,
+												(9*metrics.dome.rTopI+3*metrics.dome.rBottomI)/12);	
 console.log("unchargePDrops:"+JSON.stringify(unchargePDrops, null, 2));
 			metrics.unchargePDrops = unchargePDrops;
 			var chargePDrops = {};
@@ -1680,11 +1729,13 @@ console.log("unchargePDrops:"+JSON.stringify(unchargePDrops, null, 2));
 			chargePDrops.diameterPipeFromToColdExpander = unchargePDrops.diameterPipeFromColdCompressor;
 			chargePDrops.diameterPipeFromHotCompressor = unchargePDrops.diameterPipeToHotTurbin;
 			chargePDrops.diameterPipeToHotCompressor = unchargePDrops.diameterPipeFromHotTurbin;
-			chargePDrops.inColdStorage = getColdStoragePressureDrop(0.5, mainCompressor.viscIn, mainCompressor.dIn, mainCompressor.flowIn*mainCompressor.massFlow) +
-										 getColdStoragePressureDrop(0.5, mainTurbin.viscOut, mainTurbin.dOut, mainTurbin.flowOut*mainTurbin.massFlow);
-			chargePDrops.inHotStorage = getHotStoragePressureDrop(0.7, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow) +
-										getHotStoragePressureDrop(0.3, mainTurbin.viscIn, mainTurbin.dIn, mainTurbin.flowIn*mainTurbin.massFlow);
-
+			chargePDrops.inColdStorage = getColdStoragePressureDrop(0.55, mainCompressor.viscIn, mainCompressor.dIn, mainCompressor.flowIn*mainCompressor.massFlow,
+												(metrics.rGround+3*metrics.rTop)/4)+
+										 getColdStoragePressureDrop(0.45, coldExpander.viscOut, coldExpander.dOut, coldExpander.flowOut*coldExpander.massFlow, metrics.rGroundBelowActual);
+			chargePDrops.inHotStorage = getHotStoragePressureDrop(0.7, coldCompressor.viscOut, coldCompressor.dOut, coldCompressor.flowOut*coldCompressor.massFlow,
+												(metrics.dome.rTopI+2*metrics.dome.rBottomI)/3) +	// approximation
+										getHotStoragePressureDrop(0.3, mainCompressor.viscIn, mainCompressor.dIn, mainCompressor.flowIn*mainCompressor.massFlow,
+												(9*metrics.dome.rTopI+3*metrics.dome.rBottomI)/12);	
 
 			ret = getPipeDiameterAndPressureDrop( coldExpander.viscIn, coldExpander.flowIn*coldExpander.massFlow, coldExpander.dIn,
      											  metrics.pipeToColdExpander, maxPressureDrop*pHigh, chargePDrops.diameterPipeFromToColdExpander);
@@ -1718,14 +1769,14 @@ console.log("chargePDrops:"+JSON.stringify(chargePDrops, null, 2));
 			// gas budjet in turbin case: 
 			var tc = {};
 			// The volume changing the temperature in second for 1000kg mass flow in high pressure storage
-			tc.hpGravelVolume = (hotCycle[0].hIn - coldCompressor.hOut) / (metrics.gravelDensity*metrics.rockHeatCapasity*(hotCycle[0].tIn-coldCompressor.tOut));
+			tc.hpGravelVolume = (hotCycle[0].hIn - coldCompressor.hOut) / (metrics.gravelDensity*getAverageRockHeatCapasity(coldCompressor.tOut,hotCycle[0].tIn)*(hotCycle[0].tIn-coldCompressor.tOut));
 			tc.hpGravelWeight = tc.hpGravelVolume * metrics.gravelDensity * metrics.rockDensity;
 			tc.hpGasVolume = tc.hpGravelVolume *(metrics.rockDensity-metrics.gravelDensity)/metrics.rockDensity;
 			tc.hpGasCharged = tc.hpGasVolume * hotCycle[0].dIn;
 			tc.hpGasUncharged = tc.hpGasVolume * coldCompressor.dOut;
 			tc.hpStorageChange = tc.hpGasVolume * (coldCompressor.dOut - hotCycle[0].dIn);
 			// We must assume, that extra heat of turbin out will sooner or later cooled to compressor in temperature, BUT low pressure may rise until then!!!
-			tc.lpGravelVolume = (hotCycle[1].hIn - coldCompressor.hIn) / (metrics.lpGravelDensity*metrics.rockHeatCapasity*(hotCycle[1].tIn-coldCompressor.tIn));
+			tc.lpGravelVolume = (hotCycle[1].hIn - coldCompressor.hIn) / (metrics.lpGravelDensity*getAverageRockHeatCapasity(coldCompressor.tIn,hotCycle[1].tIn)*(hotCycle[1].tIn-coldCompressor.tIn));
 			tc.lpGravelWeight = tc.lpGravelVolume * metrics.lpGravelDensity * metrics.rockDensity;
 			tc.lpGasVolume = tc.lpGravelVolume*(metrics.rockDensity-metrics.lpGravelDensity)/metrics.rockDensity;
 			tc.lpGasUncharged = tc.lpGasVolume * hotCycle[1].dIn;
@@ -1767,7 +1818,7 @@ console.log("cc="+JSON.stringify(cc));
 			const wetness = Math.abs(tc.changeKg/1000);		// wetness in uncharge!
 			const wetnessOfColdExpander = getWetnessOfExpanderOut( name, pLowColdCompressor, pLowColdExpander, wetness );
 
-			coldExpander = doWetAdiabaticProcessWithS( name, pLowColdExpander, pHighColdExpander, wetnessOfColdExpander, 1/tEfficiency, showLog ? "Cold turbin" : null);
+			coldExpander = doWetAdiabaticProcessWithS( name, pLowColdExpander, pHighColdExpander, wetnessOfColdExpander, 1/ctEfficiency, showLog ? "Cold turbin" : null);
 			coldExpander.items[0].wetness = wetnessOfColdExpander;	// 1st because in reversed order!
 			coldCompressor = doWetAdiabaticProcessWithS( name, pLowColdCompressor, pHighColdCompressor, wetness, ccEfficiency, showLog ? "Cold compressor" : null); //, null, null, coldExpander.tIn );
 			coldCompressor.items[0].wetness = wetness;
@@ -1781,20 +1832,20 @@ console.log("cc="+JSON.stringify(cc));
 //			testRun.massFlow = (hotCycle[0].hOut - hotCycle[1].hIn)/(testRun.hIn-testRun.hOut);
 //console.log("SecondTurbin: "+JSON.stringify(testRun));
 
-			coldCycle.push(doAdiabaticProcessWithS( name, metrics.heatPumpHighP, metrics.heatPumpHighP/10, coldCycle[0].tOut, tEfficiency, showLog ? "Heat pump turbin" : null, null, coldExpander.tIn-2 )) // -2 to heat exchanger smaller
+			coldCycle.push(doAdiabaticProcessWithS( name, metrics.heatPumpHighP, metrics.heatPumpHighP/10, coldCycle[0].tOut, ctEfficiency, showLog ? "Heat pump turbin" : null, null, coldExpander.tIn-2 )) // -2 to heat exchanger smaller
 			// Heat exchange coldExpander.tOut-2 <=> 
 			coldCycle.push(doAdiabaticProcessWithS( name, coldCycle[2].pOut, metrics.heatPumpHighP, metrics.heatPumpCompressorTin, ccEfficiency, showLog ? "Heat pump compressor" : null ))
 //X  TBD:  Laske lämpöpumpun massavirta ja sen h-kerroin x,  teho MW == h * x / 1000, 1 == 1000 kg> 
 		}
 		else if (adjustedCompressorPlow) {
 			hotCycle.push(doAdiabaticProcessWithS( name, pHigh, pLow, tHigh, 1/ccEfficiency, null, hotCycle[0].tOut, showLog ? "Hot compressor" : null))
-			const coldExpander = doAdiabaticProcessWithS( name, pHigh, hotCycle[1].pIn, tLow, tEfficiency, showLog ? "Cold turbin" : null )
+			const coldExpander = doAdiabaticProcessWithS( name, pHigh, hotCycle[1].pIn, tLow, ctEfficiency, showLog ? "Cold turbin" : null )
 			coldCycle.push(doAdiabaticProcessWithS( name, pLow, pHigh, coldExpander.tOut, ccEfficiency ))
 			coldCycle.push(coldExpander)
 		}
 		else {
 			hotCycle.push(doAdiabaticProcessWithS( name, pHigh, pLow, tHigh, 1/ccEfficiency,showLog ? "Hot compressor" : null))
-			const coldExpander = doAdiabaticProcessWithS( name, pHigh, pLow, tLow, tEfficiency, showLog ? "Cold turbin" : null )
+			const coldExpander = doAdiabaticProcessWithS( name, pHigh, pLow, tLow, ctEfficiency, showLog ? "Cold turbin" : null )
 			coldCycle.push(doAdiabaticProcessWithS( name, pLow, pHigh, coldExpander.tOut, ccEfficiency, showLog ? "Cold compressor" : null ))
 			coldCycle.push(coldExpander)
 		}
@@ -1893,7 +1944,7 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 		cycleData.costOfStorage = metrics.totalMiningVolume * metrics.costOfMiningM3 + (metrics.highPressureStorageSurfaceArea+metrics.lowPressureStorageSurfaceArea)*metrics.costOfSurfaceM2;
 		
 		// How long it takes to uncharge the high pressure storage with gas flow 1000kg* hotCycle[0].massFlow and deltaH = hotCycle[0].hIn - coldCycle[0].hOut;
-		cycleData.hpStorageHeatCapacity = metrics.rockHeatCapasity*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(hotCycle[0].tIn-coldCycle[0].tOut);
+		cycleData.hpStorageHeatCapacity = getAverageRockHeatCapasity(coldCycle[0].tOut,hotCycle[0].tIn)*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(hotCycle[0].tIn-coldCycle[0].tOut);
 //"unchargeTimeS": 3492.9504982300864, ??????
 		cycleData.unchargeTimeS = cycleData.hpStorageHeatCapacity / ((hotCycle[0].hIn - coldCycle[0].hOut) * 1000 * hotCycle[0].massFlow); // 
 		cycleData.storedElectricity_kWh = cycleData.netWorkOut * cycleData.unchargeTimeS / 3600;
@@ -2237,11 +2288,11 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 						function (h) { return Math.PI * h * h * (metrics.dome.r - h/3)});
 		}
 		region = new Path2D();
-		region.moveTo(toX(dg,metrics.dome.rTop), toY(dg, hGround+metrics.hAbove));
+		region.moveTo(toX(dg,metrics.rTop), toY(dg, hGround+metrics.hAbove));
 		region.lineTo(toX(dg,metrics.rGround), toY(dg,hGround));
 		region.lineTo(toX(dg,-metrics.rGround), toY(dg,hGround));
-		region.lineTo(toX(dg,-metrics.dome.rTop), toY(dg, hGround+metrics.hAbove));
-		region.lineTo(toX(dg,metrics.dome.rTop), toY(dg, hGround+metrics.hAbove));
+		region.lineTo(toX(dg,-metrics.rTop), toY(dg, hGround+metrics.hAbove));
+		region.lineTo(toX(dg,metrics.rTop), toY(dg, hGround+metrics.hAbove));
 		region.closePath();
 		ctx.fillStyle = colorWarmLpGravel;
 		ctx.fill(region);
@@ -2265,7 +2316,7 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		if (cycleData) {
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px serif";
-			centerText( ctx, toCelsius(cycleData.hotCycle[0].tOut)+', '+getGasFlow('Lp', cycleData.hotCycle[0],LAST_ITEM,rLpHot,metrics.dome.rTop), toX(dg,0), 
+			centerText( ctx, toCelsius(cycleData.hotCycle[0].tOut), toX(dg,0), 
 						toY(dg, isCone ? (hGround+hLpHot) : (metrics.hAbove+hGround+metrics.dome.hTop-hLpHot) ));
 		}
 //if (!confirm("B")) return; 
@@ -2305,8 +2356,11 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 				ctx.fillStyle = 'black'; 
 				ctx.font = "14px arial";
 				//centerText( ctx, ,toX(dg,0), toY(dg,hGround+hColdTop)-40);
-				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn) + " "+Math.round(metrics.pLow/1000)+" kPa "+gasName+" gas in "+metrics.gravelMinLp+"/"+metrics.gravelMaxLp+" gravel",toX(dg,0), toY(dg,hGround+hColdTop)-20);
-			}
+				centerText( ctx, toCelsius(cycleData.hotCycle[1].tIn)+', '+getGasFlow('Lp', cycleData.hotCycle[1],LAST_ITEM,rColdTop,metrics.rTop),
+					toX(dg,0), toY(dg,hGround+hColdTop)-30);
+				centerText( ctx, Math.round(metrics.pLow/1000)+" kPa "+gasName+" gas in "+myRound(metrics.lpGravelDensity*metrics.lowPressureStorageVolume/1000000,1)+" Mtn compacted "
+								+metrics.gravelMinLp+"/"+metrics.gravelMaxLp+" gravel",toX(dg,0), toY(dg,hGround+hColdTop)-13);
+			} 
 			ctx.fillStyle = 'black'; 
 			ctx.font = "14px arial";
 			centerText(ctx, "\u21D1 in charge", toX(dg,-40), toY(dg, hGround+hColdTop));
@@ -2358,7 +2412,7 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 			centerText(ctx, "\u21D1 in charge", toX(dg,-40), toY(dg, hGround-hLpWarmFromGround));
 		}
 		ctx.beginPath();
-		ctx.moveTo(toX(dg,metrics.dome.rTop-1), toY(dg, hGround+metrics.hAbove));
+		ctx.moveTo(toX(dg,metrics.rTop-1), toY(dg, hGround+metrics.hAbove));
 		ctx.lineTo(toX(dg,metrics.rGround-1), toY(dg,hGround));
 		ctx.lineTo(toX(dg,metrics.rGround-1), toY(dg,hGround)+5);
 		ctx.strokeStyle = colorInsulation;
@@ -2366,13 +2420,13 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		ctx.stroke();
 
 		ctx.beginPath();
-		ctx.moveTo(toX(dg,-metrics.dome.rTop+1), toY(dg, hGround+metrics.hAbove));
+		ctx.moveTo(toX(dg,-metrics.rTop+1), toY(dg, hGround+metrics.hAbove));
 		ctx.lineTo(toX(dg,-metrics.rGround+1), toY(dg,hGround));
 		ctx.lineTo(toX(dg,-metrics.rGround+1), toY(dg,hGround)+5);
 		ctx.stroke();
 
 		ctx.beginPath();
-		ctx.moveTo(toX(dg,metrics.dome.rTop), toY(dg, hGround+metrics.hAbove));
+		ctx.moveTo(toX(dg,metrics.rTop), toY(dg, hGround+metrics.hAbove));
 		ctx.lineTo(toX(dg,metrics.rGround), toY(dg,hGround));
 		ctx.lineTo(toX(dg,metrics.rGround), toY(dg,hGround)+5);
 		ctx.strokeStyle = 'black';
@@ -2380,7 +2434,7 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		ctx.stroke();
 
 		ctx.beginPath();
-		ctx.moveTo(toX(dg,-metrics.dome.rTop), toY(dg, hGround+metrics.hAbove));
+		ctx.moveTo(toX(dg,-metrics.rTop), toY(dg, hGround+metrics.hAbove));
 		ctx.lineTo(toX(dg,-metrics.rGround), toY(dg,hGround));
 		ctx.lineTo(toX(dg,-metrics.rGround), toY(dg,hGround)+5);
 		ctx.strokeStyle = 'black';
@@ -2444,14 +2498,14 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 			region.closePath();
 			ctx.fillStyle = colorInsulation;
 			ctx.fill(region);
-
+/*
 			ctx.lineWidth = 2;
 			ctx.beginPath();
 			ctx.moveTo(toX(dg,-metrics.rOpenBottom), toY(dg,hGround-metrics.hBelow));
 			ctx.lineTo(toX(dg,metrics.rOpenBottom), toY(dg,hGround-metrics.hBelow));
 			ctx.strokeStyle = 'black'; 
 			ctx.stroke();
-
+*/
 			ctx.lineWidth = 1;
 			ctx.beginPath();
 			ctx.moveTo(toX(dg,-metrics.rGround), toY(dg,hGround));
@@ -2577,7 +2631,8 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 				}
 				centerText( ctx, toCelsius(cycleData.hotCycle[0].tIn)+', '+getGasFlow('Hp', cycleData.hotCycle[0],FIRST_ITEM,metrics.dome.rTopI,rColdHpGravel), toX(dg,0), toY(dg,metrics.dome.hBottomI-10));
 				centerText( ctx, text2, toX(dg,0), toY(dg,metrics.dome.hBottomI-20) );
-				centerText( ctx, Math.round(metrics.pHigh/1000)+" kPa "+gasName+" gas in compacted "+metrics.gravelMinHp+"/"+metrics.gravelMaxHp+" gravel",
+				centerText( ctx, Math.round(metrics.pHigh/1000)+" kPa "+gasName+" gas in "+myRound(metrics.gravelDensity*metrics.highPressureStorageVolume/1000000,1)+" Mtn compacted "
+								+metrics.gravelMinHp+"/"+metrics.gravelMaxHp+" gravel",
 							toX(dg,0), toY(dg,metrics.dome.hBottomI-30) );
 			}
 
@@ -2593,6 +2648,17 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		ctx.fillStyle = colorColdHpGravel;
 		ctx.fill(region);
 //if (!confirm("I")) return; 
+
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(toX(dg,-metrics.dome.rTopI), toY(dg,metrics.dome.hBottomI));
+		ctx.lineTo(toX(dg,-metrics.dome.rBottomI), toY(dg,metrics.insCaveBottom));
+		ctx.lineTo(toX(dg,metrics.dome.rBottomI), toY(dg,metrics.insCaveBottom));
+		ctx.lineTo(toX(dg,metrics.dome.rTopI), toY(dg,metrics.dome.hBottomI));
+		ctx.lineTo(toX(dg,-metrics.dome.rTopI), toY(dg,metrics.dome.hBottomI));
+		ctx.closePath();
+		ctx.strokeStyle = 'black'; 
+		ctx.stroke();
 
 		if (cycleData) {
 			ctx.fillStyle = 'black'; 
@@ -2631,11 +2697,21 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 
 		ctx.lineWidth = 15;
 		ctx.strokeStyle = colorWarmLpGravel;
+/*XXXXX
 		ctx.beginPath();
-		ctx.moveTo(towerRightX+5, y = toY(dg,(yHpBottom+yHpTop)/2)-4);
 		ctx.lineTo(towerRightX-ctWidth-8, y);
 		ctx.stroke();
-
+*/
+		{
+			ctx.beginPath();
+			var x2;
+			ctx.moveTo(towerRightX+5, y = toY(dg,(yHpBottom+yHpTop)/2)-4);
+			ctx.lineTo(x2 = towerRightX-10, y);
+			const pixelsUp = y - toY(dg,hGround+hLpHot-4);
+			ctx.lineTo(x2-pixelsUp, y-pixelsUp );
+			ctx.lineTo(toX(dg,metrics.rTop+10), y-pixelsUp);
+			ctx.stroke();
+		}
 		ctx.fillStyle = 'black'; 
 		ctx.font = "bold 18px serif";
 		ctx.fillText("\u2192", towerRightX-12, toY(dg, yLpBottom+6));
@@ -2795,8 +2871,8 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		ctx.strokeStyle = colorHotLpGravel;
 		ctx.beginPath();
 		ctx.moveTo(towerLeftX-5, toY(dg,(yHpBottom+yHpTop)/2));
-		ctx.lineTo(toX(dg,-metrics.dome.rTop-xyAddRoof-16), y = toY(dg,metrics.hAbove+hGround));
-		ctx.lineTo(toX(dg,-metrics.dome.rTop-4), y);
+		ctx.lineTo(toX(dg,-metrics.rTop-xyAddRoof-16), y = toY(dg,metrics.hAbove+hGround));
+		ctx.lineTo(toX(dg,-metrics.rTop-4), y);
 		ctx.stroke();
 
 		ctx.fillStyle = 'black'; 
@@ -2884,17 +2960,17 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		ctx.fillText("bedrock",x = toX(dg,metrics.rGround), y);
 		const depth = metrics.hBelow+metrics.hCylinder;
 //console.log( depthM+", yPx="+toY(dg,depth))
-		ctx.fillText( "-"+Math.round(metrics.hBelow)+" m", toX(dg,metrics.dome.rTop-22), toY(dg,metrics.hCylinder));
+		ctx.fillText( "-"+Math.round(hGround-metrics.dome.hBottomI)+" m", toX(dg,metrics.dome.rTopI-22), toY(dg,metrics.dome.hBottomI));
 		ctx.fillText( "-"+Math.round(depth)+" m", toX(dg,metrics.dome.rBottom+14), toY(dg,0));
 		ctx.fillStyle = 'black'; 
-		ctx.fillText( "+"+Math.round(metrics.hAbove)+" m", toX(dg,metrics.dome.rTop+11), toY(dg,hGround+metrics.hAbove));
+		ctx.fillText( "+"+Math.round(metrics.hAbove)+" m", toX(dg,metrics.rTop+11), toY(dg,hGround+metrics.hAbove));
 
 		ctx.font = "bold 12px arial";
 		ctx.fillStyle = 'black'; 
 		ctx.fillText("r="+Math.round(metrics.dome.rBottom)+" m \u21A6", toX(dg,0), toY(dg,0));
 
 		ctx.fillStyle = 'white'; 
-		ctx.fillText("r="+Math.round(metrics.dome.rTop)+" m \u21A6", toX(dg,0), toY(dg,metrics.dome.hBottom));
+		ctx.fillText("r="+Math.round(metrics.dome.rTopI)+" m \u21A6", toX(dg,0), toY(dg,metrics.dome.hBottomI));
 
 		ctx.fillStyle = 'white'; 
 		ctx.fillText("r="+Math.round(metrics.rGround)+" m \u21A6", toX(dg,0),toY(dg,hGround+4));
@@ -2903,16 +2979,16 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		ctx.fillText("r="+Math.round(metrics.rGroundBelow)+" m \u21A6", toX(dg,0), toY(dg,hGround-3));
 
 		ctx.fillStyle = 'black';
-		ctx.fillText("r="+Math.round(metrics.dome.rTop)+" m \u21A6", toX(dg,0), toY(dg,hGround+metrics.hAbove+5));
+		ctx.fillText("r="+Math.round(metrics.rTop)+" m \u21A6", toX(dg,0), toY(dg,hGround+metrics.hAbove+5));
 
 		ctx.font = "14px arial";
 		ctx.fillStyle = 'white'; 
-		centerText(ctx,"Insulated with sorted gravel + biochar, ~0 kPa", toX(dg,0), toY(dg,hGround-metrics.hBelow+6));
+		centerText(ctx,"Insulated with sorted gravel + biochar, ~0 kPa", toX(dg,0), toY(dg,metrics.dome.hBottomI+5));// hGround-metrics.hBelow+6));
 
 		ctx.beginPath();
 		ctx.moveTo(toX(dg,metrics.rTop), y = toY(dg,hGround+metrics.hAbove));
 		ctx.lineTo(toX(dg,metrics.rTop+xyAddRoof+3),y);
-		ctx.lineTo(toX(dg,metrics.rTop+xyAddRoof+13),y = toY(dg,hGround+metrics.hAbove-10));
+		ctx.lineTo(toX(dg,metrics.rTop+xyAddRoof+13),y = toY(dg,hGround+metrics.hAbove-8));
 		ctx.lineTo( x=toX(dg,metrics.rTop+10),y );
 		ctx.closePath();
 		ctx.stroke();
@@ -2921,7 +2997,7 @@ console.log("roofInsulation="+roofInsulation+", xyAddRoof="+xyAddRoof+", xyAddRo
 		ctx.fillStyle = colorHotLpGravel; 
 		ctx.fillText("\u21D8", toX(dg,metrics.rTop), toY(dg,hGround+metrics.hAbove-5));
 		ctx.fillStyle = colorWarmLpGravel; 
-		ctx.fillText("\u21D8", x-1, y+10);
+		ctx.fillText("\u21D8", x-5, y+6);
 		ctx.font = "14px arial";
 		ctx.fillStyle = 'black'; 
 		ctx.fillText("\u2192 Heat exchange: district heat"+(cycleData ? workToMW(cycleData.heatOutInDischarge) : ''), toX(dg,metrics.rTop+xyAddRoof+10), toY(dg,hGround+metrics.hAbove-10));

@@ -47,7 +47,7 @@ td {
 <DIV>
 	<DIV>
 		<LABEL>Main turbin mass flow (kg): </LABEL><INPUT size="4" id="unchargeMassFlow" type="float" value="1645" onchange="metricsChanged()">
-		<LABEL>Number of power units: </LABEL><INPUT id="numberOfUnits" type="text" value="16" size="2" maxlength="2" onchange="metricsChanged()">
+		<LABEL>Number of power units: </LABEL><INPUT id="numberOfUnits" type="text" value="4" size="2" maxlength="2" onchange="metricsChanged()">
 		<INPUT id="unchargeMassFlowRange" type="checkbox"><LABEL>Draw diagram for Gross turbin work MW: </LABEL><INPUT size="4" id="unchargeMassFlowFrom" type="float" value="400"> - <INPUT size="4" id="unchargeMassFlowTo" type="float" value="4000">
 	</DIV>
 
@@ -63,11 +63,11 @@ td {
 	<LABEL>Turbin stage efficiency: </LABEL>
 	<INPUT size="6" title="95-97% is the upper efficiency for a modern industrial size turbin" id="tEfficiency" type="float" value="0.97"> 
 	<LABEL>Stage efficiency of cyrogenic compressor: </LABEL>
-	<INPUT size="6" title="Industrial size cyrogenic turbins do not yet exist, but hot turbins can be scaled down to cyrogenic temperatures" id="cLowEfficiency" type="float" value="0.95"> 
+	<INPUT size="6" title="Industrial size cyrogenic turbins do not yet exist, but hot turbins can be scaled down to cyrogenic temperatures" id="cLowEfficiency" type="float" value="0.955"> 
 	<INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for turbin and compressor stage efficiencies </LABEL><INPUT size="6" id="tEfficiencyFrom" type="float" value="0.90"> - <INPUT size="6" id="tEfficiencyTo" type="float" value="0.97"></Div>
 <DIV>
 	<LABEL>Compressor efficiency: </LABEL>
-	<INPUT size="6" title="94-95% is a typical efficiency range for a a modern industrial size compressor stage" id="cEfficiency" type="float" value="0.95"> 
+	<INPUT size="6" title="94-95% is a typical efficiency range for a a modern industrial size compressor stage" id="cEfficiency" type="float" value="0.955"> 
 	<LABEL>Stage efficiency of cyrogenic turbine: </LABEL>
 	<INPUT size="6" title="Industrial size cyrogenic turbins do not yet exist, but hot turbins can be scaled down to cyrogenic temperatures" id="tLowEfficiency" type="float" value="0.97"> 
 	<!-- powerOnly option produces worse power back % than the combined power
@@ -93,24 +93,24 @@ td {
 	<LABEL>Insulation gravel porosity: </LABEL><INPUT size="4" id="insGravelPorosity" type="float" value="0.5" onchange="metricsChanged()">
 	<LABEL>Open pit angle: </LABEL><INPUT size="2" id="maxOpenPitAngle" type="float" value="73" onchange="metricsChanged()">
 	<LABEL>Max top fill angle: </LABEL><INPUT size="2" id="maxTopFillAngle" type="float" value="70" onchange="metricsChanged()">
-	<LABEL>Max hot rock compression (MPa): </LABEL><INPUT size="2" id="maxHotRockPressureMPa" type="float" value="100" onchange="metricsChanged()">
 </DIV>
 <DIV>
 	<LABEL id="storageDimensions"></LABEL>
 </DIV>
 <DIV>
 	<LABEL>Max relative pressure drop in pipes: </LABEL><INPUT size="4" id="maxPressureDrop" type="float" value="0.01" onchange="metricsChanged()">
-	<LABEL>Average cost of insulation, gas isolation and borders €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1200" onchange="metricsChanged()">
+	<!--LABEL>Average cost of insulation, gas isolation and borders €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1200" onchange="metricsChanged()"-->
 	<LABEL>Max heat leak out W/m^2: </LABEL><INPUT size="3" style="width:3em" id="maxHeatFlowOut" type="float" value="20" onchange="metricsChanged()">
 	<LABEL>U value of biochar+gravel mix W/mK: </LABEL><INPUT size="4" style="width:4em" id="uOfGravelBioCharMix" type="float" value="0.1" onchange="metricsChanged()">
 </DIV>
 <DIV>
-	<LABEL>Average cost of insulation, gas isolation and cover €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1500" onchange="metricsChanged()">
+	<LABEL>Average cost of insulation, gas isolation and cover €/m2: </LABEL><INPUT size="4" id="costOfSurfaceM2" type="float" value="1200" onchange="metricsChanged()">
 	<LABEL>Cost of open pit mining €/m3: </LABEL><INPUT size="4" id="costOfMiningM3" type="float" value="12" onchange="metricsChanged()">
+	<LABEL>Max hot rock compression (MPa): </LABEL><INPUT size="2" id="maxHotRockPressureMPa" type="float" value="100" onchange="metricsChanged()">
 </DIV>
 <DIV>
-	<LABEL>Cost of gross turbomachinery power €/kW (0.95 bar,P1/P2=25): </LABEL><INPUT size="6" id="tcCostOfKW" type="float" value="35" onchange="metricsChanged()">
-	<LABEL>Costs other power plant costs and generator €/kW: </LABEL><INPUT size="6" id="otherCostOfKW" type="float" value="250" onchange="metricsChanged()">
+	<LABEL>Cost of gross turbomachinery power €/kW (0.95 bar,P1/P2=25): </LABEL><INPUT size="6" id="tcCostOfKW" type="float" value="20" onchange="metricsChanged()">
+	<LABEL>Costs other power plant costs and generator €/kW: </LABEL><INPUT size="6" id="otherCostOfKW" type="float" value="200" onchange="metricsChanged()">
 	<!--LABEL>Cost of generator €/kW: </LABEL><INPUT size="6" id="generatorCostOfKW" type="float" value="50" onchange="metricsChanged()"-->
 	<LABEL>Cost of heat exchage €/kW: </LABEL><INPUT size="6" id="heCostOfKW" type="float" value="30" onchange="metricsChanged()">
 </DIV>
@@ -159,6 +159,8 @@ td {
 		<canvas id="diagram2" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagram3" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagram4" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
+		<canvas id="hotCompressorImage" style="border:1px solid #000000;display:none"></canvas>
+		<canvas id="coldCompressorImage" style="border:1px solid #000000;display:none"></canvas>
 	</div>
 </div>
 
@@ -516,7 +518,7 @@ else {
 	//var zoomedTurbinStages;
 	//var cZoomedTurbinStages = 2;
 	//var maxSteamWetness = 0;
-	//var impulseTurbineEffciency = 0.90;
+	//var impulseTurbineefficiency = 0.90;
 	var pTransformer = {};
 
 	//drawOnlyStorage();
@@ -1237,7 +1239,7 @@ function getCone( V )//, concreteMaxStrengthMPa, weightMPa )
 			V = pHigh/pHighActual * maxAngleTan*(1/2) * PI / 3 * (1 + (1/(1 + pHigh/pHighActual))  + (1/(1 + pHigh/pHighActual))*(1/(1 + pHigh/pHighActual))) * rTop^3
 			rTop = pow( V / (pHigh/pHighActual * maxAngleTan*(1/2) * PI / 3 * (1 + (1/(1 + pHigh/pHighActual))  + (1/(1 + pHigh/pHighActual))*(1/(1 + pHigh/pHighActual))), 1/3)
 		*/
-// XXXXX metrics.maxHotRockPressureMPa
+//  metrics.maxHotRockPressureMPa
 		ret.vCave = V;
 		ret.rTop = Math.pow(V/(pHigh/pHighActual * maxAngleTan*(1/2) * Math.PI / 3 * (1 + (1/(1 + pHigh/pHighActual))  + (1/(1 + pHigh/pHighActual))*(1/(1 + pHigh/pHighActual)))), 1/3);
 		ret.rTopTEST = Math.pow(V/((Math.tan(Math.PI*ret.maxAngle/180)/2)*Math.PI/3*(1 + 1/2 + 1/4)), 1/3);
@@ -4669,7 +4671,6 @@ console.log("Saturation curve ...");
 			drawDirectionArrow( ctx, hotCycle[1], hotCycle[1].pOut*0.45, 15, true, "Gas flow in charge "+Math.round(hotCycle[1].massFlow*1000)+" kg/s" );
 			showPointData(ctx, hotCycle[1], LAST_ITEM, 16, -16, hotCycle[1].massFlow );
 
-getCompressorStages(hotCycle[1], LAST_ITEM, hotCycle[1].massFlow/metrics.cUnits, "Hot compressor", metrics.chargePDrops.diameterPipeToHotCompressor, metrics.chargePDrops.diameterPipeFromHotCompressor, metrics.cEfficiency);
 		}
 		if (coldCycle) {
 			ctx.beginPath();
@@ -4702,7 +4703,6 @@ getCompressorStages(hotCycle[1], LAST_ITEM, hotCycle[1].massFlow/metrics.cUnits,
 			ctx.stroke();
 			showPointData(ctx, coldCycle[1], FIRST_ITEM, -15, -15, coldCycle[1].massFlow  );
 			showPointData(ctx, coldCycle[1], LAST_ITEM, 40, -40, coldCycle[1].massFlow, coldCycle[0].massFlow, coldCycle[0].items[0].p );
-//getCompressorStages(coldCycle[0], FIRST_ITEM, coldCycle[0].massFlow/metrics.cUnits, "Cold compressor", metrics.unchargePDrops.diameterPipeToColdCompressor, metrics.unchargePDrops.diameterPipeFromColdCompressor, metrics.cLowEfficiency);
 
 			drawDirectionArrow( ctx, coldCycle[1], maxPressure*0.30, 15, coldCycle[1].isForward );
 			
@@ -4867,6 +4867,14 @@ getCompressorStages(hotCycle[1], LAST_ITEM, hotCycle[1].massFlow/metrics.cUnits,
 		//$("#drawTurbin").css('display','block');
 		$("#output").html("");
 		ctx.setLineDash([]);
+
+		const hotCompressor = getCompressorStages(hotCycle[1], LAST_ITEM, hotCycle[1].massFlow/metrics.cUnits, "Hot compressor", metrics.chargePDrops.diameterPipeToHotCompressor, metrics.chargePDrops.diameterPipeFromHotCompressor, metrics.cEfficiency);
+		drawCompressor( "hotCompressorImage", hotCompressor );
+
+		const coldCompressor = getCompressorStages(coldCycle[0], FIRST_ITEM, coldCycle[0].massFlow/metrics.cUnits, "Cold compressor", metrics.unchargePDrops.diameterPipeToColdCompressor, metrics.unchargePDrops.diameterPipeFromColdCompressor, metrics.cLowEfficiency, true);
+		drawCompressor( "coldCompressorImage", coldCompressor );
+
+
 //console.log(JSON.stringify(compressorStages[0].items));
 console.log("drawBraytonCycle done");
 	}
@@ -5176,13 +5184,15 @@ console.log("exit: "+JSON.stringify(exit));
 			stage.d = item.d;
 			return stage;
 	}
-	function nextCompressorStage(stageData, prev, rpm, effciency ) {
+	function nextCompressorStage(stageData, prev, rpm, efficiency ) {
 		stage = getCompressorStage(stageData, prev, rpm );
 		
-		if (stage == null) return null;
+		if (stage == null) {
+			console.log("stage == null");
+			return null;
+		}
 		stageData.stages.push(stage);
 		stageData.items.push(prev);
-		if (stage.wasLast) return null;
 		stageData.cStagesRemaining = (stageData.hEnd - prev.h - 0.5*stage.v*stage.v)/stage.deltaH;
 
 		var next = {};
@@ -5190,8 +5200,8 @@ if (typeof stage.deltaH === 'undefined'  || !prev.v || !prev.p) {
 	console.log("Bad stage:"+JSON.stringify(stage));
 	return null;
 }
-		const hActualWork = stage.deltaH * effciency;
-		const hHeating = stage.deltaH * (1-effciency);
+		const hActualWork = stage.deltaH * efficiency;
+		const hHeating = stage.deltaH * (1-efficiency);
 		const s = Module.PropsSI('S','P', prev.p, 'H', prev.h, name);
 		const pMax = Module.PropsSI('P','S', s, 'H', hActualWork+prev.h, name);
 //console.log("hActualWork="+hActualWork+", pMax="+pMax+", "+JSON.stringify(stage));
@@ -5213,7 +5223,7 @@ if (typeof stage.deltaH === 'undefined'  || !prev.v || !prev.p) {
 //console.log("p="+p+"=>"+JSON.stringify(next)+", hRet="+(next.h + 0.5*(next.v*next.v - stage.v*stage.v)));
 			return next.h + 0.5*(next.v*next.v - stage.v*stage.v);
 		})) {
-
+console.log("testResult == false: "+JSON.stringify(next));
 			testResult( prev.h+hActualWork, prev.p+(pMax-prev.p)/2, pMax, hActualWork*0.01, function(p) {
 				next.p = p;
 				next.h = Module.PropsSI('H','P', p, 'S', s, name)+ hHeating;
@@ -5245,19 +5255,30 @@ console.log("p="+p+"=>"+JSON.stringify(next)+", hRet="+(next.h + 0.5*(next.v*nex
 			next.d = Module.PropsSI('D','P', next.p, 'T', next.t+0.1, name);
 		}
 		next.hRemaining = stageData.hEnd - (prev.h + stage.v*stage.v*0.5);
+//console.log("stage.wasLast="+stage.wasLast);
+		if (stage.isLast) {
+			const v = stageData.vMach*next.speedOfSound;
+			const flowM3 = stageData.massFlowInKg /next.d;
+			const area =  flowM3 / (v*stageData.horizontalVector);
+			next.rTip = Math.sqrt(area/(Math.PI*(1-stageData.tipToHubConst*stageData.tipToHubConst)));
+			next.rHub = stage.rTip * stageData.tipToHubConst;
+			stageData.hpExit = next;
+console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
+			return null;
+		}
 		return next;
 	}
 
 	// LP: hub/tip = starts from v=0.25Mach, v/w=0.3, hub/tip=0.5, keep: 
 	// Calculated h defines new p, t and speed of sound 
 	// If (h/w^2)/(v/w)=2/3 == (h/w^2)*(w/v)=2/3 == h = w*v*2/3
-	function getCompressorStages( data, isFirst, massFlow, title, inletPipeDiameter, exitPipeDiameter, stageEfficiency )
+	function getCompressorStages( data, isFirst, massFlow, title, inletPipeDiameter, exitPipeDiameter, stageEfficiency, sideOfGeneratorAxel )
 	{	
 		if (!data.isForward) {
 			if (isFirst) isFirst = false;
 			else isFirst = true;
 		}
-		return getCompressorStagesI( true, data, isFirst, massFlow*1000, title, inletPipeDiameter, exitPipeDiameter, stageEfficiency );
+		return getCompressorStagesI( true, data, isFirst, massFlow*1000, title, inletPipeDiameter, exitPipeDiameter, stageEfficiency, sideOfGeneratorAxel );
 	}
 
 	// https://moodle.polymtl.ca/file.php/1047/HDVo/Module_04_-_Axial_Flow_Comp.pdf
@@ -5296,51 +5317,204 @@ console.log("p="+p+"=>"+JSON.stringify(next)+", hRet="+(next.h + 0.5*(next.v*nex
 		var i;
 		for (i = 0; i < 30; i++) {
 			item = nextCompressorStage(stageData, item, stageData.rpm, stageData.efficiency );
-if (item == null || !item.v || !item.p) break;
+			if (item == null || !item.v || !item.p) {
+				console.log("item: "+JSON.stringify(item));
+				break;
+			}
 			const lastStage = stageData.stages[stageData.stages.length-1];
 			if (lastStage.isLast || item.hRemaining < lastStage.deltaH) {
+				console.log("lastStage.isLast="+lastStage.isLast+" item.hRemaining < lastStage.deltaH == "+(item.hRemaining < lastStage.deltaH));
 				break;
 			}
 		}
 	}
-
-	function getCompressorStagesI( isCompressor, data, isFirst, massFlowInKg, title, inletPipeDiameter, exitPipeDiameter, stageEfficiency )
+	function toPoint(x,y) {
+		var obj = {};
+		obj.x = x;
+		obj.y = y;
+		return obj;
+	}
+	function getCompressorStagesI( isCompressor, data, isFirst, massFlowInKg, title, inletPipeDiameter, exitPipeDiameter, stageEfficiency, sideOfGeneratorAxel )
 	{	
-		getMetrics();
+		//getMetrics();
 		var i = isFirst ? data.items.length-1 : 0;
-/*
-		// to calc width:
-		// mean apect ratio h/c = 1.42, mid solidity: 1.6 (c/s, s=blade pitch, 
-		var ascpectRatio = 1.42;
-		var midLineSolidity = 1.6;
-*/
 		var stageData = {}
 		// 6*4 design for both: 0.48, 0.33, 0.20, 1, 0.325:
 		stageData.title = title;
 		stageData.flowCoefficientMax = 0.48;	// flow coefficient max
-		stageData.flowCoefficientMin = 0.40; 	// flow coefficient min
-		//stageData.flowCoefficientMin = 0.33; 	// flow coefficient min
+		//stageData.flowCoefficientMin = 0.40; 	// flow coefficient min
+		stageData.flowCoefficientMin = 0.33; 	// flow coefficient min
 		stageData.stageLoadingCoefficientMin = 0.20; // 0.19
 		stageData.flowCoefficientToStageLoadingCoefficient = 1;
- 		stageData.vMachLimitForFirstStage = 0.325;
-		stageData.tipToHubConst = 0.75; // 2/3; //
 		stageData.vExpectedHorizontalAngle = Math.PI* 15/180; // Math.PI/8; //for 0.75;
 		stageData.massFlowInKg = massFlowInKg;
-		stageData.maxRpmStages = 2;
-		stageData.maxAN2EXP8 = 2.5;
+		//stageData.axelStepMultiplier = 1.3;
+		//stageData.axelRadius = 0.10;
+		stageData.maxRpmStages = 1;
+		//stageData.maxAN2EXP8 = 2.5;
+		//stageData.minTipToHub = 0.80; // 2/3; //
+		stageData.aspectRatio = 1.2;	// for tip, => ~1.4 for hub
+		stageData.tipToHubConst = 0.70; // 2/3; //  sideOfGeneratorAxel ? 0.5 : 
+		stageData.machMaxSpeed = 0.95;		// <= 0.9 is subsonic, <= 1.2 If transonic, Relative MACH number in rotor tip, TOP SPEED OF GAS RELATIVE TO BLADE AND STAGE: Use Vrel1(β1) instead Vasb2!!!!
+		stageData.maxStatorHubAbsSpeed = 0.7;	// ABSOLUTE MACH NUMBER IN STATOR HUB
+		stageData.vGearMax = 180; // RENK Het Gear: max pitch line velocity 
 		stageData.isCompressor = isCompressor;
 		stageData.efficiency = stageEfficiency;
-		stageData.machMaxSpeed = 0.95;		// THIS IS NOT "ABSOLUTE" SPEED BUT THE TOP SPEED OF GAS RELATIVE  TO BLADE AND STAGE: Use Vrel1(β1) instead Vasb2!!!!
 		stageData.tanβ1 = (1/2 + stageData.stageLoadingCoefficientMin/2)/stageData.flowCoefficientMin;
 		stageData.tanβ2 = (1/2 - stageData.stageLoadingCoefficientMin/2)/stageData.flowCoefficientMin;
 		stageData.β1deg = 180 * Math.atan(stageData.tanβ1)/Math.PI;
 		stageData.β2 = Math.atan(stageData.tanβ2);
 		stageData.β2deg = 180 * stageData.β2/Math.PI;
 		stageData.β1 = Math.atan(stageData.tanβ1);
-		stageData.aspectRatio = 1.42;
-		stageData.axelStrength = 1000000000 * 0.355;	// 0.4 OK for short term, max strength 1000 MPa * 0.3 => long term strength as axel 300 MPa = 300000000 N/m2, short term 0.4
+		// almost ordinary steel:
+		stageData.axelStrength = 1000000000 * 0.3;	// 0.4 OK for short term, max strength 1000 MPa * 0.3 => long term strength as axel 300 MPa = 300000000 N/m2, short term 0.4
+		stageData.axelBearingSpace = 0.002;	// 5 mm is probably enough for bearing, but is it enough for bearing oil pipe if used
+		stageData.axelBearingSpace = 0.002;	// 5 mm is probably enough for bearing, but is it enough for bearing oil pipe if used
+		stageData.rInnerAxelCoolingPipe = 0.010;	// 
+		stageData.minAxelPipeWidth = 0.010;	// 
+		stageData.generatorRpm = 3000;	// 50 Hz power plant generator
+
+		// https://en.wikipedia.org/wiki/Maraging_steel Grage 350
+		//stageData.axelStrength = 2413000000 * 0.35;	// 0.4 OK for short term, max strength 1000 MPa * 0.3 => long term strength as axel 300 MPa = 300000000 N/m2, short term 0.4
 		// We use β2 as the stagger angle, because β2 seems to be quite near to it in in picture. I did not find any easy way to calc the stagger angle
 		stageData.stageWidth2h = Math.cos(stageData.β2) / (0.35*stageData.aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 
+		stageData.getCompressorMetrics = function( stageData) {
+			const frameTop = [];
+			const frameBottom = [];
+			const yInletPipe = inletPipeDiameter/2;
+			const yExitPipe = exitPipeDiameter/2;
+			const frameThickness = 0.050;
+			const gearWidth = 0.250;
+			const tipGap = 0.002;
+			var stageData = this;
+			function getInnerRadius(iStage) {
+				iStage++;
+				while (iStage < stageData.stages.length) {
+					if (stageData.stages[iStage].rAxel) return stageData.stages[iStage].rAxel + stageData.axelBearingSpace;
+					iStage++;
+				}
+				return stageData.rInnerAxelCoolingPipe;
+			}
+			var xNextGear, nextBladeBasementFromX;
+			var nextBladeBasement = [];
+			var metrics = {};
+			metrics.rotors = [];
+			metrics.stators = [];
+			metrics.axels = [];
+			metrics.bladeBasements = [];
+			metrics.generatorAxel = [];
+			
+			var x = 0;
+			var i, p, pb, pb2;
+			for (i = 0; i < stageData.stages.length; i++) {
+				const nextTip = i < stageData.stages.length-1 ? stageData.stages[i+1].rTip : stageData.hpExit.rTip;
+				const nextHub = i < stageData.stages.length-1 ? stageData.stages[i+1].rHub : stageData.hpExit.rHub;
+				const rInnerAxel = getInnerRadius(i);
+				const stage = stageData.stages[i];
+
+				var points = [];
+				if (i == 0) {
+					p=toPoint(-stage.width*(yInletPipe-stage.rTip)/(stage.rTip-nextTip), yInletPipe+tipGap);
+					frameBottom.push(toPoint(p.x-0.1, p.y));
+					frameBottom.push(p);
+					frameTop.push(toPoint(p.x-0.1, p.y+frameThickness));
+					frameTop.push(toPoint(p.x, p.y+frameThickness));
+					frameBottom.push(p=toPoint(x, stage.rTip+tipGap));
+					frameTop.push(toPoint(p.x, p.y+frameThickness));
+					xNextGear = p.x-(inletPipeDiameter+frameThickness+gearWidth); // the gears bix is immediately after the pipe turns up 90 degrees
+					
+					// IVG:
+					var p2, p3;
+					points.push(p2=toPoint(x-stage.width*0.01, stage.rTip+(stage.rTip-nextTip)*0.01+tipGap));
+					points.push(p=toPoint(x-stage.width*0.36, stage.rTip+(stage.rTip-nextTip)*0.36+tipGap));
+					points.push(p3 = toPoint(x-stage.width*0.36, stage.rHub+p.x)); // 45 degrees down
+					points.push(toPoint(p3.x-(p3.y-stage.rAxel+stageData.axelBearingSpace), stage.rAxel+stageData.axelBearingSpace)); // continues 45 degrees until top axel
+					points.push(toPoint(x-stage.width*0.01, stage.rAxel+stageData.axelBearingSpace)); // 
+					points.push(p2) // back to home
+					metrics.stators.push(points);	
+					points = [];
+				}
+				points.push(p = toPoint(x,stage.rTip));
+				points.push(toPoint(x+stage.width*0.35, stage.rTip-(stage.rTip-nextTip)*0.35));
+				points.push(pb2 = toPoint(x+stage.width*0.35, stage.rHub-(stage.rHub-nextHub)*0.35));
+				points.push(pb = toPoint(x,stage.rHub));
+				nextBladeBasement.push(pb);
+				nextBladeBasement.push(pb2);
+				points.push(p);
+				metrics.rotors.push(points);
+				points = [];
+				var p2;
+				points.push(p = toPoint(x+stage.width*0.5, stage.rTip-(stage.rTip-nextTip)*0.5+tipGap));
+				points.push(toPoint(x+stage.width*(i == stageData.stages.length-1 ? 1 : 0.85), stage.rTip-(stage.rTip-nextTip)*(i == stageData.stages.length-1 ? 1 : 0.85)+tipGap));
+				points.push(p2 = toPoint(x+stage.width*(i == stageData.stages.length-1 ? 1 : 0.85), stage.rHub-(stage.rHub-nextHub)*(i == stageData.stages.length-1 ? 1 : 0.85)+tipGap));
+				if (i == stageData.stages.length-1) {
+					points.push(toPoint(x+stage.width-0.002 + nextHub, 0));
+					points.push(toPoint(x+stage.width-0.002 + nextHub-0.01/Math.cos(Math.PI/4), 0));
+					points.push(toPoint(p2.x, p2.y-0.01));
+					points.push(toPoint(pb2.x+0.002, pb2.y-0.01));
+					points.push(toPoint(pb2.x+0.002, pb2.y));
+				}
+				points.push(p = toPoint(x+stage.width*0.5, stage.rHub-(stage.rHub-nextHub)*0.5+tipGap));
+				points.push(p);
+				metrics.stators.push(points);
+
+				if (stage.rpmPower) {
+					if (i < stageData.stages.length-1) {
+						nextBladeBasement.push(toPoint(x+stage.width-0.002, nextHub));
+						nextBladeBasement.push(toPoint(x+stage.width-0.002, nextHub-0.01));
+					}
+					nextBladeBasement.push(toPoint(pb2.x, nextHub-0.01));
+					nextBladeBasement.push(toPoint(x+stage.width, stage.rAxel));
+					nextBladeBasement.push(toPoint(nextBladeBasement[0].x, stage.rAxel));
+					nextBladeBasement.push(nextBladeBasement[0]);
+					metrics.bladeBasements.push(nextBladeBasement);
+					nextBladeBasement = [];
+
+					points = [];
+					points.push(p = toPoint(xNextGear, stage.rGear));
+					points.push(toPoint(xNextGear+gearWidth/2, stage.rGear));
+					points.push(toPoint(xNextGear+gearWidth/2, stage.rAxel));
+					points.push(toPoint(x+stage.width, stage.rAxel));
+					points.push(toPoint(x+stage.width, rInnerAxel));
+					points.push(toPoint(xNextGear, rInnerAxel));
+					points.push(p);
+					metrics.axels.push(points);
+
+					points = [];
+					stageData.gearCenterDifference + 0.075;
+					points.push(p = toPoint(xNextGear-gearWidth/2-0.01, stageData.gearCenterDifference + 0.075));
+					points.push(toPoint(xNextGear, stageData.gearCenterDifference + 0.075));
+					points.push(toPoint(xNextGear, 2*stageData.gearCenterDifference - stage.rGear));
+					points.push(toPoint(xNextGear+gearWidth/2, 2*stageData.gearCenterDifference - stage.rGear));
+					points.push(toPoint(xNextGear+gearWidth/2, stage.rGear));
+					points.push(toPoint(xNextGear, stage.rGear));
+					points.push(toPoint(xNextGear, stageData.gearCenterDifference - 0.075));
+					points.push(toPoint(xNextGear-gearWidth/2-0.01, stageData.gearCenterDifference - 0.075));
+					points.push(p);
+					metrics.generatorAxel.push(points);
+
+					xNextGear -= gearWidth;
+				}
+				x += stage.width;
+				frameBottom.push(p=toPoint(x, nextTip+tipGap));
+				frameTop.push(toPoint(p.x, p.y+frameThickness));
+				if (i == stageData.stages.length-1) {
+					frameBottom.push(p=toPoint(x+(yExitPipe-nextTip), yExitPipe));
+					frameBottom.push(toPoint(p.x+0.1, p.y));
+					frameTop.push(toPoint(p.x, p.y+frameThickness));
+					frameTop.push(toPoint(p.x+0.1, p.y+frameThickness));
+				}
+			}
+			metrics.minX = xNextGear + gearWidth - 0.1;
+			metrics.maxX = frameBottom[frameBottom.length-1].x + 0.1;
+			metrics.maxY = frameTop[0].y + 0.1;
+			metrics.minY = -metrics.maxY;
+			
+			metrics.frame = frameTop.concat(frameBottom.reverse());
+			metrics.frame.push(metrics.frame[0]);
+			
+			return metrics;
+		}
 
 		// Axial speed v has increased 2 times faster at rotor exit than mach in p, t 
 		// Typical v and mach incerement per stage with the values above is between 1.04 and 1.05
@@ -5359,6 +5533,8 @@ if (!first.p || !last.p) console.log("Bad cycledata:"+JSON.stringify(data.items)
 		const speedIn = (massFlowInKg/first.d)/(Math.PI*inletPipeDiameter*inletPipeDiameter/4); 
 		const speedOut = (massFlowInKg/last.d)/(Math.PI*exitPipeDiameter*exitPipeDiameter/4);
 		stageData.speedOut = speedOut;
+		last.v = speedOut;
+		first.v = speedIn;
 		stageData.pHigh = last.p;
 
 		stageData.hEnd = last.h + 0.5* speedOut * speedOut;
@@ -5373,18 +5549,18 @@ console.log("speedOut="+speedOut+", exitPipeDiameter="+exitPipeDiameter+", hEnd=
 			first.v = stageData.vMach*first.speedOfSound;
 			//first.v = stageData.vMachLimitForFirstStage*first.speedOfSound;
 			first.s = Module.PropsSI('S','P', first.p, 'H', first.h, name);
-			var hKinectic = 0.5* first.v*first.v;
-			var hMin = first.h - hKinectic*1.1;
+			var hKinetic = 0.5* first.v*first.v;
+			var hMin = first.h - hKinetic*1.1;
 			var pMin = Module.PropsSI('P','H', hMin, 'S', first.s, name);
 			while (pMin == Infinity) {
 				vMachInlet = vMachInlet*0.98;
 				first.v = vMachInlet*first.speedOfSound;
-				hKinectic = 0.5* first.v*first.v;
-				hMin = first.h - hKinectic*1.1;
+				hKinetic = 0.5* first.v*first.v;
+				hMin = first.h - hKinetic*1.1;
 				pMin = Module.PropsSI('P','H', hMin, 'S', first.s, name);
 			}
 console.log("First item:"+JSON.stringify(first)+", pMin="+pMin+", hMin="+hMin+", stageData="+JSON.stringify(stageData));
-			var ret = testResult(first.h, pMin, first.p, hKinectic*0.01, function(p) {
+			var ret = testResult(first.h, pMin, first.p, hKinetic*0.01, function(p) {
 				inlet.p = p;
 				inlet.h = Module.PropsSI('H','P', p, 'S', first.s, name);
 				inlet.t = Module.PropsSI('T','P', p, 'S', first.s, name);
@@ -5415,7 +5591,7 @@ console.log("First item:"+JSON.stringify(first)+", pMin="+pMin+", hMin="+hMin+",
 		var i;
 		cos = 0;
 		for (i = 0; i < stages.length; i++) {
-			cos += (stages[i].rTip-stages[i].rHub)*stageData.stageWidth2h; 
+			cos += (stages[i].rTip-stages[i].rHub)*stageData.stageWidth2h;
 		}
 		stageData.middleLineLength = cos;
 		// Basic trigonometry: we know the middle line length, and 
@@ -5435,14 +5611,22 @@ console.log("First item:"+JSON.stringify(first)+", pMin="+pMin+", hMin="+hMin+",
 		stages = stageData.stages;
 		var rpmPower = 0;
 		var prevRmp = -1;
+		var totalPower = 0;
 		for (i = 0; i < stages.length; i++) {
+			const tanβ2 = (1/2 - stages[i].stageLoadingCoefficient/2)/stages[i].flowCoefficient;
+			const β2 = Math.atan(tanβ2);
+			stages[i].β2deg = 180 * β2/Math.PI;
+			const stageWidth2h = Math.cos(β2) / (0.35*stageData.aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 
+			stages[i].width = (stages[i].rTip-stages[i].rHub)*stageWidth2h*stageData.horizontalVector;
+			const hubToTip = (stages[i].rHub/stages[i].rTip);
+			stages[i].hubStageLoadingCoefficient = stages[i].stageLoadingCoefficient/(hubToTip*hubToTip);
+			stages[i].hubFlowCoefficient = stages[i].flowCoefficient / hubToTip;
+			stages[i].hubβ2deg = 180/Math.PI * Math.atan((1/2 - stages[i].hubStageLoadingCoefficient/2)/stages[i].hubFlowCoefficient);
 			if (i == stages.length-1) {
 				stages[i].pRatio = stageData.exit.p / stages[i].p;
-				stages[i].width = (stages[i].rTip-stages[i].rHub)*stageData.stageWidth2h*stageData.horizontalVector;
 			}
 			else {
 				stages[i].pRatio = stages[i+1].p / stages[i].p;
-				stages[i].width = (stages[i].rTip-stages[i].rHub)*stageData.stageWidth2h*stageData.horizontalVector;
 			}
 			var visc = Module.PropsSI('V', 'P', stages[i].p, 'T', stages[i].t, name);
 			if (visc == Infinity) {
@@ -5456,11 +5640,13 @@ console.log("First item:"+JSON.stringify(first)+", pMin="+pMin+", hMin="+hMin+",
 			stageData.length += stages[i].width;
 			if (prevRmp != stages[i].rpm && rpmPower != 0) {
 				stages[i-1].rpmPower = rpmPower;
+				totalPower += rpmPower;
 				rpmPower = 0;
 			}
 			rpmPower += stages[i].deltaH*stageData.massFlowInKg;
 			prevRmp = stages[i].rpm;
 		}
+		totalPower += rpmPower;
 		stages[i-1].rpmPower = rpmPower;
 		var rPrev = 0, rPrevPrev = 0;
 		// Md = 9500 * P / rpm;
@@ -5471,45 +5657,231 @@ console.log("First item:"+JSON.stringify(first)+", pMin="+pMin+", hMin="+hMin+",
 		for (i = stages.length-1; i >= 0; i--) {
 			if (stages[i].rpmPower) {
 				// https://www.theseus.fi/bitstream/handle/10024/77283/Hartikainen_Matti.pdf?sequence=1
-				const curPower =  stages[i].rpmPower*stageData.massFlowInKg; // stages[i].deltaH //
+				const curPower =  stages[i].rpmPower; // stages[i].deltaH //
 				// stages[i].rpmPower, https://en.wikipedia.org/wiki/Torque: P = Mn*2*PI*rpm/60;
 				const Md = 60 * curPower / (2 * Math.PI * stages[i].rpm);
 				// Wx = 2*Wi/PI =>
 				const Wx = 2 * (Md / stageData.axelStrength) / Math.PI;
 				if (rPrev == 0) {
-					stages[i].rAxel = Math.pow(Wx, 1/3);
+					if (stageData.rInnerAxelCoolingPipe == 0) {
+						stages[i].rAxel = Math.pow(Wx, 1/3);
+					}
+					else {
+						testResult( Wx, stageData.rInnerAxelCoolingPipe, 0.20+stageData.rInnerAxelCoolingPipe, Wx*0.01, function (r) {
+							stages[i].rAxel = r;
+							return (Math.pow(r,4)-Math.pow(stageData.rInnerAxelCoolingPipe,4)) / r;
+						});
+						stages[i].axelPipeWidth = stages[i].rAxel - stageData.rInnerAxelCoolingPipe;
+					}
 				}
 				else {
-					http://rmseura.tkk.fi/opetusmonisteita/RLP_L.pdf: Ympyrärengaspoikkileikkauksen vääntö:
+					// http://rmseura.tkk.fi/opetusmonisteita/RLP_L.pdf: Ympyrärengaspoikkileikkauksen vääntö:
 					// Wi = PI * (Dout^4 - Din^4) / (16*Dout) where Dout outer diameter of pipe and Din inner diameter
 					// => Wi = PI*(Rout^4 - Rin^4) / (2*Rout); 
 					testResult( Wx, rPrev, rPrev+(rPrev-rPrevPrev), Wx*0.01, function (r) {
 						stages[i].rAxel = r;
 						return (Math.pow(r,4)-Math.pow(rPrev,4)) / r;
 					});
+					stages[i].axelPipeWidth = stages[i].rAxel - rPrev;
 				}
-				stages[i].vGear = stages[i].U * stages[i].rAxel / stages[i].rTip; // gear Pitch line velocity
+				if (stages[i].axelPipeWidth < stageData.minAxelPipeWidth) {
+					if (stageData.gearCenterDifference) {
+						const rGear  =  3000 * stageData.gearCenterDifference / (stages[i].rpm + 3000);
+						const minAxel = stages[i].rAxel;
+						stages[i].rAxel += (stageData.minAxelPipeWidth-stages[i].axelPipeWidth);
+						if (stages[i].rAxel > rGear) {
+							stages[i].rAxel = rGear > minAxel ? rGear : minAxel;
+						}
+					}
+					else {
+						stages[i].rAxel += (stageData.minAxelPipeWidth-stages[i].axelPipeWidth);	// never here???
+					}
+					stages[i].axelPipeWidth = stageData.minAxelPipeWidth;
+				}
+				// This is now always the same as the actual power
+				const torqueUpToPower = (stages[i].U/stages[i].rTip) * stageData.axelStrength * Math.PI/2 * (Math.pow(stages[i].rAxel,4)-Math.pow(rPrev,4)) / stages[i].rAxel;
+				stages[i].usedTorquePower = myRound(curPower/torqueUpToPower, 2);
 				// Math.sqrt(stages[i].rpmPower/(stageData.axelStrength*Math.PI) + rPrev*rPrev);
 				rPrevPrev = rPrev;
-				rPrev = stages[i].rAxel + (stages[i].rAxel-rPrev) * 0.05;	// add 5% of pipe thickness for bearings between
+				rPrev = stages[i].rAxel + stageData.axelBearingSpace; // add 2 mm pipe thickness for bearings between pipes
+				
+				if (stageData.gearCenterDifference) {
+					// rpm * rGear = 3000 * (diffAxels-rGear)
+					// => rGear*(rpm + 3000) = 3000*diffAxels
+					// => rGear = 3000*diffAxels / (rpm + 3000);
+					stages[i].rGear  =  3000 * stageData.gearCenterDifference / (stages[i].rpm + 3000);
+					if (stages[i].rGear < stages[i].rAxel) {
+						console.log("stage "+i+": Gear radius cannot be less than stage axel:"+stages[i].rGear+" < "+stages[i].rAxel+" => use stronger steel for stage axels");
+					}
+				}
+				else {
+					if (sideOfGeneratorAxel) {
+						stageData.height = 2 * stageData.stages[0].rTip + 0.052; // 50 mm for frame, 2 mm for tip gap
+						stageData.gearCenterDifference = stageData.height / 2 + 0.10; // Generator axel diameter 15 cm, 5 cm for margin
+						stages[i].rGear  =  3000 * stageData.gearCenterDifference / (stages[i].rpm + 3000);
+						const vGear = stages[i].U * stages[i].rGear / stages[i].rTip; // gear Pitch line velocity
+						if (vGear > stageData.vGearMax) {
+							stageData.gearCenterDifference *= stageData.vGearMax/vGear;
+							stages[i].rGear *= stageData.vGearMax/vGear;
+						}
+					}
+					else {
+						stages[i].rGear = stages[i].rAxel;
+						stageData.gearCenterDifference = stages[i].rGear * (stages[i].rpm + 3000) / 3000;
+					}
+				}
+				stages[i].vGear = stages[i].U * stages[i].rGear / stages[i].rTip; // gear Pitch line velocity
 //console.log("rPrev="+rPrev+", stages["+i+"].rAxel="+stages[i].rAxel+". stages[i].rpmPower="+stages[i].rpmPower);
 			}
 		}
-		stageData.height = 2 * stageData.stages[0].rTip * 1.05; // added 5% for the frame and tip gap
+		stageData.height = 2 * stageData.stages[0].rTip + 0.052; // 50 mm for frame, 2 mm for tip gap
 		
 		const hEff100 = Module.PropsSI('H', 'P', stageData.exit.p, 'S', first.s, name);
 		
 		console.log("stages:"+JSON.stringify(stageData.stages));
 
 		console.log(title+ " compressor stages: "+stageData.stages.length+", rpm speeds: "+stageData.rpmCount+
-		", efficiency: "+myRound(hEff100/stageData.exit.h,3)+
+		", efficiency: "+myRound((hEff100-first.h)/(stageData.exit.h - first.h),3)+", power: "+Math.round(totalPower/1000000)+" MW"+
 		", compressor length, height, width: "+myRound(stageData.length,2)+", "+myRound(stageData.height,2)+", "+myRound(stageData.height,2)+" m");
 		console.log("pHigh pipe diameter:"+exitPipeDiameter+", calculated gas properties:"+JSON.stringify(stageData.exit));
 		//console.log("pHigh pipe expected, properties:"+JSON.stringify(last));
 		console.log("pLow pipe diameter="+inletPipeDiameter+", gas properties:"+JSON.stringify(first));
 		//console.log(JSON.stringify(stageData.stages, null, 2));
+
+//calcStageProperties(stageData, stageData.massFlowInKg, first, last );
+		
 		return stageData;
 	}
+	function drawCompressorSide(ctx, metrics, stageData, xPx, yPx, mToPx, upSide ) {
+		var side = upSide ? -1 : 1;
+		function toX( xM ) { return xPx + xM*mToPx; }
+		function toY( yM ) { return yPx + side*yM*mToPx; }
+		function fillPoints(points, color, hasBorderLine) {
+			const region = new Path2D();
+			var i;
+			for (i = 0; i < points.length; i++) {
+				const p = points[i];
+				if (i == 0) region.moveTo(toX(p.x),toY(p.y)); 
+				else region.lineTo(toX(p.x),toY(p.y)); 
+			}
+			region.closePath();
+			ctx.fillStyle = color;
+			ctx.fill(region);
+			if (hasBorderLine) {
+				ctx.beginPath();
+				for (i = 0; i < points.length; i++) {
+					const p = points[i];
+					if (i == 0) ctx.moveTo(toX(p.x),toY(p.y)); 
+					else ctx.lineTo(toX(p.x),toY(p.y)); 
+				}
+				ctx.closePath();
+				ctx.stroke();
+			}
+		}
+		ctx.strokeStyle = 'black';
+		ctx.lineWidth = 1;
+		const rpmColors = ['#FCB1AD', '#E5E7E7', '#FCA09C', '#D5D8D8', '#FC8782', '#C0C3C3', '#FB6A64', '#B2B6B6', '#FB4A43', '#A9ACAC', '#999C9C', '#8E9090', '#808181', '#747575'];
+		const frameColor = '#393939';
+		const generatorColor = '#FBCC43';
+		
+		var iRpm = 0;
+		var rpmColor = rpmColors[0];
+//console.log("metrics.bladeBasements:"+JSON.stringify(metrics.bladeBasements));
+		var k;
+		for (k = 0; k < metrics.rotors.length; k++) {
+			fillPoints( metrics.rotors[k], rpmColor);
+			fillPoints( metrics.stators[k], frameColor );
+			if (stageData.stages[k].rpmPower) {
+				if (iRpm < metrics.bladeBasements.length) {
+					fillPoints( metrics.bladeBasements[iRpm], rpmColor);
+					fillPoints( metrics.axels[iRpm], rpmColor );
+//console.log(iRpm+": "+rpmColor+", points:"+JSON.stringify(metrics.axels[iRpm]));
+				}
+				else {
+//console.log("k="+k+", iRpm="+iRpm+" stage="+JSON.stringify(stageData.stages[i]));
+				}
+				iRpm++;
+				rpmColor = rpmColors[iRpm % rpmColors.length];
+			}
+		}
+		while (k < metrics.stators.length) {
+			fillPoints( metrics.stators[k], frameColor );
+			k++;
+		}
+		if (upSide) {
+			for (k = 0; k < metrics.generatorAxel.length; k++) {
+				fillPoints( metrics.generatorAxel[k], generatorColor );
+			}
+		}
+		fillPoints( metrics.frame, frameColor );
+	}
+	function drawXCoordinate( cm, x, xPx ) {
+		const text = x + ' m';
+		const ctx = cm.ctx;
+		const height = ctx.measureText(text).height;
+		ctx.fillText( text, xPx+2, height+2);
+		ctx.beginPath();
+		ctx.moveTo(xPx, height/2);
+		ctx.lineTo(xPx, 0 );
+		ctx.stroke();
+		
+		ctx.fillText( text, xPx+2, cm.pxHeight-1);
+		ctx.beginPath();
+		ctx.moveTo(xPx, cm.pxHeight-height/2);
+		ctx.lineTo(xPx, cm.pxHeight );
+		ctx.stroke();
+	}
+	function drawYCoordinate( cm, y, yPx ) {
+		const text = y + ' m';
+		const ctx = cm.ctx;
+		const height = ctx.measureText(text).height;
+		const width = ctx.measureText(text).width;
+
+		ctx.fillText( text, 2, yPx+2);
+		ctx.beginPath();
+		ctx.moveTo(0, yPx);
+		ctx.lineTo(height/2, yPx);
+		ctx.stroke();
+		
+		ctx.fillText( text, cm.pxWidth-width-1, yPx+1);
+		ctx.beginPath();
+		ctx.moveTo(cm.pxWidth-height/2, yPx);
+		ctx.lineTo(cm.pxWidth, yPx);
+		ctx.stroke();
+	}
+	
+	function drawCompressor( canvasId, stageData ) {
+		const cm = stageData.getCompressorMetrics();
+		const canvas = document.getElementById(canvasId);
+		const mToPx = 100;  // 10 mm == 1 px
+		const xPx = -cm.minX*mToPx, yPx = cm.maxY*mToPx;
+		function toX( xM ) { return xPx + xM*mToPx; }
+		function toY( yM ) { return yPx + yM*mToPx; }
+
+		canvas.width = Math.round((cm.maxX - cm.minX)*mToPx);
+		canvas.height = Math.round((cm.maxY - cm.minY)*mToPx);
+console.log("canvas.width="+canvas.width+", canvas.height="+canvas.height);
+		const ctx = canvas.getContext("2d");
+		cm.pxWidth = canvas.width;
+		cm.pxHeight = canvas.height;
+		cm.ctx = ctx;
+		cm.mToPx = mToPx;
+		drawCompressorSide( ctx, cm, stageData, xPx,  yPx, mToPx, true );
+		drawCompressorSide( ctx, cm, stageData, -cm.minX*mToPx,  cm.maxY*mToPx, mToPx, false );
+		var x; 
+		ctx.lineWidth = 1;
+		ctx.fillStyle = 'black'; 
+		ctx.strokeStyle = 'black'; 
+		ctx.font = "10px serif";
+		for (x = Math.floor(cm.minX); x <= Math.floor(cm.maxX); x += 1) {
+			drawXCoordinate( cm, x, toX(x) );
+		}
+		for (x = Math.floor(cm.minY); x <= Math.floor(cm.maxY); x += 1) {
+			drawYCoordinate( cm, x, toY(x));
+		}
+		$("#"+canvasId).css('display','block');
+	}
+
 	function stagesToHtmlTable( stageData )
 	{
 		//const tmp = {"flowM3":4173.533301242276,"speedOfSound":438.5292933044679,"v":142.52202032395206,"rTip":4.615800092373975,"rHub":3.4618500692804814,"w":431.884910072582,"rpm":893.4956052158383,"h":483243.00598183315,"t":464.66160353971225,"p":48895.79446968536,"d":0.35447548938912926,"flowCoefficient":0.33,"stageLoadingCoefficient":0.2,"deltaH":37304.91510968045,"wMach":0.9848484848484848};

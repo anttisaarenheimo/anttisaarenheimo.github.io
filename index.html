@@ -181,7 +181,7 @@ th {
 			<DIV>
 				<LABEL>Hub/Tip ratio from:</LABEL><INPUT type="float" size="4" id="hubToTipRatio" value="0.65"/>
 				<SPAN> to </SPAN><INPUT type="float" size="4" id="hubToTipRatioMax" value="0.85"/>
-				<LABEL>Aspect ratio of main compressor:</LABEL><INPUT type="float"  size="4" id="aspectRatio" value="2.25" title="Optimal AR value depends on blade thickness/heigh, if 0.02 => AR:1.3-1.9, if 0.07 => AR:0.78-1.14"/><LABEL>Aspect ratio of cyro compressor:</LABEL><INPUT type="float"  size="4" id="aspectRatioCyro" value="5">
+				<LABEL>Aspect ratio of main compressor:</LABEL><INPUT type="float"  size="4" id="aspectRatio" value="1.5" title="Optimal AR value depends on blade thickness/heigh, if 0.02 => AR:1.3-1.9, if 0.07 => AR:0.78-1.14"/><!--LABEL>Aspect ratio of cyro compressor:</LABEL><INPUT type="float"  size="4" id="aspectRatioCyro" value="5"-->
 				<LABEL>Solidity c/s:</LABEL><INPUT type="float"  size="4" id="solidity" value="2" title="Chord spacing: chord length/distance between chords"/>
 				<!--LABEL>Blade thickness/chord:</LABEL><INPUT type="float"  size="4" id="t2cInMiddleFlow" value="0.01" title="Maximum allowed average thickness/chort in the middle flow"/-->
 				<LABEL>Scale:</LABEL>
@@ -192,12 +192,15 @@ th {
 				<!--LABEL>Number of stages with constant power:</LABEL><INPUT size="2" type="float" id="cStages" value=""/-->
 			</DIV>
 			<DIV>
-				<LABEL>Max centrifugal stress: </LABEL><INPUT size="4" type="float" id="cStressMaxMPa" title=" Values of Nimonic 105 with 1000h service cycle" value="510"/><Span>MPa in</span>
-					<INPUT size="4" type="float" id="tempStressMaxMPa" value="923"/><Span>K</span>
-					<INPUT size="4" type="float" id="cStressMaxMPa2" value="134"/><Span>MPa in</span>
-					<INPUT size="4" type="float" id="tempStressMaxMPa2" value="1088"/><Span>K</span>
-					<LABEL>Blade cooling up to K: </LABEL><INPUT size="3" type="float" id="bladeCoolingK" value="400"/>
+				<LABEL>Max allowed blade stress MPa (eg. stress to give plastic 0.2% strain in 3000h)</LABEL><INPUT size="4" type="float" id="cStressMaxMPa" value="456"/>
+				<LABEL>Max uncooled blade temperature K</Label><INPUT size="4" type="float" id="tempStressMaxMPa" value="923"/>
+					<!-- blade is 
+					<!--INPUT size="4" type="float" id="cStressMaxMPa2" value="134"/><Span>MPa in</span>
+					<INPUT size="4" type="float" id="tempStressMaxMPa2" value="1088"/><Span>K, see: </span-->
+					<a href="https://www.specialmetals.com/documents/technical-bulletins/nimonic-alloy-105.pdf">Nimonic 105</a>
 					<a href="https://www.specialmetals.com/documents/technical-bulletins/nimonic/">Nimonic alloys</a>
+					<!-- assume unlimited cooling-->
+					<!--LABEL>Blade cooling up to K: </LABEL><INPUT size="3" type="float" id="bladeCoolingK" value="400"/-->
 			</DIV>
 			<DIV>
 				<LABEL>Shaft bearing space mm:</LABEL><INPUT size="2" type="float" id="bearingsSpace" type="float" value="2.5"/>
@@ -5693,7 +5696,7 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 		stageData.flowCoefficientMin = getFloatParam('flowCoefficient', 0.44); 	// 0.33 => β2=50, 0.4 => β2=45 degree (β2~tip stagger angle)
 		stageData.stageLoadingCoefficientMin = getFloatParam('stageLoadingCoefficient', 0.20); // 0.19
 
-		stageData.aspectRatio =  getFloatParam(first.t > 273 ? 'aspectRatio' : 'aspectRatioCyro', 1.2);	// for tip, => ~1.4 for hub
+		stageData.aspectRatio =  getFloatParam('aspectRatio', 1.25); //getFloatParam(first.t > 273 ? 'aspectRatio' : 'aspectRatioCyro', 1.2);	// 
 		stageData.hubToTipRatio = getFloatParam('hubToTipRatio', 0.70); // 2/3; //  sideOfGeneratorShaft ? 0.5 : 
 		stageData.hubToTipRatioMax = getFloatParam('hubToTipRatioMax', 0.9);
 		//stageData.t2cInMiddleFlow = getFloatParam('t2cInMiddleFlow', 0.05);
@@ -5711,9 +5714,9 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 		}
 		stageData.cStressMaxMPa = getFloatParam('cStressMaxMPa', 568);
 		stageData.tempStressMaxMPa = getFloatParam('tempStressMaxMPa', 923);
-		stageData.cStressMaxMPa2 = getFloatParam('cStressMaxMPa2', 568);
-		stageData.tempStressMaxMPa2 = getFloatParam('tempStressMaxMPa2', 923);
-		stageData.bladeCoolingK = getFloatParam('bladeCoolingK', 100);
+		//stageData.cStressMaxMPa2 = getFloatParam('cStressMaxMPa2', 568);
+		//stageData.tempStressMaxMPa2 = getFloatParam('tempStressMaxMPa2', 923);
+		//stageData.bladeCoolingK = getFloatParam('bladeCoolingK', 100);
 		stageData.bladeOfStageWidth = getFloatParam('bladeOfStageWidth', 0.50);
 		stageData.getDeltaH = function( stage, item ) {
 			//	Cuts down the power if the max tensile stress would exceeded
@@ -5742,6 +5745,16 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 				const pOut = Module.PropsSI('P','H', item.h+hActualWork, 'S', item.s, name);	
 				const tOut = Module.PropsSI('T','H', item.h+deltaH, 'P', pOut, name);
 				const tUncooledBlade = item.t + (tOut-item.t)*stageData.bladeOfStageWidth;
+				stage.maxTensileStressMPa = stageData.cStressMaxMPa;
+				if (tUncooledBlade > stageData.tempStressMaxMPa) {
+					stage.bladeCoolingK = tUncooledBlade - stageData.tempStressMaxMPa;
+				}
+				else {
+					stage.bladeCoolingK = 0;
+				}
+				stage.stageLoadingCoefficient = stageLoadingCoefficient;
+/*
+	Let's assume cooling down to the max strength area
 				const tBladeMax = tUncooledBlade - stageData.bladeCoolingK;
 				stage.maxTensileStressMPa = tBladeMax <= stageData.tempStressMaxMPa ? stageData.cStressMaxMPa :
 					stageData.cStressMaxMPa2 + 	
@@ -5758,11 +5771,13 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 					stage.tensileStressMPa = stage.maxTensileStressMPa;
 					stage.stageLoadingCoefficient = myStressCoefficient*deltaH / stage.tensileStressMPa;
 				}
+*/
 			}
 			else {
 				stage.stageLoadingCoefficient = stageLoadingCoefficient;
 				stage.maxTensileStressMPa = stageData.cStressMaxMPa;
 				stage.tensileStressMPa = myStressCoefficient*deltaH / stageLoadingCoefficient;
+				stage.bladeCoolingK = 0;
 			}
 			stage.tensileStressPercent = Math.round((stage.tensileStressMPa / stage.maxTensileStressMPa) * 100)+" %";
 			stage.deltaH = deltaH;
@@ -5773,7 +5788,14 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 			const v2 = Math.sqrt(2 * stage.deltaH + stage.v*stage.v);
 //console.log("v2="+v2+", v="+stage.v+", deltaH="+stage.deltaH+",  massFlowInKg="+ massFlowInKg);
 			stage.F = (v2-stage.v) * massFlowInKg;	// the massflow is accelerated from v to v2 in a second 
-		
+			const hubToTip = stage.rHub / stage.rTip;
+			testResult( stageData.K, 0.1, 0.4, stageData.K*0.01, function (d) {
+				stage.tipToHubSectionArea = d;
+				// https://moodle.polymtl.ca/file.php/1047/HDVo/Module_04_-_Axial_Flow_Comp.pdf Page 29: Typical K range 0.55-0.65 => 
+				// K = 1 - (1-d)*(2 - b - b^2)/(3*(1-b^2)), where b=rHub/rTip and d=>tip sectinal area>/(hub sectinal area>, r=radius, t=thickness
+				return stage.K = 1 - (1-d)*(2-hubToTip - hubToTip*hubToTip)/(3*(1-hubToTip*hubToTip));
+			});
+//OK: console.log("*****"+stageData.stages.length+": d="+stage.tipToHubSectionArea+", K="+stage.K+"; hubToTip="+hubToTip);
 			// rTip*rTip - rMiddle*rMiddle = rMiddle*rMiddle - rHub*rHub;	// ever area in both sides =>
 			// rMiddle = sqrt((rTip*rTip+rHub*rHub)/2)
 			const rMiddle = Math.sqrt((stage.rTip*stage.rTip+stage.rHub*stage.rHub)/2);
@@ -5785,31 +5807,30 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 			const rTip999 = 0.999*stage.rTip;
 			const tip999MomentumPerM = (stage.F*(stage.rTip-stage.rHub)/2000*(stage.rTip*stage.rTip-rTip999*rTip999)/(stage.rTip*stage.rTip-stage.rHub*stage.rHub))
 										/ (stageData.solidity*2*stage.rHub*Math.PI);   // assume that blade is a rectangle
-			// tip999MomentumPerM = unusedTensileStress*bladeThicknessInTip*bladeThicknessInTip*1/6 =>
-			const minBladeTipThickness = first.t > 273 ? 0.002 : 0.001; // 2 mm min width in the very tip of blade for big one, 1 mm is enough in cyrogenic compressor 
-			const bladeThicknessInTip = Math.sqrt(6*tip999MomentumPerM/unusedTensileStress)+minBladeTipThickness;	
-			const bladeThicknessInHub = bladeThicknessInTip/0.15;	// k=0.55 => tip cut area 15% of hub cut area
+			const r75 = Math.sqrt((stage.rTip*stage.rTip+rMiddle*rMiddle)/2);
+			const r75MomentumPerM = (stage.F*(r75-rMiddle)*(stage.rTip*stage.rTip-rMiddle*rMiddle)/(stage.rTip*stage.rTip-stage.rHub*stage.rHub))
+										/ (stageData.solidity*2*stage.rHub*Math.PI);   // assume that blade is a rectangle
+			const hubMomentumPerM = stage.F*(rMiddle-stage.rHub) / (stageData.solidity*2*stage.rHub*Math.PI);
+			stage.bladeThicknessInHub = Math.sqrt(6*hubMomentumPerM/unusedTensileStress);
+			stage.bladeThicknessInTip = stage.bladeThicknessInHub*stage.tipToHubSectionArea;	// k=0.55 => tip cut area 16,5% of hub cut area
+			stage.bladeThicknessInMiddle = stage.bladeThicknessInTip + (stage.bladeThicknessInHub-stage.bladeThicknessInTip)*(stage.rTip-rMiddle)/(stage.rTip-stage.rHub);
 			
 			// Momentum/m: (rMiddle/hubThickness * F) / (solidity(=2)*rHub*2*PI)  = (unusedTensileStress/2) * 1 m * hubThickness
 			// => hubThickness = (rMiddle/hubThickness * F) / ((solidity(=2)*rHub*2*PI)*(unusedTensileStress/2))
 			/*const bladeThicknessInHub = Math.sqrt(rMiddle*stage.F / (stageData.solidity*stage.rHub*Math.PI*unusedTensileStress));
 			const bladeThicknessInTip = bladeThicknessInHub*0.15;*/
-			const bladeThicknessInMiddle = bladeThicknessInTip + (bladeThicknessInHub-bladeThicknessInTip)*(stage.rTip-rMiddle)/(stage.rTip-stage.rHub);
-			const r75 = Math.sqrt((stage.rTip*stage.rTip+rMiddle*rMiddle)/2);
-			const r75MomentumPerM = (stage.F*(r75-rMiddle)*(stage.rTip*stage.rTip-rMiddle*rMiddle)/(stage.rTip*stage.rTip-stage.rHub*stage.rHub))
-										/ (stageData.solidity*2*stage.rHub*Math.PI);   // assume that blade is a rectangle
 			// usedMomentumStress*b*h^2/6=r75MomentumPerM, where b=1 and h=bladeThicknessInMiddle =>
-			const usedMomentumStressInMiddle = 6*r75MomentumPerM / (bladeThicknessInMiddle*bladeThicknessInMiddle*1);
-			const hubMomentumPerM = stage.F*(rMiddle-stage.rHub) / (stageData.solidity*2*stage.rHub*Math.PI)
-			const usedMomentumStressInHub = 6*hubMomentumPerM / (bladeThicknessInHub*bladeThicknessInHub*1);
-			stage.yieldMomentMidHubMPa = Math.round(usedMomentumStressInMiddle/1000000)+'/'+Math.round(usedMomentumStressInHub/1000000);
+			const usedMomentumStressInMiddle = 6*r75MomentumPerM / (stage.bladeThicknessInMiddle*stage.bladeThicknessInMiddle*1);
+			const usedMomentumStressInHub = 6*hubMomentumPerM / (stage.bladeThicknessInHub*stage.bladeThicknessInHub*1);
+			stage.yieldMomentMidHubMPa = //Math.round(usedMomentumStressInMiddle/1000000)+'/'+
+				Math.round(usedMomentumStressInHub/1000000);
 //console.log("hubMomentumPerM="+hubMomentumPerM+", bladeThicknessInHub="+bladeThicknessInHub+",  usedMomentumStressInHub="+usedMomentumStressInHub);
 			stage.totalTensileStressPercentMidHub = Math.round(((stage.tensileStressMPa + usedMomentumStressInMiddle/1000000) / stage.maxTensileStressMPa) * 100)+"/"
-													+Math.round(((stage.tensileStressMPa + usedMomentumStressInHub/1000000) / stage.maxTensileStressMPa) * 100)+" %";
+													+Math.round(((stage.tensileStressMPa + usedMomentumStressInHub/1000000) / stage.maxTensileStressMPa) * 100);
 
 			// min chord is defined by max tensile stress
 			//const minChord = (bladeThicknessInMiddle/stageData.t2cInMiddleFlow);
-			const defaultChord = stageData.aspectRatio*(stage.rTip-stage.rHub);
+			const defaultChord = (stage.rTip-stage.rHub) / stageData.aspectRatio;
 			/* We cannot yet handle variable aspect ratio
 			if (minChord > defaultChord) {
 				stage.aspectRatio = ((stage.rTip-stage.rHub)) / minChord;
@@ -5819,10 +5840,10 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 			{
 				stage.aspectRatio = stageData.aspectRatio;
 				//stage.bladeThicknessInMiddle = (bladeThicknessInMiddle/defaultChord);
-				stage.bladeThicknesses = Math.round(1000*bladeThicknessInTip/defaultChord)+'/'+
-					Math.round(1000*bladeThicknessInMiddle/defaultChord)+'/'+Math.round(1000*bladeThicknessInHub/defaultChord)+' ‰';
+				stage.bladeThicknesses = //myRound(100*stage.bladeThicknessInTip/defaultChord,1)+'/'+
+					myRound(100*stage.bladeThicknessInMiddle/defaultChord,1)+'/'+Math.round(100*stage.bladeThicknessInHub/defaultChord);
 			}
-//console.log("rMiddle="+rMiddle+", bladeThicknessIn hub/Middle/tip="+bladeThicknessInHub+"/"+bladeThicknessInMiddle+"/"+bladeThicknessInTip+", minChord="+minChord+", defaultChord="+defaultChord+" => AR:"+stage.aspectRatio);
+console.log("*****"+stageData.stages.length+":rMiddle="+rMiddle+", bladeThicknessIn hub/Middle/tip="+stage.bladeThicknessInHub+"/"+stage.bladeThicknessInMiddle+"/"+stage.bladeThicknessInTip+", defaultChord="+defaultChord+" => AR:"+stage.aspectRatio);
 			stage.stageWidth2h = Math.cos(stageData.β2) / (0.35*stage.aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 
 			return deltaH;
 		}
@@ -5836,6 +5857,7 @@ console.log("stageData.hpExit="+JSON.stringify(stageData.hpExit));
 console.log("stageData.constantDeltaH="+stageData.constantDeltaH); 
 		}
 		stageData.maxStatorHubAbsSpeed = 0.7;	// ABSOLUTE MACH NUMBER IN STATOR HUB
+		stageData.K = 0.55;			// defines <tip section area>/<hub section area>, typical range 0.55-0.65
 		stageData.massFlowInKg = massFlowInKg;
 		stageData.flowCoefficientToStageLoadingCoefficient = 1;
 		stageData.maxRpmStages = 1;
@@ -6190,10 +6212,11 @@ console.log("First item:"+JSON.stringify(first)+", pMin="+pMin+", hMin="+hMin+",
 			stages[i].β2deg = 180 * β2/Math.PI;
 			const stageWidth2h = Math.cos(β2) / (0.35*stages[i].aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 
 			stages[i].width = (stages[i].rTip-stages[i].rHub)*stageWidth2h*stageData.horizontalVector;
-			stages[i].diameter = (stages[i].rTip+0.002)*2;
-			stages[i].widthMm = stages[i].width * 0.35 * 1000;
+			stages[i].diameterMm = (stages[i].rTip+0.002)*2*1000;
+			stages[i].rTipMm = stages[i].rTip*1000;
 			const hubToTip = (stages[i].rHub/stages[i].rTip);
 			stages[i].hBladeMm = (stages[i].rTip - stages[i].rHub)*1000;
+			stages[i].widthMm = stages[i].hBladeMm / stages[i].aspectRatio;
 			stages[i].hubStageLoadingCoefficient = stages[i].stageLoadingCoefficient/(hubToTip*hubToTip);
 			stages[i].hubFlowCoefficient = stages[i].flowCoefficient / hubToTip;
 			stages[i].hubβ2deg = 180/Math.PI * Math.atan((1/2 - stages[i].hubStageLoadingCoefficient/2)/stages[i].hubFlowCoefficient);
@@ -6222,15 +6245,20 @@ console.log(totalBladesMass+" = "+stages[i].F+" / ("+(stages[i].U*stages[i].U)+"
 			stages[i].bladeThicknessInHub = totalBladesMass/(0.65 * 8 * (stages[i].rTip-stages[i].rHub)*2*Math.PI*stages[i].rHub*2);
 */
 /* Rotor tips are VERY VERY HOLLOW AND SLIM COMPARED TO THICKNESS IN HUB, d=0.15 => K=0.55
+
 			if (i == 0) {
 				var d;
-				for (d = 0.1; d < 0.5; d += 0.05) {
+				for (d = 0.1125; d < 0.5; d += 0.025) {
 					const K = 1 - (1-d)*(2-hubToTip - hubToTip*hubToTip)/(3*(1-hubToTip*hubToTip));
-					console.log("d="+d+" => K="+K);
+					console.log("****** d="+d+" => K="+K);
 				}
 			}
+			// https://moodle.polymtl.ca/file.php/1047/HDVo/Module_04_-_Axial_Flow_Comp.pdf Page 29: Typical K range 0.55-0.65 => 
+			// => d=0.1625 => K=0.5516289551934646
+			// => d=0.35 => K~0.65
 */
-			stages[i].tensileStressMPa = 0.5*stages[i].U*stages[i].U*7800*(1-hubToTip*hubToTip)*0.55/1000000; // austentic steel alloy density 7800kg/m3)
+	
+			stages[i].tensileStressMPa = 0.5*stages[i].U*stages[i].U*8000*(1-hubToTip*hubToTip)*stages[i].K/1000000; // Nimonics: 8000 kg/m3, austentic steel alloy density 7800kg/m3)
 			if (i == stages.length-1) {
 				stages[i].pRatio = stageData.exit.p / stages[i].p;
 			}
@@ -6313,7 +6341,7 @@ console.log(totalBladesMass+" = "+stages[i].F+" / ("+(stages[i].U*stages[i].U)+"
 				}
 				// This is now always the same as the actual power
 				const torqueUpToPower = (stages[i].U/stages[i].rTip) * stageData.shaftStrength * Math.PI/2 * (Math.pow(stages[i].rShaft,4)-Math.pow(rPrev,4)) / stages[i].rShaft;
-				stages[i].usedTorquePower = Math.round(100*stages[i].rpmPower/torqueUpToPower)+' %';
+				stages[i].usedTorquePower = Math.round(100*stages[i].rpmPower/torqueUpToPower);
 				// Math.sqrt(stages[i].rpmPower/(stageData.shaftStrength*Math.PI) + rPrev*rPrev);
 				rPrevPrev = rPrev;
 				rPrev = stages[i].rShaft + stageData.shaftBearingSpace; // add 2 mm pipe thickness for bearings between pipes
@@ -6369,6 +6397,9 @@ console.log("***** New stageData.gearCenterDifference:"+stageData.gearCenterDiff
 			stages[i].shaftPush = pressureForce + stages[i].F;
 //console.log("nextPressure="+nextPressure+", p="+stages[i].p+", pressureForce="+pressureForce+", diff="+(nextPressure-stages[i].p)+"; stages[i].shaftPush="+stages[i].shaftPush+", stages[i].rShaft="+stages[i].rShaft);
 		}
+		for (i = stages.length-1; i >= 0; i--) {
+			stages[i].rShaftMm = stages[i].rShaft*1000;
+		}
 		if (gearCenterDifferenceScale > 1) {
 			stageData.gearCenterDifference = 0;
 			for (i = stages.length-1; i >= 0; i--) {
@@ -6408,8 +6439,10 @@ console.log("***** New stageData.gearCenterDifference:"+stageData.gearCenterDiff
 		titles.push('Pipe-out');
 		stageProps.push(titles);
 		first.diameter = inletPipeDiameter;
+		first.diameterMm = inletPipeDiameter*1000;
 		first.pRatio = stages[0].p / first.p;
 		last.diameter = exitPipeDiameter;
+		last.diameterMm = exitPipeDiameter*1000;
 		last.pRatio = last.p / stageData.hpExit.p;
 		stages[stages.length-1].pRatio /= last.pRatio;
 		var data = [];
@@ -6419,44 +6452,44 @@ console.log("***** New stageData.gearCenterDifference:"+stageData.gearCenterDiff
 		stageProps.push(getSheetValues('Temp K', 't', data ));
 		stageProps.push(getSheetValues('P kPa', 'p', data, 1000 ));
 		stageProps.push(getSheetValues('Vx m/s', 'v', data));
-		stageProps.push(getSheetValues('Diameter m', 'diameter', data, 3));
-		stageProps.push(getSheetValues('Enthalpy kJ/kg', 'h', data, 1000));
-		stageProps.push(getSheetValues('P2/P1', 'pRatio', data, 3));
+		stageProps.push(getSheetValues('D mm', 'diameterMm', data));
+		stageProps.push(getSheetValues('h kJ/kg', 'h', data, 1000));
+		stageProps.push(getSheetValues('P2/P1', 'pRatio', data, 2));
+		stageProps.push(getSheetValues('Flow m3/s', 'flowM3', data));
 		stageProps.push(getSheetValues('Power MW', 'stagePower', data, 1000000));
 		stageProps.push(getSheetValues('rpm', 'rpm', data));
-		stageProps.push(getSheetValues('Tip m', 'rTip', data, 3));
+		stageProps.push(getSheetValues('Load coefficient', 'stageLoadingCoefficient', data, 2));
+		stageProps.push(getSheetValues('Flow coefficient', 'flowCoefficient', data, 2));
+		stageProps.push(getSheetValues('rTip mm', 'rTipMm', data));
+		stageProps.push(getSheetValues('Hub/Tip', 'hubToTipRatio', data, 2));
+		stageProps.push(getSheetValues('Blade h mm', 'hBladeMm', data));
+		stageProps.push(getSheetValues('Chord mm', 'widthMm', data));
+		stageProps.push(getSheetValues('t/c % mid/hub', 'bladeThicknesses', data));
 		//if (stageData.constantDeltaH) 
 		{
-			stageProps.push(getSheetValues('Hub/Tip', 'hubToTipRatio', data, 3));
 			//stageProps.push(getSheetValues('Aspect ratio', 'aspectRatio', data, 3));
-			stageProps.push(getSheetValues('Stage loading coefficient', 'stageLoadingCoefficient', data, 3));
-			stageProps.push(getSheetValues('Flow coefficient', 'flowCoefficient', data, 3));
-			stageProps.push(getSheetValues('vRel in tip inlet', 'machRelTip', data, 3));
-			stageProps.push(getSheetValues('vRel in hub inlet', 'machRelHub', data, 3));
+			//stageProps.push(getSheetValues('Mach m/s', 'mach', data ));
+			//stageProps.push(getSheetValues('vRel tip inlet', 'machRelTip', data, 2));
+			//stageProps.push(getSheetValues('vRel hub inlet', 'machRelHub', data, 2));
 		}
-		stageProps.push(getSheetValues('Blade height mm', 'hBladeMm', data));
-		stageProps.push(getSheetValues('Chord mm', 'widthMm', data));
-		stageProps.push(getSheetValues('Blade t/c in tip/mid/hub', 'bladeThicknesses', data));
 		
 		//stageProps.push(getSheetValues('P coeff.', 'pRiseCoeffcient', data, 3));
 	
-		stageProps.push(getSheetValues('Mach m/s', 'mach', data ));
-		stageProps.push(getSheetValues('Flow m3/s', 'flowM3', data));
-		stageProps.push(getSheetValues('AN2 E08', 'AN2EXP8', data, 3));
-		stageProps.push(getSheetValues('Re(c) EXP06', 'cReText', data, 3 ));
-		stageProps.push(getSheetValues('Shaft radius m', 'rShaft', data, 3));
-		stageProps.push(getSheetValues('Shaft torque used', 'usedTorquePower', data));
+		stageProps.push(getSheetValues('AN2 E08', 'AN2EXP8', data, 2));
+		stageProps.push(getSheetValues('Re(c) EXP06', 'cReText', data, 2 ));
+		stageProps.push(getSheetValues('Shaft radius mm', 'rShaftMm', data));
+		stageProps.push(getSheetValues('Shaft torque %', 'usedTorquePower', data));
 		stageProps.push(getSheetValues('uShaft m/s', 'vShaft', data, 1 ));
 		stageProps.push(getSheetValues('uGear m/s', 'vGear', data, 1 ));
-		stageProps.push(getSheetValues('Axial force of blades N', 'F', data));
-		stageProps.push(getSheetValues('Yield moment stress mid/hub MPa', 'yieldMomentMidHubMPa', data));
+		stageProps.push(getSheetValues('Blades\' load kN', 'F', data, 1000));
+		stageProps.push(getSheetValues('Shaft load kN', 'shaftPush', data, 1000));
+		stageProps.push(getSheetValues('Yield moment MPa', 'yieldMomentMidHubMPa', data));
 		stageProps.push(getSheetValues('Centrifugal stress MPa', 'tensileStressMPa', data));
 		//stageProps.push(getSheetValues('Centr. stress of max', 'tensileStressPercent', data));
-		stageProps.push(getSheetValues('Total stress middle/hub', 'totalTensileStressPercentMidHub', data));
+		//stageProps.push(getSheetValues('Max stress mid/hub %', 'totalTensileStressPercentMidHub', data));
 		if (stages[stages.length-1].bladeCoolingK) {
 			stageProps.push(getSheetValues('Blade cooling K', 'bladeCoolingK', data));
 		}
-		stageProps.push(getSheetValues('Shaft push N', 'shaftPush', data));
 		stageData.stageProps = stageProps;
 
 		const hEff100 = Module.PropsSI('H', 'P', stageData.exit.p, 'S', first.s, name);
@@ -6479,11 +6512,9 @@ console.log("***** New stageData.gearCenterDifference:"+stageData.gearCenterDiff
 			//"Relative velocity on blade tip inlet surface: "+stageData.machMaxSpeed+" mach",
 			//"Relative velocity on blade hub inlet surface: "+myRound(stageData.machRelHub,3)+" mach",
 			"Max/min relative flow angle in blade tip/hub inlet β1: "+ myRound(stageData.β1deg, 1)+'/'+ myRound(stageData.hubβ1deg, 1)+'°',
+			"Axial velocity: "+myRound(stageData.vMach,3)+" mach"
 		];
 		//if (!stageData.constantDeltaH) 
-		{
-			titles.push("Axial velocity: "+myRound(stageData.vMach,3)+" mach");
-		}
 		stageData.height = 2 * (stageData.stages[0].rTip + 0.052); // 50 mm for frame, 2 mm for tip gap
 		
 		console.log("stages:"+JSON.stringify(stageData.stages));
@@ -6636,19 +6667,27 @@ console.log("***** New stageData.gearCenterDifference:"+stageData.gearCenterDiff
 				ctx.fillStyle = 'black';
 			}
 			if (tblId) {
-				tbl += "<tr><th>"+row[0]+"</th>";
+//console.log("row[1]="+row[1]+"#");
+				if (row[1] && row[1]!=' ') {
+					tbl += "<tr><th>"+row[0]+"</th>";
+				}
+				else {
+					tbl += "<tr><th colspan=\"2\">"+row[0]+"</th>";
+				}
 			}
 			if (drawOnPicture) ctx.fillText( row[0], x, y+i*cellHeightPx);
 			
 			ctx.font = i == 0 ? titleFont : cellFont;
 			for (j = 1; j < row.length; j++) 
 			{
-				if (tblId) {
-					if (i == 0) {
-						tbl += "<th>"+row[j]+"</th>";
-					}
-					else {
-						tbl += "<td>"+row[j]+"</td>";
+				if (j != 1 || (row[j] && row[1]!=' ')) {
+					if (tblId) {
+						if (i == 0) {
+							tbl += "<th>"+row[j]+"</th>";
+						}
+						else {
+							tbl += "<td>"+row[j]+"</td>";
+						}
 					}
 				}
 				if (drawOnPicture) ctx.fillText( row[j], cellWidthPx*0.7+j*cellWidthPx, y+i*cellHeightPx);
@@ -6660,6 +6699,7 @@ console.log("***** New stageData.gearCenterDifference:"+stageData.gearCenterDiff
 		if (tblId) {
 			$("#"+tblId).html(tbl);
 		}
+//console.log(tbl);
 	}
 	var gTotalPower = 0;
 	function drawCompressor( canvasId, stageData, mToPx ) {

@@ -149,9 +149,10 @@ th {
 <DIV>
 	<LABEL>Cost of gravel+stone wool insulation €/m3: </LABEL><INPUT size="4" id="costOfInsulationM3" type="float" value="25" onchange="metricsChanged()">
 	<LABEL>Cost of open pit mining €/m3: </LABEL><INPUT size="4" id="costOfMiningM3" type="float" value="12" onchange="metricsChanged()">
-	<LABEL>Cost of stainless steel sheet €/ton: </LABEL><INPUT size="4" id="costOfStainlessSteelPerTon" type="float" value="1500" onchange="metricsChanged()">
-	<LABEL>Cost of he plate processing €/m2: </LABEL><INPUT size="4" id="costOfSteelPlateProcessingPerM2" type="float" value="5" onchange="metricsChanged()">
-	<!--LABEL>Cost of above ground wall and roof €/m2: </LABEL><INPUT size="4" id="costOfWallAndRoofAboveM2" type="float" value="300" onchange="metricsChanged()"-->
+	<!--LABEL>Cost of stainless steel sheet €/ton: </LABEL><INPUT size="4" id="costOfStainlessSteelPerTon" type="float" value="1500" onchange="metricsChanged()">
+	<LABEL>Cost of he plate processing €/m2: </LABEL><INPUT size="4" id="costOfSteelPlateProcessingPerM2" type="float" value="5" onchange="metricsChanged()"-->
+	<LABEL>Cost of gravel storage roof and walls €/m2: </LABEL><INPUT size="4" id="costOfWallAndRoofAboveM2" type="float" value="300" onchange="metricsChanged()">
+	<LABEL>Cost of ice storage roof and walls €/m2: </LABEL><INPUT size="4" id="costOfIceStorageWallAndRoofIceM2" type="float" value="100" onchange="metricsChanged()">
 </DIV>
 <DIV>
 	<LABEL>Cost of turbomachinery power €/kW: </LABEL><INPUT size="4" id="tcCostOfKW" type="float" value="40" onchange="metricsChanged()">
@@ -183,10 +184,10 @@ th {
 <DIV>
 	<BUTTON onClick="simulateStorageHeatExchange()">Simulate heat exchange</BUTTON> 
 	<LABEL>Height resolution (m):</LABEL> <INPUT id="heSimulationStepLen" type="float" size="3" value="0.1">
-	<LABEL>Time resolution (s):</LABEL><INPUT id="heSimulationTimeResolution" type="text" size="4" value="900">
+	<LABEL>Time resolution (s):</LABEL><INPUT id="heSimulationTimeResolution" type="text" size="4" value="900"> <Input id="calcHeatExchangeCoeffcient" type="checkbox" title="Calculate temperatured difference caused by heat exchange coefficient">
 	<LABEL>Iterations:</LABEL><INPUT id="heSimulations" type="text" size="4" value="2">
-	<LABEL>Max temp difference in bottom, low pressure store:</LABEL><INPUT id="lpMaxLowDiff" type="text" size="4" value="2">
-	<LABEL>high pressure store:</LABEL><INPUT id="hpMaxLowDiff" type="text" size="4" value="25">
+	<LABEL>Max temp difference in low/high pressure storage bottom:</LABEL><INPUT id="lpMaxLowDiff" type="text" size="4" value="2"><INPUT id="hpMaxLowDiff" type="text" size="4" value="25">
+	<LABEL>and top:</LABEL><INPUT id="maxHighDiff" type="text" size="4" value="100">
 	<!--span id="liquidCoolStorages" style="display:none"> 
 		<LABEL>Liquid methane coolant capasity (GWh):</LABEL><INPUT id="lpLiquidStorageSizeGWh" type="text" size="4" value="95">
 		<LABEL>Cooling water capasity (GWh):</LABEL><INPUT id="hpLiquidStorageSizeGWh" type="text" size="4" value="115">
@@ -212,9 +213,9 @@ th {
 			<LABEL>Show the mass specific enthalpy (J/g) and entropy (J/g/K) lines</LABEL>
 		<div>
 		<canvas id="myCanvas" width="1000" height="800" style="border:1px solid #000000;display:none"></canvas>
-		<canvas id="lpHeatExchangeDiagram" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
-		<canvas id="hpHeatExchangeDiagram" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
-		<canvas id="usedHeatCapasitiesAndEnthalpies" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
+		<canvas id="lpHeatExchangeDiagram" width="500" height="400" style="border:1px solid #000000;display:none"></canvas>
+		<canvas id="hpHeatExchangeDiagram" width="500" height="400" style="border:1px solid #000000;display:none"></canvas>
+		<canvas id="usedHeatCapasitiesAndEnthalpies" width="500" height="400" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagram0" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagram1" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagram2" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
@@ -1734,65 +1735,37 @@ function getAverageRockHeatCapasitykJinKg(tLow, tHigh )
 		ret += (getRockHeatCapasityJinKgK(tLow) + getRockHeatCapasityJinKgK(tHigh))/2000 * (tHigh-tLow);
 		tLow = tHigh;
 	}
+	if (tLow < 200) {
+		const tLowHigh = tHigh < 200 ? tHigh : 200;
+		ret += (getRockHeatCapasityJinKgK(tLow) + getRockHeatCapasityJinKgK(tLowHigh))/2000 * (tLowHigh-tLow);
+		tLow = tLowHigh;
+	}
 	if (tLow < 293) {
 		const tLowHigh = tHigh < 293 ? tHigh : 293;
 		ret += (getRockHeatCapasityJinKgK(tLow) + getRockHeatCapasityJinKgK(tLowHigh))/2000 * (tLowHigh-tLow);
 		tLow = tLowHigh;
 	}	
-	if (tHigh > 733) {
-		const tHighLow = tLow > 733 ? tLow : 733;
-		ret += getRockHeatCapasityJinKgK(tHighLow)/1000*(tHigh - tHighLow);
-		tHigh = 733;
-	}
+	if (tLow < 473) {
+		const tLowHigh = tHigh < 473 ? tHigh : 473;
+		ret += (getRockHeatCapasityJinKgK(tLow) + getRockHeatCapasityJinKgK(tLowHigh))/2000 * (tLowHigh-tLow);
+		tLow = tLowHigh;
+	}	
+	if (tLow < 773) {
+		const tLowHigh = tHigh < 773 ? tHigh : 773;
+		ret += (getRockHeatCapasityJinKgK(tLow) + getRockHeatCapasityJinKgK(tLowHigh))/2000 * (tLowHigh-tLow);
+		tLow = tLowHigh;
+	}	
+	if (tLow < 1023) {
+		const tLowHigh = tHigh < 1023 ? tHigh : 1023;
+		ret += (getRockHeatCapasityJinKgK(tLow) + getRockHeatCapasityJinKgK(tLowHigh))/2000 * (tLowHigh-tLow);
+		tLow = tLowHigh;
+	}	
 	if (tLow < tHigh) {
 		ret += (getRockHeatCapasityJinKgK(tLow) + getRockHeatCapasityJinKgK(tHigh))/2000 * (tHigh-tLow);
 	}
 	ret = ret / deltaT;
 console.log("***getAverageRockHeatCapasitykJinKg("+tLowOrg+","+tHighOrg+")="+ret);
 	return ret;
-}
-
-function getAverageRockHeatCapasitykJinKgOld(tLow, tHigh )
-{
-	// Measured specific heat capacities for nonporous rock samples seems to decrease linearily between 293-773 K and to be constant above it
-	// we assume the the decrease continue in same rate below 293 K°C
-	const rockHeatCapasityAt293K = tHigh > 773 ? metrics.hpCp : metrics.lpCp;
-	const rockHeatCapasityAbove773K = rockHeatCapasityAt293K*1.3/0.8;
-	
-	const rockHeatCapasityDecreaseTo293 = (rockHeatCapasityAbove773K - rockHeatCapasityAt293K) / (773-293);
-	const rockHeatCapasityDecreaseBelow293 = rockHeatCapasityAt293K/(293-27);	// heat capasity is zero at 0 K
-	const tLowRockHeatCapasity = rockHeatCapasityAt293K + (tLow-293)*rockHeatCapasityDecreaseBelow293;
-	
-	if (tHigh > 773) {
-		ret = ((tLowRockHeatCapasity+rockHeatCapasityAbove773K)/2)*(773-tLow) / (tHigh - tLow) + rockHeatCapasityAbove773K * (tHigh - 773) / (tHigh - tLow);
-	}
-	else {
-		const tAveAbove293 = (rockHeatCapasityAt293K + (tHigh-293)*rockHeatCapasityDecreaseTo293);
-		const tAveBelow293 = (rockHeatCapasityAt293K + tLowRockHeatCapasity)/2;
-		ret = (293-tLow)/(tHigh-tLow) * tAveBelow293 + (tHigh-293)/(tHigh-tLow) * tAveAbove293;
-	}
-	//hc82K = rockHeatCapasityAt293K + (82-293)*rockHeatCapasityDecreaseFrom293;
-console.log("***getAverageRockHeatCapasitykJinKg("+tLow+","+tHigh+")="+ret+", rockHeatCapasityAbove773K="+rockHeatCapasityAbove773K+", tLowRockHeatCapasity="+tLowRockHeatCapasity);
-	return ret;
-}
-function getIceHeatCapasityKJinKgK(t)
-{
-		// ice heat capasity decrease by temp is almost linear
-		// https://www.aanda.org/articles/aa/pdf/2004/10/aa3290.pdf:
-		const iceCpAt79_98K =  0.7146;
-		const iceCpAt175_36K = 1.398;
-		const cp2cv = 1; // 0.925;  // cp/m3 => 
-		const cpAtT = iceCpAt79_98K + (t - 79.98)/(175.36-79.98)*(iceCpAt175_36K-iceCpAt79_98K);
-		return cpAtT*cp2cv;  // to CV kJ/kg to J/kg
-}
-
-function logHeatCapasities() {
-	for (t = 73; t <= 273; t += 5) {
-		console.log("Heat capasity MJ/M3 at "+t+": ice="+myRound(getRockHeatCapasityJinKgK(t,'ice')*metrics.lpGravelDensity/1000/metrics.crushedIceDensity,2)+ 
-			", crushed ice="+myRound(getRockHeatCapasityJinKgK(t,'ice')*metrics.lpGravelDensity/1000,2)+
-			", lp gravel="+myRound(getRockHeatCapasityJinKgK(t,'lp')*metrics.lpGravelDensity/1000,2)+
-			", hp gravel="+myRound(getRockHeatCapasityJinKgK(t,'lp')*metrics.gravelDensity/1000,2));
-	}
 }
 function getRockHeatCapasityJinKgK(t, type)
 {
@@ -1809,38 +1782,65 @@ function getRockHeatCapasityJinKgK(t, type)
 	// XXXX WRONG: 
 	// Use Olivine Cobalt as reference, or should we ask also debyes temp 
 	//const relCp = [{t:0.1*293/0.3, cp:4/16}, {t:0.1*293/0.3, cp:10/16}, {t:293, cp:16/16}];
+	// 658 K Debye below 20 C, normalized specific heat capasity of non porous rocks above it =>
+	// Ref
 	
-
 	// Measured specific heat capacities for nonporous rock samples seems to decrease linearily between 293-773 K and to be constant above it
 	// we assume the the decrease continue in same rate below 293 K°C
-	if (t > 773) {
-		return metrics.rockHeatCapasityAbove773K * 1000;
+	if (t >= 773) {
+		return (metrics.rockHeatCapasityAt773K + (t - 773)/(1023-773)*(metrics.rockHeatCapasityAt1023K - metrics.rockHeatCapasityAt773K)) * 1000;
+	}
+	else if (t >= 473) {
+		return (metrics.rockHeatCapasityAt473K + (t - 473)/(773-473)*(metrics.rockHeatCapasityAt773K - metrics.rockHeatCapasityAt473K)) * 1000;
 	}
 	else if (t >= 293) {
-		return (metrics.hpCp + (t-293)*metrics.rockHeatCapasityIncreaseFrom293) * 1000;
+		return (metrics.hpCp + (t-293)/(473-293)*(metrics.rockHeatCapasityAt473K-metrics.hpCp)) * 1000;
 	}
 	else if (t < 273 && ((metrics.topFillWithIceWithStorage && typeof type === 'undefined') || type=='ice')) {
 		// ice heat capasity decrease by temp is almost linear
 		// https://www.aanda.org/articles/aa/pdf/2004/10/aa3290.pdf:
-		const iceCpAt79_98K =  0.7146;
-		const iceCpAt175_36K = 1.398;
 		const cp2cv = metrics.crushedIceDensity;  // cp/m3
-		const cpAtT = iceCpAt79_98K + (t - 79.98)/(175.36-79.98)*(iceCpAt175_36K-iceCpAt79_98K);
+		const cpAtT = getIceHeatCapasityKJinKgK(t)
 		return cpAtT*cp2cv/metrics.lpGravelDensity * 1000;
+	}
+	else if (t >= 200) {
+		return (metrics.rockHeatCapasityAt200K + (t - 200)/(293-200)*(metrics.hpCp-metrics.rockHeatCapasityAt200K)) * 1000;
 	}
 	else {
 		// https://en.wikipedia.org/wiki/Debye_model for Gabbro: https://journals.squ.edu.om/index.php/squjs/article/viewFile/455/464:
 		// For gabbro the heat capasity at 82K is about 20% of that at Debyes temp 548 K
 		// and with a linear decrease its heat capasity would be zero at 27 K =>  
 		// This is a very raw estimation,  
-		return (metrics.hpCp - (293-t)*metrics.rockHeatCapasityDecreaseBelow293) * 1000;
+		return (metrics.rockHeatCapasityAt75K + (t - 75)/(200-75)*(metrics.rockHeatCapasityAt200K-metrics.rockHeatCapasityAt75K)) * 1000;;
 	}
-	
-/*
-	else {
-		return (metrics.hpCp - (293-t)*metrics.rockHeatCapasityDecreaseBelow293) * 1000;
+}
+function getIceHeatCapasityKJinKgK(t)
+{
+		// ice heat capasity decrease by temp is almost linear
+		// https://www.aanda.org/articles/aa/pdf/2004/10/aa3290.pdf:
+		const iceCpAt79_98K =  0.7146;
+		const iceCpAt99_57K = 0.8878;
+		const iceCpAt175_36K = 1.398;
+		const iceCpAt267_77K = 2.074;
+		var cpAtT;
+		if (t < 99.57) {
+			cpAtT = iceCpAt79_98K + (t - 79.98)/(99.57-79.98)*(iceCpAt99_57K-iceCpAt79_98K);
+		}
+		else if (t < 175.36)
+			cpAtT = iceCpAt99_57K + (t - 99.57)/(175.36-99.57)*(iceCpAt175_36K-iceCpAt99_57K);
+		else {
+			cpAtT = iceCpAt175_36K + (t - 175.36)/(267.77 - 175.36)*(iceCpAt267_77K-iceCpAt175_36K);
+		}
+		return cpAtT;  // to CV kJ/kg to J/kg
+}
+
+function logHeatCapasities() {
+	for (t = 73; t <= 273; t += 5) {
+		console.log("Heat capasity MJ/M3 at "+t+": ice="+myRound(getRockHeatCapasityJinKgK(t,'ice')*metrics.lpGravelDensity/1000/metrics.crushedIceDensity,2)+ 
+			", crushed ice="+myRound(getRockHeatCapasityJinKgK(t,'ice')*metrics.lpGravelDensity/1000,2)+
+			", lp gravel="+myRound(getRockHeatCapasityJinKgK(t,'lp')*metrics.lpGravelDensity/1000,2)+
+			", hp gravel="+myRound(getRockHeatCapasityJinKgK(t,'lp')*metrics.gravelDensity/1000,2));
 	}
-*/
 }
 	
 // https://www.aanda.org/articles/aa/pdf/2004/10/aa3290.pdf  Cp of water ice:
@@ -1901,10 +1901,10 @@ function getMetrics(pRatio, storageSize) {
 		//lpGravelDensity : getFloatParam('lpGravelDensity', 2.1 ),	// high density because it makes storage more compact and aboslute pressure drop does not matter in a high pressure
 		crushedIceDensity : getFloatParam('crushedIceDensity', 0.93*2.2/2.65),	// compacted gravel 2.1/2.65, ice is probably more packed
 		crushedIcePorosity : getFloatParam('crushedIcePorosity', 1 - 2.2/2.65),	// compacted gravel 2.1/2.65, ice is probably more packed
-		hpCp : getFloatParam('hpCp', 1.0),
-		lpCp : getFloatParam('hpCp', 0.9),
+		hpCp : getFloatParam('hpCp', 0.8),
+		lpCp : getFloatParam('lpCp', 0.8),
 		//rockHeatCapasityAt293K : getFloatParam('rockHeatCapasityAt293K', 0.8)*1000, // kJ/kg/K  at 293K !!!
-		//rockHeatCapasityAbove773K : getFloatParam('rockHeatCapasityAbove773K', 1.3 )*1000, // kJ/kg/K  (Cp increases from 20C to 500C and then stabilize 
+		//rockHeatCapasityAt773K : getFloatParam('rockHeatCapasityAt773K', 1.3 )*1000, // kJ/kg/K  (Cp increases from 20C to 500C and then stabilize 
 		maxPartLiquid : 0.01,   // spefic value is calculated later
 		maxTopFillAngle : getFloatParam('maxTopFillAngle', 50),
 		maxHotRockPressureMPa: getFloatParam('maxHotRockPressureMPa', 200),
@@ -1924,9 +1924,12 @@ function getMetrics(pRatio, storageSize) {
 		//concreteMaxStrengthMPa : 80	// for a very high quality rock-filled concrete could have >90 MPa
 	};
 	metrics = storageMetrics;
-	metrics.rockHeatCapasityAbove773K = metrics.hpCp * 1.3/0.8;
-	metrics.rockHeatCapasityIncreaseFrom293 = (metrics.rockHeatCapasityAbove773K - metrics.hpCp) / (773-293);
-	metrics.rockHeatCapasityDecreaseBelow293 = metrics.hpCp/(293 - 27);		// gabbro heat capasity would zero at 27 K, if heat capasity decrease would we linear to very end
+	metrics.rockHeatCapasityAt1023K = metrics.hpCp * 1.3/0.8;
+	metrics.rockHeatCapasityAt773K = metrics.hpCp * 1.2/0.8;
+	metrics.rockHeatCapasityAt473K = metrics.hpCp * 1.0/0.8;
+	metrics.rockHeatCapasityAt200K = metrics.hpCp*0.78;		// gabbro heat capasity would zero at 27 K, if heat capasity decrease would we linear to very end
+	metrics.rockHeatCapasityAt75K = metrics.hpCp*0.225;		// gabbro heat capasity would zero at 27 K, if heat capasity decrease would we linear to very end
+	metrics.rockHeatCapasityDecreaseBelow163 = metrics.rockHeatCapasityAt200K/(163 - 27);		// gabbro heat capasity would zero at 27 K, if heat capasity decrease would we linear to very end
 	
 	metrics.tEfficiency = getFloatParam('tEfficiency', 0.97);
 	metrics.cEfficiency = getFloatParam('cEfficiency', metrics.tEfficiency);
@@ -2507,11 +2510,14 @@ console.log("Reynold's number in high pressure storage:"+Re);
 		ret.sideVolume = Math.PI/3*ret.height*(rExtBottom*rExtBottom + rExtBottom*rExtTop + rExtTop*rExtTop) - ret.sizeM3;
 		ret.earthWorkVolume = (ret.sideVolume*2.1/2.65);
 		ret.depth = ret.earthWorkVolume / (Math.PI*rExtBottom*rExtBottom);
-		
+
+		const uValueInCold = 0.030; // u-value decrease in very cold
+		const insluationCostPerM3 = 30; 
+
 		// XPS min temperature is -50 => gravel+biochar/rock wool must be used inner parts!!!
-		ret.insForTop = (280-tMin)*metrics.uOfGravelrockwoolMix/metrics.maxHeatFlowOut*0.80;	// about 25% can be done with XPS having at least three times better U-value/euro
+		ret.insForTop = (280-tMin)*uValueInCold/metrics.maxHeatFlowOut;	// about 25% can be done with XPS having at least three times better U-value/euro
 		ret.insForBottom = (280-tMin)*metrics.uOfGravelrockwoolMix/metrics.maxHeatFlowOut;
-		ret.insForSide = (280-tMin)*metrics.uOfGravelrockwoolMix/metrics.maxHeatFlowOut*0.80; // + 10 m frozen gravel earth mix
+		ret.insForSide = (280-tMin)*uValueInCold/metrics.maxHeatFlowOut; // + 10 m frozen gravel earth mix
 		const costOfColdChannelsM2 = getFloatParam('costOfColdChannelsM2', getFloatParam('costOfChannelsM2', 25)/ 4);	// 25 % of hot channel cost 
 		ret.getArea = function( h ) {
 			const r = this.rTop + (this.rBottom-this.rTop)* (this.height-h) / this.height;
@@ -2520,11 +2526,13 @@ console.log("Reynold's number in high pressure storage:"+Re);
 		// ice is produced with 1.3m * 
 		console.log("walls:"+ (metrics.costOfMiningM3*ret.earthWorkVolume) +
 				   "\n\rchannels:"+ (0.25 * costOfColdChannelsM2*(ret.getArea(0) + ret.getArea(ret.height))) + 
-				   "\n\rIce storage insulation:"+(getFloatParam('costOfInsulationM3', 25)*(ret.getArea(ret.height)*ret.insForTop+ret.getArea(0)*ret.insForBottom + ret.sideArea*ret.insForSide)) +
+				   "\n\rIce storage insulation:"+getFloatParam('costOfInsulationM3', 25)*(ret.getArea(0)*ret.insForBottom) + insluationCostPerM3*(ret.insForTop*ret.getArea(ret.height)+ret.sideArea*ret.insForSide)+
+				   "\n\rIce storage wall and roof:"+ getFloatParam('costOfIceStorageWallAndRoofIceM2', 100)*(ret.getArea(ret.height)+ret.sideArea)+
 				   "\n\rIce work cost:" + (ret.totalMassInTons * getFloatParam("iceWorkCostPerTon", 3))); // 
 		ret.cost = metrics.costOfMiningM3*ret.earthWorkVolume + 	// earth walls and cover of ice
 				   0.25 * costOfColdChannelsM2*(ret.getArea(0) + ret.getArea(ret.height)) + // Frozen earth can be used instead of concrete, and channel network simpler too, estimate cost 25% of hot channels
-				   getFloatParam('costOfInsulationM3', 25)*(ret.getArea(ret.height)*ret.insForTop+ret.getArea(0)*ret.insForBottom + ret.sideArea*ret.insForSide)+	// insulation cost
+				   getFloatParam('costOfInsulationM3', 25)*(ret.getArea(0)*ret.insForBottom) + insluationCostPerM3*(ret.insForTop*ret.getArea(ret.height)+ret.sideArea*ret.insForSide)	// insulation cost
+				   + getFloatParam('costOfIceStorageWallAndRoofIceM2', 100)*(ret.getArea(ret.height)+ret.sideArea)
 				   + ret.totalMassInTons * getFloatParam("iceWorkCostPerTon", 4); // depends on distance of the ice 
 console.log("External ice storage:"+JSON.stringify(ret, null, 2));
 		return ret;
@@ -2600,7 +2608,7 @@ console.log("tMin changed, tSat="+tSat);
 		// ice is produced with 1.3m * 
 		console.log("earth walls:"+ (getFloatParam("costOfEarthWorkM3",metrics.costOfMiningM3/2) *ret.earthWorkVolume) +
 				   "\n\rchannels:"+ (2 * costOfColdChannelsM2*ret.areaM2) + 
-				   "\n\rIce storage insulation:"+(getFloatParam('costOfInsulationM3', 25)*ret.areaM2*(ret.insForTop+ret.insForBottom)) +
+				   "\n\rIce storage cover and insulation:"+(getFloatParam('costOfInsulationM3', 25)*ret.areaM2*(ret.insForTop+ret.insForBottom)) +
 				   "\n\rwork cost:" + (ret.totalMassInTons * getFloatParam("iceWorkCostPerTon", 3))); // 
 		ret.cost = metrics.costOfMiningM3*ret.depth*ret.areaM2 + 	// earth walls and cover of ice
 				   0.25 * 2 * costOfColdChannelsM2*ret.areaM2 + // Frozen earth can be used instead of concrete, and channel network simpler too, estimate cost 25% of hot channels
@@ -2740,7 +2748,6 @@ console.debug("totA="+totA+", pipeA="+pipeA+", diameter="+diameter+", totalFlowA
 					return ret.pDropLow;
 				}, 15);
 			ret.volumeM3 = ret.totalCrossAreaM2*ret.length;
-
 			return ret;
 		}
 		const flowTP = function (massFlowKg, t, p ) {
@@ -3134,6 +3141,8 @@ console.log(cache.gravelMin+"/"+cache.gravelMax+" gravel m3 surface area:"+cache
 			// NuDp = h * Dp / k => h = NuDp*k/Dp; 
 			const heCofficient = NuDp * cache.CONDUCTIVITY[tIndex] / cache.medianDP;
 			// the heat exhange power in 1 m3 of gravel
+			//item.NuDp = NuDp; 
+			//item.heCofficient = heCofficient;
 			item.heCofficientInM3 = heCofficient*cache.m3Area;
 			//console.log("heCofficientInM3="+heCofficientInM3+" W/K, G="+G+", ReDp="+ReDp+", NuDp="+NuDp+", heCofficient="+heCofficient+", tGas="+tGas);
 		}
@@ -3157,14 +3166,9 @@ console.log(cache.gravelMin+"/"+cache.gravelMax+" gravel m3 surface area:"+cache
 			item.deltaH = item.hGasOut-hGas;
 			item.hGasOut = hGas;
 			item.tRock = tGas;
+			item.deltaT = 0;
 			return true; 	// OK, no heat exchange is possible
 		}
-		// The gas flow is 14-50 g/m2 => its enthalpy is very small compared to the heat exchange capabilty of Gravel
-		// So we can assume, that after 1h heatin/cooling the rock temp is the same as incoming gas temp (and enthalpy) difference with rock temp is lost in the heat exchange.
-		// If the incoming gas temp is the max or min temp, the actual gas ethalpy change is only half of the enthalpy of temp difference.
-		// Otherwise the gravel-gas temp diff and enthapy are constant, because the temp of incoming gas increase in the same time with gravel temp
-		// heCofficient and temp diff are ignored for now 
-		// 
 		const tRock = item.tRock;
 		const rockHC = getRockHeatCapasityJinKgK((tRock+tGas) / 2, item.type);
 		var hGasOut, tRockNew = tRock;
@@ -3175,11 +3179,11 @@ console.log(cache.gravelMin+"/"+cache.gravelMax+" gravel m3 surface area:"+cache
 console.log("Fixed hGas: tGas="+tGas+", tRock="+tRock+", hGas="+hGas+"->"+hGasOut+", hRock="+hRockTest);
 			//return false;
 		}
-		//hGasOut = getEnthalpy( cache, tRockNew );
-		//const deltaRockHeat = rockHC*cache.gravelDensityKgInM3*(tRockNew-tRock)*cache.stepLen;
-		//const deltaGasHeat = cache.rockHeatingTime*(hGasOut-hGas)*G;
-		// cache.rockHeatingTime*(hGasOuts-hGas)*G = rockHC*cache.gravelDensityKgInM3*(tRockNew-tRock);
-		// hGasOut = enthalpy(T2);
+		// The gas flow is 14-50 g/m2 => its enthalpy is very small compared to the heat exchange capabilty of Gravel
+		// So we can assume, that after 1h heatin/cooling the rock temp is the same as incoming gas temp (and enthalpy) difference with rock temp is lost in the heat exchange.
+		// If the incoming gas temp is the max or min temp, the actual gas ethalpy change is only half of the enthalpy of temp difference.
+		// Otherwise the gravel-gas temp diff and enthapy are constant, because the temp of incoming gas increase in the same time with gravel temp
+		// heCofficient can be udes to calc the temp difference of gas and rock
 		if (!testResult( 0, tGas < tRock ? tGas : tRock, tGas < tRock ? tRock : tGas, 10,	// diff in Joules, typical amount per K: 800*2100(kg/m3)/K for gravel, 1(J/g/K)*35(g/s)*3600s for gas
 			function (t) { 
 					tRockNew = t;
@@ -3212,6 +3216,8 @@ console.log((dbgCount++)+":t="+t+"=> hGasOut="+hGasOut+", hGas="+hGas+", diff: "
 		item.deltaH = hGasOut-hGas;	// enthalpy change of gas
 		item.hGasOut = hGasOut;
 		item.tRock = tRockNew;
+		// deltaT == difference of rock and gas temprature in the slice
+		item.deltaT = calcMaxHeatExchange ? item.deltaH*G/(cache.stepLen*item.heCofficientInM3) : 0;
 
 		if (!item.tRock || !item.hGasOut) { //  || !item.tGas || item.tGas<cache.tLow || item.tGas>cache.tHigh || !rockHC
 			console.log((!item.tRock)+" || "+(item.tRock<cache.tLow)+" || "+(item.tRock>cache.tHigh)); //+" || "+(!item.tGas)+" || "+(item.tGas<cache.tLow)+" || "+(item.tGas>cache.tHigh)+" || "+(!rockHC));
@@ -3251,10 +3257,12 @@ console.log((dbgCount++)+":t="+t+"=> hGasOut="+hGasOut+", hGas="+hGas+", diff: "
 		const stepLen = 	  getFloatParam("heSimulationStepLen", 0.1);	// the height (m) of each calclulated storace slice
 		const rockHeatingTime = getIntParam("heSimulationTimeResolution", 900);	// the resolution time in seconds
 		const lpMaxLowDiff = 	getIntParam("lpMaxLowDiff", 50);
-		const lpMaxHighDiff = 	getIntParam("lpMaxHighDiff", 100);
+		const lpMaxHighDiff = 	getIntParam("lpMaxHighDiff", getIntParam("maxHighDiff",100));
 		const hpMaxLowDiff = 	getIntParam("hpMaxLowDiff", swapTHighLpAndTLowHp ? 200 : 50);
-		const hpMaxHighDiff = 	getIntParam("hpMaxHighDiff", 100);		// die fast??
+		const hpMaxHighDiff = 	getIntParam("hpMaxHighDiff", getIntParam("maxHighDiff",100));		// die fast??
 		const simulations = getIntParam("heSimulations", 2 );
+		const calcHeatExchangeCoeffcient = getBooleanParam("calcHeatExchangeCoeffcient", false );
+console.log("calcHeatExchangeCoeffcient="+calcHeatExchangeCoeffcient);		
 		/*
 		const lpLiquidStorageSizeGWh= name != 'Argon' ? 0.0000001 : getIntParam("lpLiquidStorageSizeGWh", 95);
 		const hpLiquidStorageSizeGWh= name != 'Argon' ? 0.0000001 : getIntParam("hpLiquidStorageSizeGWh", 115);
@@ -3568,7 +3576,14 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 			arraysOfVals.push(iceCp);
 			arraysOfVals.push(rockH);
 			arraysOfVals.push(iceH);
-			drawDiagram4Y( id, xVals, 'K', arraysOfVals, yTitles, "Crushed ice and gravel heat capasities and enthalpies in this simulation", bottomLines );
+
+			showIceEndEnthalpy = function (ctx, dg) {
+				const i = iceH.length-1;
+				ctx.font = "12px Arial";
+				ctx.fillStyle = 'blue';
+				ctx.fillText( Math.round(iceH[i]/metrics.crushedIceDensity)+" kJ/kg", toX(dg, xVals[i]), toY(dg, iceH[i]));
+			};
+			drawDiagram4Y( id, xVals, 'K', arraysOfVals, yTitles, "Crushed ice and gravel heat capasities and enthalpies in this simulation", bottomLines, null, showIceEndEnthalpy );
 		}
 		
 		drawHeatExchangeDiagram = function( id, items, title, initialTemps, minMaxDefault ) 
@@ -3631,13 +3646,12 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 				arrayOfyVals[3].push(items[h].tRock);
 			}
 		*/
-	//XXXXX
 	//console.log(JSON.stringify(arrayOfyVals))
 			drawDiagram4Y( id, xVals, 'm', arrayOfyVals, yTitles, title, bottomLines, minMaxDefault);
 		}
-		readYVals = function(items) {
+		readYVals = function(items, addDeltaT) {
 			yVals = [];
-			for (j = 0; j < items.length; j++) yVals.push(items[j].tRock);
+			for (j = 0; j < items.length; j++) yVals.push(items[j].tRock + (addDeltaT && items[j].deltaT ? items[j].deltaT : 0));
 			return yVals;
 		}
 		//const lpMaxLowDiff = 2, lpMaxHighDiff  = 20 , hpMaxLowDiff = 20, hpMaxHighDiff = 40;
@@ -3673,11 +3687,11 @@ console.log("drawIceStorage...");
 			ctx.lineWidth = 2;
 			ctx.stroke();
 			ctx.font = "12px Arial";
+			ctx.fillStyle = 'blue';
 			var text = "tMax="+Math.round(tMaxIceStorage)+" K";
 			ctx.fillText( text, toX(dg,hIce/2),toY(dg,tMaxIceStorage)); // -ctx.measureText(text).width
 			ctx.font = "16px Arial";
-			text = myRound(cycleData.iceStorage.totalMassInTons/1000000,1)+" mt ice storage for cold";
-			ctx.fillStyle = 'blue';
+			text = myRound(cycleData.iceStorage.totalMassInTons/1000000,1)+" mt ice storage";
 			ctx.fillText( text, toX(dg,0)+10,toY(dg,tMaxIceStorage/2));
 
 			ctx.beginPath();
@@ -3697,48 +3711,75 @@ console.log("drawIceStorage...");
 		lpArraysOfVals = [], hpArraysOfVals = [], bottomLines = [];
 		//const lpMaxLowDiff = 1, lpMaxHighDiff  = 20 , hpMaxLowDiff = 10, hpMaxHighDiff = 50;
 console.log("Starting...");
+		maxLpOutDeltaT = maxHpOutDeltaT = 0;
+		minLpOutDeltaT = minHpOutDeltaT = 0;
 		for (i = 0; i < simulations; i++) {
 			hCount = 0;
+			var tLpOut, tHpOut;
 			do {
-				if (!simulateDischarge( false, 1)) {
+				if (!simulateDischarge( calcHeatExchangeCoeffcient, 1)) {
 					console.log("hCount="+hCount);
 					return;
 				}
 				//console.log(hCount+":9.t="+hpTemps[9].tRock+",h="+hpTemps[9].hGasOut+";10.t="+hpTemps[10].tRock+",h="+hpTemps[10].hGasOut+";11.t="+hpTemps[11].tRock+",h="+hpTemps[11].hGasOut);
 				hCount += rockHeatingTime/3600;
-			} while (hpTemps[hpTemps.length-1].tRock>(tHighHp-hpMaxHighDiff) && lpTemps[0].tRock<(tLowLp+lpMaxLowDiff));
-			console.log("Reason NOT:"+hpTemps[hpTemps.length-1].tRock+">"+(tHighHp-hpMaxHighDiff)+" && "+lpTemps[0].tRock+"<"+(tLowLp+lpMaxLowDiff)+", hCount="+hCount);
+				if (Math.abs(minLpOutDeltaT) < Math.abs(lpTemps[0].deltaT)) minLpOutDeltaT = lpTemps[0].deltaT;
+				if (Math.abs(maxHpOutDeltaT) < Math.abs(hpTemps[hpTemps.length-1].deltaT)) maxHpOutDeltaT = hpTemps[hpTemps.length-1].deltaT;
+				tLpOut = lpTemps[0].tRock + lpTemps[0].deltaT;
+				tHpOut = hpTemps[hpTemps.length-1].tRock + hpTemps[hpTemps.length-1].deltaT;
+			} while (tHpOut>(tHighHp-hpMaxHighDiff) && tLpOut<(tLowLp+lpMaxLowDiff));
+			console.log("Reason NOT:"+tHpOut+">"+(tHighHp-hpMaxHighDiff)+" && "+tLpOut+"<"+(tLowLp+lpMaxLowDiff)+", hCount="+hCount);
 //console.log("hpLiquidStorage="+JSON.stringify(hpLiquidStorage));
-			console.log("Discharged "+hCount+" hours");
+			console.log("Discharged "+hCount+" hours, minLpOutDeltaT="+minLpOutDeltaT+", maxHpOutDeltaT="+maxHpOutDeltaT);
 			lpArraysOfVals.push(readYVals(lpTemps));
 			hpArraysOfVals.push(readYVals(hpTemps));
-			bottomLines.push("After "+Math.round(hCount)+" hours discharge"); // : "+getUnusedLength(lpHeCache));
+			bottomLines.push("Gravel temp after "+Math.round(hCount)+" hours discharge"); // : "+getUnusedLength(lpHeCache));
+
+			if (calcHeatExchangeCoeffcient && i == (simulations-1)) {
+				lpArraysOfVals.push(readYVals(lpTemps, true));
+				hpArraysOfVals.push(readYVals(hpTemps, true));
+				bottomLines.push("Gas temperature in last discharge (dots)"); // : "+getUnusedLength(lpHeCCache));
+			}
 
 			hCount = 0;
 			for (;;) {
-				if (!simulateCharge( false, 1)) return;
+				if (!simulateCharge( calcHeatExchangeCoeffcient, 1)) return;
 				if (false && i == 0 && hCount==0) {
 					console.log(JSON.stringify(hpTemps));
 					return;
 				}
 				hCount += rockHeatingTime/3600;
-				if (hpTemps[0].tRock>(tLowHp+hpMaxLowDiff) 
-					|| lpTemps[lpTemps.length-1].tRock<=(tHighLp-lpMaxHighDiff) ) {
-					console.log("Reason:"+hpTemps[0].tRock+">"+(tLowHp+hpMaxLowDiff)+", hCount="+hCount);
+				if (Math.abs(maxLpOutDeltaT) < Math.abs(lpTemps[lpTemps.length-1].deltaT)) maxLpOutDeltaT = lpTemps[lpTemps.length-1].deltaT;
+				if (Math.abs(minHpOutDeltaT) < Math.abs(hpTemps[0].deltaT)) minHpOutDeltaT = hpTemps[0].deltaT;
+
+				tLpOut = lpTemps[lpTemps.length-1].tRock + lpTemps[lpTemps.length-1].deltaT;
+				tHpOut = hpTemps[0].tRock + hpTemps[0].deltaT;
+				if (tHpOut>(tLowHp+hpMaxLowDiff) || tLpOut<=(tHighLp-lpMaxHighDiff) ) 
+				{
+					console.log("Reason NOT:"+tLpOut+">"+(tHighLp-lpMaxHighDiff)+" && "+tHpOut+"<"+(tLowHp+hpMaxLowDiff)+", hCount="+hCount);
 					break;
 				}
-				if (!swapTHighLpAndTLowHp) {
-					if (lpTemps[lpTemps.length-1].tRock<=(tHighLp-lpMaxHighDiff)) {
-						console.log("Reason NOT:"+lpTemps[lpTemps.length-1].tRock+">"+(tHighLp-lpMaxHighDiff)+" && "+hpTemps[0].tRock+"<"+(tLowHp+hpMaxLowDiff)+", hCount="+hCount);
+				/*if (!swapTHighLpAndTLowHp) {
+					if (tLpOut<=(tHighLp-lpMaxHighDiff)) {
+						console.log("Reason:"+tLpOut+">"+(tLowHp+hpMaxLowDiff)+", hCount="+hCount);
 						break;
 					}
-				}
+				}*/
 			}
-			console.log("Charged "+hCount+" hours");
+			console.log("Charged "+hCount+" hours, maxLpOutDeltaT="+maxLpOutDeltaT+", minHpOutDeltaT="+minHpOutDeltaT);
 			lpArraysOfVals.push(readYVals(lpTemps));
 			hpArraysOfVals.push(readYVals(hpTemps));
-			bottomLines.push("After "+Math.round(hCount)+" hours charge"); // : "+getUnusedLength(lpHeCCache));
+			bottomLines.push("Gravel temp after "+Math.round(hCount)+" hours charge"); // : "+getUnusedLength(lpHeCCache));
+			
+			if (calcHeatExchangeCoeffcient && i == (simulations-1)) {
+				lpArraysOfVals.push(readYVals(lpTemps, true));
+				hpArraysOfVals.push(readYVals(hpTemps, true));
+				bottomLines.push("Gas temperature in last charge (dots)"); // : "+getUnusedLength(lpHeCCache));
+			}
 		}
+//console.log("lpTemps="+JSON.stringify(lpTemps));
+//console.log("hpTemps="+JSON.stringify(hpTemps));
+
 //console.log("lpHeCCache="+JSON.stringify(lpHeCCache.SAT_ENTHALPY.slice(0, 30)));
 //console.log("lpHeCache="+JSON.stringify(lpHeCache.SAT_ENTHALPY.slice(0, 30)));
 console.log("Showing diagarm...");
@@ -4062,10 +4103,13 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 					const hInMaxToIceStorage = Module.PropsSI('H', 'P', coldCompressor.pIn, 'T', tInMaxToIceStorage, name);
 					tc.lpGravelVolume = (hotCompressor.hIn - hInMaxToIceStorage) / 
 						(1000*metrics.lpGravelDensity*getAverageRockHeatCapasitykJinKg(tInMaxToIceStorage,hotCompressor.tIn)*(hotCompressor.tIn-tInMaxToIceStorage));
-					tc.lpGravelWeight =  tc.lpGravelVolume * metrics.lpGravelDensity;
+					tc.lpGravelWeight =  tc.lpGravelVolume * metrics.lpGravelDensity * 0.95;
+				}
+				else {
+					tc.lpGravelWeight *= 1.92;	// because of very low rock heat capasity at 76 K (see wiki Debye model)
 				}
 			}
-			tc.changeKg = tc.hpStorageChange + tc.lpStorageChange;
+			tc.changeKg1000 = tc.hpStorageChange + tc.lpStorageChange;
 console.log("tc="+JSON.stringify(tc, null, 2));
 			return tc;
 	}
@@ -4124,6 +4168,7 @@ console.log("tc="+JSON.stringify(tc, null, 2));
 		var mainHeatExchanger;
 		const compressorMassFlow = powerAndHeat ? turbinMassFlow/1.255 : turbinMassFlow/1.085;/// APPROXIMATION TO CALC THE PRESSURE DROPS!!!
 		// Main charge process, the compression from warm pLow => hot pHigh calculated as reverse turbin, because we we know only the high temperature
+		var tc;
 		if (true) { //cryogenicCooling) {
 			var mainCompressor = doAdiabaticProcessWithS( name, pHighFromCompressor, pLowInCompressor, tHighActual, 1/cEfficiency,showLog ? "Hot compressor" : null, null, powerAndHeat ? null : mainTurbin.tOut-warmHeatExchangerLoss )
 			mainCompressor.massFlow = compressorMassFlow;
@@ -4274,7 +4319,7 @@ console.log("chargePDrops:"+JSON.stringify(chargePDrops, null, 2));
 /*
 "rockDensity":2.65,"gravelDensity":2.1,"insGravelDensity":1.6,"rockHeatCapasity":0.8,"hpAverageGravelDensity":2.0019739765394906,*/
 			// gas budjet in turbin case: 
-			const tc = getEnergyLevelChangeOf1000KgGasFlow( mainCompressor, coldCompressor);
+			tc = getEnergyLevelChangeOf1000KgGasFlow( mainCompressor, coldCompressor);
 			metrics.maxPartLiquid=tc.maxPartLiquid;
 			metrics.lpGasVolume = tc.lpGasVolume;
 /*{
@@ -4314,7 +4359,7 @@ console.log("pLowColdCompressor:"+pLowColdCompressor+" = "+pLow+" - "+dischargeP
 console.log("pLowColdExpander:"+pLowColdExpander+" = "+pLowInCompressor+" + "+chargePDrops.inColdStorage+" + "+chargePDrops.fromColdExpander);
 			const pHighColdExpander = pHigh - chargePDrops.inHotStorage - chargePDrops.toColdExpander;
 
-			var wetness = name == 'Helium' ? 0 : Math.abs(tc.changeKg/1000);		// wetness in discharge!
+			var wetness = name == 'Helium' ? 0 : Math.abs(tc.changeKg1000/1000);		// wetness in discharge!
 			const wetnessOfColdExpander = name == 'Helium' ? 0 : powerAndHeat ? getWetnessOfP2( name, pLowColdCompressor, pLowColdExpander, wetness ) : wetness;
 console.log(pLowColdExpander+", "+pHighColdExpander+", "+wetnessOfColdExpander+", wetness="+wetness);
 // 97341.00906709408+ +2473574.4313408597, 0.0033383167053469896, wetness=0.0033383167053469896
@@ -4399,6 +4444,7 @@ console.log("Heat pump hCooled="+hCooled);
 */		
 		const cycleData = {};
 		cycleData.mainHeatExchanger = mainHeatExchanger;
+		cycleData.tc = tc;
 
 		if (cryogenicCooling && coldCycle.length>2) {
 			if (name == 'Helium') {
@@ -4565,12 +4611,13 @@ console.log("Average Cp ("+hotCycle[1].tIn+"-"+hotCycle[0].tIn+")="+getAverageRo
 		else {
 			if (metrics.externalIceStorage) {
 				cycleData.iceStorage = getExternalIceStorage(coldCycle[0].tIn);
-				// only 50% of theoretical max capasity is available because of low Cp in cryogenic temprerature
-				cycleData.hpStorageHeatCapacity = 710/1347 * 1000*getAverageRockHeatCapasitykJinKg(coldCycle[0].tOut,hotCycle[0].tIn)*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(hotCycle[0].tIn-coldCycle[0].tOut);
+				// With the reference rock heat capasity, temperature and pressure difference
+				// 53% of theoretical max capasity is available because of low Cp in cryogenic temprerature // 710/1347
+				cycleData.hpStorageHeatCapacity = 0.53 * 1000*getAverageRockHeatCapasitykJinKg(coldCycle[0].tOut,hotCycle[0].tIn)*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(hotCycle[0].tIn-coldCycle[0].tOut);
 			}
 			else {
 				// only 20% of theoretical max capasity is available because of low rock Cp in cryogenic temprerature
-				cycleData.hpStorageHeatCapacity = 0.20 * 1000*getAverageRockHeatCapasitykJinKg(coldCycle[0].tOut,hotCycle[0].tIn)*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(hotCycle[0].tIn-coldCycle[0].tOut);
+				cycleData.hpStorageHeatCapacity = 1/2.36 * 1000*getAverageRockHeatCapasitykJinKg(coldCycle[0].tOut,hotCycle[0].tIn)*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(hotCycle[0].tIn-coldCycle[0].tOut);
 			}
 			cycleData.dischargeTimeS = cycleData.hpStorageHeatCapacity / ((hotCycle[0].hIn - coldCycle[0].hOut) * 1000 * hotCycle[0].massFlow); // 
 		}
@@ -4622,8 +4669,47 @@ console.log("*****"+tHigh+": metrics.otherCostOfKW="+metrics.otherCostOfKW+", cy
 	function getLpExpansion( cycleData, length ) {
 		return length * (cycleData.hotCycle[1].tIn-cycleData.coldCycle[1].tOut)/metrics.lpGravelExpansionIn100K;
 	}
-	
+
+
 	function getHeatExchangeWidth(tHigh, tLow, p, r, massFlow, gravelMinMM, gravelMaxMM, porosity, deltaT ) 
+	{
+		// all gravel particles are perfect balls => shapeFactor = 1,  if perfect cubics sape factor = 1.91, 2 is probably a low end estimation
+		const gravelMax = gravelMaxMM/1000; 
+		const gravelMin = gravelMinMM/1000;
+		const medianDP = (gravelMin+gravelMax)/2;
+		const shapeFactor = 2; // for the irregular surface, shape and high aspect ratio
+		const dStep = (gravelMax - gravelMin) / 10;
+		var m3A = 0, pD;
+		for (pD = gravelMin; pD < gravelMax; pD += dStep) {
+			m3A += (4 * Math.PI * Math.pow(pD/2, 2)    	// surface area of perfect ball : 4*PI*r*r
+					* 1 / (Math.PI * 4 * Math.pow(pD/2,3)/3))	// number of items / m3, ignore here the porosity of balls
+		}
+		const m3Area = shapeFactor*(1-porosity)*m3A/10;
+		const G = massFlow * 1000 / (Math.PI * r * r);
+		const tStep = (tHigh-tLow)/10;
+		var width = 0;
+		while (!isFinite(Module.PropsSI('H', 'T', tLow, 'P', p, name))) tLow += 0.1;
+
+		const deltaStepQm2 = G*(Module.PropsSI('H', 'T', tHigh, 'P', p, name) - Module.PropsSI('H', 'T', tLow, 'P', p, name)) / 10;
+
+		for (t = tHigh - tStep/2; t > tLow; t-= tStep) {
+			const VISCOSITY = Module.PropsSI('VISCOSITY', 'T', t, 'P', p, name);
+			const PRANDTL = Module.PropsSI('PRANDTL', 'T', tLow, 'P', p, name);
+			const CONDUCTIVITY = Module.PropsSI('CONDUCTIVITY', 'T', tLow, 'P', p, name);
+			// https://shop.tarjomeplus.com/UploadFileEn/TPLUS_EN_4259.pdf
+			const ReDp = G*medianDP / (6*(1-porosity)*VISCOSITY);
+			const NuDp = 8.74+9.34*Math.pow(6*(1-porosity), 0.2)*Math.pow(ReDp, 0.2)*PRANDTL;
+			// NuDp = h * Dp / k => h = NuDp*k/Dp; 
+			const heCofficient = NuDp * CONDUCTIVITY / medianDP;
+			//const NuDp2 =  0.789*(6*(1-porosity))*Math.pow(ReDp, 0.49)*Math.pow(PRANDTL,1/3); // 0.5 of prev 
+console.log(t+"/"+p+": ReDp="+ReDp+", NuDp="+NuDp+" => heCofficient="+heCofficient);
+			//  the heat exhange power in 1 m3 of gravel
+			width += deltaStepQm2/(heCofficient*m3Area*deltaT);
+		}
+		return width;
+	}
+	
+	function getHeatExchangeWidthOld(tHigh, tLow, p, r, massFlow, gravelMinMM, gravelMaxMM, porosity, deltaT ) 
 	{
 		// First calculate the area/m3
 		var m3A = 0;
@@ -4640,16 +4726,22 @@ console.log("*****"+tHigh+": metrics.otherCostOfKW="+metrics.otherCostOfKW+", cy
 		
 		// heat transfer in convection:
 		// https://www.engineeringtoolbox.com/convective-heat-transfer-d_430.html,  2 b) approximation for dry air, for air flows 2 - 10 m/s)
-		var hcAir;  // low end appromiation for air, we scale it to actual density
+		var hcAir;  // low end approximation for air, we scale it to actual density
 		const dAir = 1.13;
 		const tStep = (tHigh-tLow)/10;
 		while (!isFinite(Module.PropsSI('H', 'T', tLow, 'P', p, name))) tLow += 0.1;
 		// returns h as J/kg
+		const deltaStepQm2 = massFlowM2*(Module.PropsSI('H', 'T', tHigh, 'P', p, name) - Module.PropsSI('H', 'T', tLow, 'P', p, name));
+		const NuD = 5; // The range for a full laminar flow: 4 - 9, not perfect balls 
+		const hD = gravelMin/2;	// a guess: the average width of flow channels between gravel 
+		const conductivity = Module.PropsSI('CONDUCTIVITY', 'T', (tLow+tHigh)/2, 'P', p, name);
+		const heatCoefficient = NuD*conductivity/hD;
+		width = deltaStepQm2/(m3A*heatCoefficient*deltaT);
+/*		
 		const deltaStepQm2 = massFlowM2*(Module.PropsSI('H', 'T', tHigh, 'P', p, name) - Module.PropsSI('H', 'T', tLow, 'P', p, name)) / 10;
-		
 		var t;
 		var width = 0;
-		for (t = tHigh; t > tLow; t-= tStep/2) {
+		for (t = tHigh; t > tLow; t-= tStep) {
 			const dInTP = Module.PropsSI('D', 'T', t, 'P', p, name) / dAir;		// scale hcAir to actual density
 			const v = massFlowM2 / dInTP;
 			// https://pubmed.ncbi.nlm.nih.gov/36074290/
@@ -4661,6 +4753,7 @@ console.log("*****"+tHigh+": metrics.otherCostOfKW="+metrics.otherCostOfKW+", cy
 			// => length = Q/(hcAir*dInTP*m3A*deltaT)
 			width += deltaStepQm2 / (hcAir*dInTP*m3A*deltaT);
 		}
+*/
 //console.log( "width="+width+", m3A="+m3A+", massFlowM2="+massFlowM2+", deltaStepQm2="+deltaStepQm2+", deltaT="+deltaT);
 //console.log("getHeatExchangeWidth("+tHigh+', '+tLow+', '+p+', '+r+', '+massFlow+', '+gravelMinMM+', '+gravelMaxMM+', '+porosity+', '+deltaT+")="+width); 
 		return width;
@@ -5614,6 +5707,7 @@ console.log("px="+px);
 			// and we can assume, that the high pressure dome and its Insulation is below the 50% level
 			var hLiquid = 0, hLiquidStorage=0, rLiquidStorage=0, liquidM3 = 0;
 			if (powerAndHeat) {
+				
 				const liquidV3 = metrics.maxPartLiquid/2*metrics.lowPressureStorageVolume; // 50%
 				var rLiquid;
 				hLiquid = testResult( liquidV3, 0, metrics.hBelowActual/2, 0.01*liquidV3,
@@ -5635,9 +5729,12 @@ console.log("px="+px);
 		}
 		if (!powerAndHeat)
 		{
+			//const dLiquid = Module.PropsSI('D', 'P', metrics.pLow, 'Q', 1, name);
+			liquidM3 = cycleData.tc.changeKg1000 * cycleData.hotCycle[0].massFlow*cycleData.dischargeTimeS / cycleData.tc.dLiq;
+			/*
 			liquidM3 = Math.abs(metrics.maxPartLiquid * (
 						metrics.topFillWithIceWithStorage ? cycleData.iceStorage.sizeM3*metrics.crushedIcePorosity :
-						metrics.lowPressureStorageVolume*(metrics.rockDensityLp-metrics.lpGravelDensity)/metrics.rockDensityLp));
+						metrics.lowPressureStorageVolume*(metrics.rockDensityLp-metrics.lpGravelDensity)/metrics.rockDensityLp));*/
 			hLiquidStorage = Math.pow(liquidM3, 1/3);
 			rLiquidStorage = Math.sqrt(liquidM3/(hLiquidStorage*Math.PI));
 console.log("liquidM3="+liquidM3+" => hLiquidStorage="+hLiquidStorage+", rLiquidStorage="+rLiquidStorage);
@@ -6994,19 +7091,22 @@ return;
 	function drawDiagram4Y( canvasId, xVals, xTitle, arrayOfyVals, yTitles, topTitle, bottomLines, minMaxDefault, fpCustomizer) {
 //console.log("X lines...");
 		const dg = {};
-		const canvas = document.getElementById(canvasId);
-		const ctx = canvas.getContext("2d");
-		ctx.textAlign = "start";
-		ctx.textBaseline = "bottom";
-		ctx.fillStyle = 'black'; 
-		dg.ctx = ctx;
 		dg.ySign = 1;
-		ctx.font = "8px Arial";
-		dg.marginX = ctx.measureText(yTitles[0]).width + 6;
 		dg.marginTop = topTitle ? (topTitle.indexOf(',')>0 ? 50 : 30) : 10;
 		dg.baseX = 0;
 		dg.baseY = 0;
-		dg.marginBottom = 10 + (bottomLines ? bottomLines.length * 10 : 0);
+		dg.marginBottom = 12 + (bottomLines ? bottomLines.length * 8 : 0);
+		const canvas = document.getElementById(canvasId);
+		const newHeight = (typeof canvas.height === 'string' ? parseInt(canvas.height) : canvas.height)+dg.marginBottom+dg.marginTop;
+console.log("Increasing canvas "+canvasId+" height from "+canvas.height+" to "+newHeight);
+		canvas.height = newHeight;
+		const ctx = canvas.getContext("2d");
+		ctx.font = "8px Arial";
+		ctx.textAlign = "start";
+		ctx.textBaseline = "bottom";
+		ctx.fillStyle = 'black'; 
+		dg.marginX = ctx.measureText(yTitles[0]).width + 6;
+		dg.ctx = ctx;
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		dg.width = canvas.getAttribute("width");
 		dg.cWidth = dg.width - 2 * dg.marginX;
@@ -7071,6 +7171,8 @@ console.log("xMinMax="+JSON.stringify(xMinMax)+"yMinMax="+JSON.stringify(yMinMax
 		if (xTitle) textOnWhite(ctx, xTitle, dg.width-dg.marginX, height);
 
 //console.log("Y- lines...");
+		var oldStrokeStyle = null;
+		var oldFillStyle = null;
 		var usedYs = [];
 		var prevMinMax = null;
 		//if (typeof iFrom === 'undefined') iFrom = 0;
@@ -7090,25 +7192,38 @@ console.log("xMinMax="+JSON.stringify(xMinMax)+"yMinMax="+JSON.stringify(yMinMax
 //console.log(i+":yMinMax="+JSON.stringify(yMinMax)); 
 			dg.maxY = yMinMax.max + yMinMax.step / 2;
 			dg.minY = yMinMax.min - yMinMax.step / 2;
+			ctx.lineDashOffset = i * 2;
 			if (i == 1) {
-				ctx.strokeStyle = 'red';
-				ctx.fillStyle = 'red'; 
-			}
-			else if (i == 2) {
-				ctx.strokeStyle = 'green';
-				ctx.fillStyle = 'green'; 
-			}
-			else if (i == 3) {
 				ctx.strokeStyle = 'blue';
 				ctx.fillStyle = 'blue'; 
 			}
+			else if (i == 2) {
+				ctx.strokeStyle = 'red';
+				ctx.fillStyle = 'red'; 
+			}
+			else if (i == 3) {
+				ctx.strokeStyle = 'green';
+				ctx.fillStyle = 'green'; 
+			}
 			else if (i == 4) {
+				ctx.strokeStyle = 'orange';
+				ctx.fillStyle = 'orange'; 
+			}
+			else if (i == 5) {
 				ctx.strokeStyle = 'purple';
 				ctx.fillStyle = 'purple'; 
 			}
-			else if (i == 5) {
-				ctx.strokeStyle = 'orange';
-				ctx.fillStyle = 'orange'; 
+			if (bottomLines[i].indexOf("Gas temperature in ") == 0) {
+				oldStrokeStyle = ctx.strokeStyle;
+				oldFillStyle = ctx.fillStyle;
+				ctx.setLineDash([1,5]);
+				ctx.strokeStyle = 'black';
+				ctx.fillStyle = 'black';
+			}
+			else if (oldStrokeStyle) {
+				ctx.strokeStyle = oldStrokeStyle;
+				ctx.fillStyle = oldFillStyle;
+				oldStrokeStyle = oldFillStyle = null;
 			}
 			var p, y, j;
 			var textX;
@@ -7116,8 +7231,8 @@ console.log("xMinMax="+JSON.stringify(xMinMax)+"yMinMax="+JSON.stringify(yMinMax
 			for (p = yMinMax.min; p <= (yMinMax.max + yMinMax.step/4); p += yMinMax.step) {
 				y = toY(dg, p);
 				if (i == 0) {
-					ctx.beginPath();
 					ctx.setLineDash([10,10]);
+					ctx.beginPath();
 					ctx.strokeStyle = 'gray';
 					ctx.moveTo( toX(dg, dg.minX), y);
 					ctx.lineTo( toX(dg, dg.maxX), y);
@@ -7139,6 +7254,7 @@ console.log("xMinMax="+JSON.stringify(xMinMax)+"yMinMax="+JSON.stringify(yMinMax
 					textOnWhite(ctx, text, textX, y-1);
 				}
 			}
+
 			if (yTitles[i]) {
 				if (i == 0) {
 					textX = dg.marginX - 1 - ctx.measureText(yTitles[i]).width;
@@ -7178,6 +7294,10 @@ console.log("xMinMax="+JSON.stringify(xMinMax)+"yMinMax="+JSON.stringify(yMinMax
 			//var dashStart = usedYs.includes(y) ? 14.14 : 0;
 			//usedYs.push(y);
 			//ctx.moveTo(toX(dg,xVals[0])+dashStart, y + y > yVals[1] ? -dashStart : dashStart);
+			if (bottomLines[i].indexOf("Gravel temp after")==0) {
+				ctx.lineDashOffset = i * 2;;
+				ctx.setLineDash([2,10]);
+			}
 			ctx.moveTo(toX(dg,xVals[0]), y);
 //console.log(i+": x="+toX(dg,xVals[0])+", y="+toY(dg,yVals[0])+", ctx.strokeStyle="+ctx.strokeStyle);
 			for (j = 1; j < yVals.length; j++) {
@@ -7186,6 +7306,9 @@ console.log("xMinMax="+JSON.stringify(xMinMax)+"yMinMax="+JSON.stringify(yMinMax
 //if (i == 0) console.log(i+": x="+toX(dg,xVals[j])+", y="+toY(dg,yVals[j]));
 			}
 			ctx.stroke();
+			ctx.setLineDash([10,10]);
+			ctx.lineDashOffset = 0;
+
 			if (j < yVals.length) {
 				var yFrom = xVals.length;
 				var yTo = yFrom + xVals.length;
@@ -7219,6 +7342,8 @@ console.log("xMinMax="+JSON.stringify(xMinMax)+"yMinMax="+JSON.stringify(yMinMax
 				}
 			}
 		}
+		ctx.setLineDash([10,10]);
+		ctx.lineDashOffset = 0;
 		if (typeof fpCustomizer === 'function') {
 			fpCustomizer( ctx, dg );
 		}

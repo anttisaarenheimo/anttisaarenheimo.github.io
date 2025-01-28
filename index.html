@@ -225,8 +225,8 @@ th {
 		<canvas id="diagram4" width="500" height="600" style="border:1px solid #000000;display:none"></canvas>
 		<DIV id="compressorDesignParams" style="display:none">
 			<DIV>
-				<LABEL>Flow coefficient</LABEL><INPUT size="5" type="float" id="flowCoefficient" value="0.50"/>
-				<LABEL>Stage loading coefficient:</LABEL><INPUT size="5" type="float" id="stageLoadingCoefficient" value="0.25"/>
+				<LABEL>Tip flow coefficient: </LABEL><INPUT size="5" type="float" id="flowCoefficient" value="0.50"/>
+				<LABEL>Tip stage loading coefficient: </LABEL><INPUT size="5" type="float" id="stageLoadingCoefficient" value="0.25"/>
 				<LABEL>Scale:</LABEL>
 					<SELECT id="compressorScale"><OPTION value="0">Default</OPTION><OPTION value="75">1 m == 75px</OPTION><OPTION value="100">1 m == 100px</OPTION><OPTION value="125">1 m == 125px</OPTION><OPTION value="150">1 m == 150px</OPTION>
 						<OPTION value="200">1 m == 200px</OPTION><OPTION value="250">1 m == 250px</OPTION><OPTION value="500">1 m == 500px</OPTION><OPTION value="1000">1 m == 1000px</OPTION>
@@ -240,12 +240,14 @@ th {
 				<LABEL>Min constant rpm tip gap:</LABEL><INPUT type="float"  size="4" id="tipGapMm" value="1" title="tip gap mm"/><SPAN> mm </SPAN><INPUT type="float"  size="4" id="tipGapPercent" value="1" title="tip gap/h %"/><SPAN> % </SPAN>
 			</DIV>
 			<DIV>
-				<LABEL>Max allowed hot compressor/turbin blade stress MPa (eg. stress to give plastic 0.2% strain in 3000h)</LABEL><INPUT size="4" type="float" id="cStressMaxMPa" value="456"/>
-				<LABEL>Max uncooled blade temperature K</Label><INPUT size="4" type="float" id="tempStressMaxMPa" value="923"/>
+				<LABEL>Max allowed hot compressor/turbin blade stress MPa (eg. 50% of stress to give plastic 0.2% strain in 3000h)</LABEL><INPUT size="4" type="float" id="cStressMaxMPa" value="228"/>
+				<LABEL>Max uncooled blade temperature K</Label><INPUT size="4" type="float" id="tempStressMaxMPa" value="1173"/>
+				<LABEL>Strength decreased 1 MPa/K above</Label><INPUT size="4" type="float" id="tempMaxStressMPaDecr" value="1023"/>
 					<!-- blade is 
 					<!--INPUT size="4" type="float" id="cStressMaxMPa2" value="134"/><Span>MPa in</span>
 					<INPUT size="4" type="float" id="tempStressMaxMPa2" value="1088"/><Span>K, see: </span-->
 					<a href="https://www.specialmetals.com/documents/technical-bulletins/nimonic-alloy-105.pdf">Nimonic 105</a>
+					<a href="https://upcommons.upc.edu/bitstream/handle/2117/350237/ANEXO%203-%20Materiales.pdf?sequence=2">MAR-M 200</a>
 					<a href="https://www.specialmetals.com/documents/technical-bulletins/nimonic/">Nimonic alloys</a>
 					<!-- assume unlimited cooling-->
 					<!--LABEL>Blade cooling up to K: </LABEL><INPUT size="3" type="float" id="bladeCoolingK" value="400"/-->
@@ -258,7 +260,7 @@ th {
 				<input id="hotCompressorTypeConstantRpm" name="hotCompressorType" type="radio" checked value="constantRpm"><LABEL>Constant rpm:</LABEL><INPUT size="5" type="float" id="hotRpm" value="3000"/>
 			</DIV>
 			<DIV>
-				<LABEL>Max allowed steady stress of cryo compressor/turbin blades MPa</LABEL><INPUT size="4" type="float" id="cStressMaxMPaCold" value="350"/>
+				<LABEL>50% of max allowed steady stress of cryo compressor/turbin blades MPa</LABEL><INPUT size="4" type="float" id="cStressMaxMPaCold" value="175"/>
 					<a href="https://nickelinstitute.org/media/1723/materialsforcryogenicservice_engineeringpropertiesofausteniticstainlesssteel_4368_.pdf">Cryogenic austenitic steels</a>
 			</DIV>
 			<DIV>
@@ -646,8 +648,8 @@ console.trace("setGasMassFlowFor1200MW");
 		const gas = $(select).val();
 		var massFlow = 1645;
 		//$("#tHigh").val('1173');		// default mass flow
-		$("#cStressMaxMPa").val('456');	// default Nimonic 105 3000h 0.2 proof tensile strength when cooled to 923 K
-		$("#tempStressMaxMPa").val("923");
+		//$("#cStressMaxMPa").val('456');	// default Nimonic 105 3000h 0.2 proof tensile strength when cooled to 923 K
+		//$("#tempStressMaxMPa").val("923");
 		if (gas == 'Nitrogen') {
 			massFlow = 1845;
 		}
@@ -660,7 +662,7 @@ console.trace("setGasMassFlowFor1200MW");
 			if (parseInt($("#tHigh").val()) > 1000) {
 				//$("#tempStressMaxMPa").val("700"); // ~max temp for maraging 2400 steel
 				$("#tHigh").val('700');
-				$("#cStressMaxMPa").val('1800');
+				//$("#cStressMaxMPa").val('1800');
 			}
 		}
 		else if (gas == 'Helium') {
@@ -669,7 +671,7 @@ console.trace("setGasMassFlowFor1200MW");
 		else if (gas == 'Methane') {
 			if (parseInt($("#tHigh").val()) > 625) {
 				$("#tHigh").val('625');
-				$("#cStressMaxMPa").val('1800');
+				//$("#cStressMaxMPa").val('1800');
 			}
 			massFlow = 2152;
 		}
@@ -8511,9 +8513,6 @@ console.log("Adjusting rTip?: "+stage.rTip+"=>"+minTip);
 						stage.U = stage.rTip*2*Math.PI*rpm/60;
 						stageData.rpmStages++;
 					}
-					const hMm = (stage.rTip - stage.rHub) * 1000;
-					const absTipGap = stageData.tipGapMm / hMm;
-					stage.tipGap = absTipGap > stageData.tipGapPercent/100 ? absTipGap : stageData.tipGapPercent/100;
 					stageData.hubToTipRatioMax = stage.hubToTipRatio = stage.rHub / stage.rTip;
 					stage.stageLoadingCoefficient = stageData.constantDeltaH/(stage.U*stage.U);
 console.log("stageData.rMid="+stageData.rMid+" stage="+JSON.stringify(stage));
@@ -8867,6 +8866,17 @@ if (!item.p) {
 		obj.y = y;
 		return obj;
 	}
+	// See https://moodle.polymtl.ca/file.php/1047/HDVo/Module_04_-_Axial_Flow_Comp.pdf page 15
+	function getWorkDone( stageNum ) {
+		if (stageNum == 1) return 1;
+		else if (stageNum <= 4) return 0.9 + 0.025*(4-stageNum);
+		else if (stageNum <= 6) return 0.9 - 0.01*(6-stageNum);
+		else if (stageNum <= 6) return 0.9 - 0.01*(6-stageNum);
+		else if (stageNum <= 8) return 0.87 + 0.005*(8-stageNum);
+		else if (stageNum <= 12) return 0.86 + 0.0025*(12-stageNum);
+		else return 0.86 - 0.005/8*(stageNum-12);
+	}
+
 // TBD: design by the type subsonic, transonic, supersonic => subsonic => stage 1 vMach<=0.9, transonic => stage 1 vMach <= 1.2, supersonic => stage 1 vMach <= 1.5
 // Rule: each stage produces equal amout of power, chose the lowest number of stages matching with the selected type
 // All other params are irrelevant before CFD optimization phase
@@ -8931,13 +8941,19 @@ if (!item.p) {
 			stageData.maxAN2 = maxAN2EXP8*100000000;
 		}
 		stageData.cStressMaxMPa = getFloatParam(first.t < 373 ? 'cStressMaxMPaCold' : 'cStressMaxMPa', 568);
-		stageData.tempStressMaxMPa = getFloatParam('tempStressMaxMPa', 923);
+		stageData.tempStressMaxMPa = getFloatParam('tempStressMaxMPa', 1173);		// MAR-M 200!
+		stageData.tempMaxStressMPaDecr = getFloatParam('tempMaxStressMPaDecr', 1023);
+
 		//stageData.cStressMaxMPa2 = getFloatParam('cStressMaxMPa2', 568);
 		//stageData.tempStressMaxMPa2 = getFloatParam('tempStressMaxMPa2', 923);
 		//stageData.bladeCoolingK = getFloatParam('bladeCoolingK', 100);
 		stageData.bladeOfStageWidth = getFloatParam('bladeOfStageWidth', 0.50);
 		stageData.getDeltaH = function( stage, item ) {
 			//	Cuts down the power if the max tensile stress would exceeded
+			const hMm = (stage.rTip - stage.rHub) * 1000;
+			const absTipGap = stageData.tipGapMm / hMm;
+			stage.tipGap = absTipGap > stageData.tipGapPercent/100 ? absTipGap : stageData.tipGapPercent/100;
+
 			const hNow = item.h + 0.5*item.v*item.v;
 			var stageLoadingCoefficient = stageData.constantRpm ? stage.stageLoadingCoefficient : stageData.stageLoadingCoefficientMin;
 			if (typeof stage.flowCoefficient === 'undefined') {
@@ -8964,10 +8980,14 @@ if (!item.p) {
 				var hActualWork = deltaH * stageData.efficiency;
 				const pOut = Module.PropsSI('P','H', item.h+hActualWork, 'S', item.s, name);	
 				const tOut = Module.PropsSI('T','H', item.h+deltaH, 'P', pOut, name);
-				const tUncooledBlade = item.t + (tOut-item.t)*stageData.bladeOfStageWidth;
+				const tUncooledBlade = item.t + (tOut-item.t)/2; // reaction 50%! //*stageData.bladeOfStageWidth;
 				stage.maxTensileStressMPa = stageData.cStressMaxMPa;
 				if (tUncooledBlade > stageData.tempStressMaxMPa) {
 					stage.bladeCoolingK = tUncooledBlade - stageData.tempStressMaxMPa;
+				}
+				else if (tUncooledBlade > tempMaxStressMPaDecr) {
+					stage.bladeCoolingK = 0;
+					stage.maxTensileStressMPa -= (tUncooledBlade - tempMaxStressMPaDecr); // default 1 MPa/K
 				}
 				else {
 					stage.bladeCoolingK = 0;
@@ -9037,9 +9057,10 @@ if (!item.p) {
 //			const tip999MomentumPerM = (stage.F*(stage.rTip-stage.rHub)/2000*(stage.rTip*stage.rTip-rTip999*rTip999)/(stage.rTip*stage.rTip-stage.rHub*stage.rHub))
 //										/ (stageData.solidity*2*stage.rHub*Math.PI);   // assume that blade is a rectangle
 			const midToTip = rMiddle/stage.rTip;
-			const midStageLoadingCoefficient = stage.stageLoadingCoefficient/(midToTip*midToTip);
-			const midFlowCoefficient = stage.flowCoefficient / midToTip;
-			const midβ1 = Math.atan((1/2 + midStageLoadingCoefficient/2)/midFlowCoefficient);
+			const midStageLoadingCoefficient = stage.midStageLoadingCoefficient = stage.stageLoadingCoefficient/(midToTip*midToTip);
+			const midFlowCoefficient = stage.midFlowCoefficient = stage.flowCoefficient / midToTip;
+			stage.workDone = getWorkDone(stageData.stages.length+1);
+			const midβ1 = Math.atan((1/2 + midStageLoadingCoefficient/2)/(midFlowCoefficient*stage.workDone));
 			const r75 = Math.sqrt((stage.rTip*stage.rTip+rMiddle*rMiddle)/2);
 			const r75MomentumPerM = (stage.F*(r75-rMiddle)*(stage.rTip*stage.rTip-rMiddle*rMiddle)/(stage.rTip*stage.rTip-stage.rHub*stage.rHub))
 										/ (stageData.solidity*2*stage.rHub*Math.PI) /Math.cos(midβ1);   // assume that blade is a rectangle
@@ -9115,6 +9136,7 @@ if (!item.p) {
 */
 			}
 //console.log("*****"+stageData.stages.length+":rMiddle="+rMiddle+", bladeThicknessIn hub/Middl//e/tip="+stage.bladeThicknessInHub+"/"+stage.bladeThicknessInMiddle+"/"+stage.bladeThicknessInTip+", AR:"+stage.aspectRatio);
+			//calcLossedOfNACA65( stageData, stage );
 			stage.stageWidth2h = Math.cos(stageData.β2) / (0.35*stage.aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 
 			return deltaH;
 		}
@@ -9315,9 +9337,10 @@ console.log("Cold stageData.constantDeltaH="+stageData.constantDeltaH);
 							nextBladeBasement.push(toPoint(x+stage.width, nextHub));
 							nextBladeBasement.push(toPoint(x+stage.width, nextHub-stage.width*0.04));
 							nextBladeBasement.push(toPoint(x, stage.rHub-stage.width*0.04 ));
+							nextBladeBasement.push(toPoint(x+stage.width*0.85, stage.rHub*0.15+0.85*nextHub ));
 						}
 						else {
-							nextBladeBasement.push(stageData.constantRpm ? toPoint(x+stage.width, peek) : toPoint(x+stage.width-0.004, peek));
+							nextBladeBasement.push(toPoint(x+stage.width-0.004, peek));
 							nextBladeBasement.push(toPoint(x+stage.width*0.85, nextHub ));
 							nextHookP1 = toPoint(x+stage.width, nextHub*0.95 );
 							nextHookP2 = toPoint(x+stage.width*0.95, nextHub-(stage.tipGap ? stage.tipGap : tipGap)*stage.hBladeMm/1000 );
@@ -9343,6 +9366,7 @@ console.log("Cold stageData.constantDeltaH="+stageData.constantDeltaH);
 							nextBladeBasement.push(toPoint(x+stage.width, nextHub));
 							nextBladeBasement.push(toPoint(x+stage.width, nextHub-stage.width*0.04));
 							nextBladeBasement.push(toPoint(x, stage.rHub-stage.width*0.04 ));
+							nextBladeBasement.push(toPoint(x+stage.width*0.60, stage.rHub*0.40+nextHub*0.60));
 						}
 						else {
 							nextBladeBasement.push(toPoint(x+stage.width*0.65, peek));
@@ -9647,7 +9671,7 @@ console.log("***grossPower="+grossPower+" => actualPower="+actualPower+", deltaH
 			const tanβ2 = (1/2 - stages[i].stageLoadingCoefficient/2)/stages[i].flowCoefficient;
 			const β2 = Math.atan(tanβ2);
 			stages[i].β2deg = 180 * β2/Math.PI;
-			const stageWidth2h = Math.cos(β2) / (0.35*stages[i].aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 
+			const stageWidth2h = Math.cos(β2) / (0.35*stages[i].aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 in middle
 			stages[i].width = (stages[i].rTip-stages[i].rHub)*stageWidth2h*(stageData.horizontalVectors ?  stageData.horizontalVectors[i] : stageData.horizontalVector);
 if (!stages[i].width) console.log(i+"null width!!!, hv="+stageData.horizontalVectors[i])
 			stages[i].diameterMm = (stages[i].rTip+0.002)*2*1000;
@@ -9897,15 +9921,16 @@ console.log(totalBladesMass+" = "+stages[i].F+" / ("+(stages[i].U*stages[i].U)+"
 		titles.push('Pipe in');
 
 		for (i = 0; i < stages.length; i++) {
+			calcLossedOfNACA65( stageData, stages[i], i )
 			titles.push('Stage '+(i+1));
 			stages[i].getEfficiency = function( i, stage ){
 				const loadingFactor = 10/14;
-				if (stage.stageLoadingCoefficient > 30) {
-					if (stage.stageLoadingCoefficient < 35) loadingFactor = (10+(stage.stageLoadingCoefficient-30)/5) / 14;
-					else if (stage.stageLoadingCoefficient < 38) loadingFactor = (11+(stage.stageLoadingCoefficient-35)/3) / 14;
-					else if (stage.stageLoadingCoefficient < 40.5) loadingFactor = (12+2*(stage.stageLoadingCoefficient-38)/2.5) / 14;
-					else if (stage.stageLoadingCoefficient < 42) loadingFactor = (14+4*(stage.stageLoadingCoefficient-40.5)/1.5) / 14;
-					else loadingFactor = (18+4.5*(stage.stageLoadingCoefficient-42)/1) / 14;
+				if (stage.effectiveLoadCoefficient > 30) {
+					if (stage.effectiveLoadCoefficient < 35) loadingFactor = (10+(stage.effectiveLoadCoefficient-30)/5) / 14;
+					else if (stage.effectiveLoadCoefficient < 38) loadingFactor = (11+(stage.effectiveLoadCoefficient-35)/3) / 14;
+					else if (stage.effectiveLoadCoefficient < 40.5) loadingFactor = (12+2*(stage.effectiveLoadCoefficient-38)/2.5) / 14;
+					else if (stage.effectiveLoadCoefficient < 42) loadingFactor = (14+4*(stage.effectiveLoadCoefficient-40.5)/1.5) / 14;
+					else loadingFactor = (18+4.5*(stage.effectiveLoadCoefficient-42)/1) / 14;
 				}
 				stage.efficiency = 1-getStageLoss(i, stage.cRe, stage.chordMm * stage.bladeMaxThicknessMid/100, stage.hBladeMm, stage.chordMm, stage.tipGap ? stage.tipGap : 0.005, loadingFactor);
 				return myRound(stage.efficiency, 3);
@@ -9937,6 +9962,7 @@ console.log(totalBladesMass+" = "+stages[i].F+" / ("+(stages[i].U*stages[i].U)+"
 		stageProps.push(getSheetValues('h kJ/kg', 'h', data, 1000));
 		stageProps.push(getSheetValues('P2/P1', 'pRatio', data, 2));
 		stageProps.push(getSheetValues('Efficiency', 'getEfficiency', data));
+		stageProps.push(getSheetValues('Efficiency (NACA 65)', 'efficiencyNACA65', data, 3 ));
 		stageProps.push(getSheetValues('Flow m3/s', 'flowM3', data));
 		stageProps.push(getSheetValues('Power MW', 'stagePower', data, 1000000, 1));
 		stageProps.push(getSheetValues('rpm', 'rpm', data));
@@ -9968,17 +9994,19 @@ console.log(totalBladesMass+" = "+stages[i].F+" / ("+(stages[i].U*stages[i].U)+"
 			stageProps.push(getSheetValues('uGear m/s', 'vGear', data, 1 ));
 			stageProps.push(getSheetValues('Shaft load kN', 'shaftPush', data, 1000));
 		}
-		stageProps.push(getSheetValues('Blades\' load kN', 'F', data, 1000));
-		stageProps.push(getSheetValues('Max blade stress MPa', 'yieldMomentMidHubMPa', data));
+		stageProps.push(getSheetValues('Blade bending kN/m', 'F', data, 1000));
+		stageProps.push(getSheetValues('Max blade stress MPa', 'maxTensileStressMPa', data));
 		stageProps.push(getSheetValues('Centrifugal stress MPa', 'tensileStressMPa', data));
 		//stageProps.push(getSheetValues('Centr. stress of max', 'tensileStressPercent', data));
 		//stageProps.push(getSheetValues('Max stress mid/hub %', 'totalTensileStressPercentMidHub', data));
 		if (stages[stages.length-1].bladeCoolingK) {
 			stageProps.push(getSheetValues('Blade cooling K', 'bladeCoolingK', data));
 		}
-		stageProps.push(getSheetValues('Load coefficient', 'stageLoadingCoefficient', data, 2));
-		stageProps.push(getSheetValues('Flow coefficient', 'flowCoefficient', data, 2));
+		stageProps.push(getSheetValues('Load coefficient', 'effectiveLoadCoefficient', data, 2));
+		stageProps.push(getSheetValues('Flow coefficient', 'midFlowCoefficient', data, 2));
 		//stageProps.push(getSheetValues('Δp/(d∙U²)', 'getPressureRiseCoeffcient', data, 2));
+		stageProps.push(getSheetValues('Diffusion factor', 'DF', data, 2));
+		stageProps.push(getSheetValues('Equivalent diffusion factor', 'DR', data, 2));
 		stageProps.push(getSheetValues('AN2 E08', 'AN2EXP8', data, 2));
 		stageData.stageProps = stageProps;
 		var eff = 0;
@@ -10074,22 +10102,13 @@ console.log(optAR+": stageLossRef 5.0="+getStageLoss(1, 500000*2.25/optAR, 1.5*o
 //console.log(log);
 		return hBladeMm / cBest;
 	}
-	// myRound(1-getStageLoss(stages[i].bladeMaxThicknessMid/100, stages[i].cRe, i+1, 0.005), 3)
+	// Analytical loss model from https://api.repository.cam.ac.uk/server/api/core/bitstreams/fbfb70fe-58b3-47fb-a338-859384279d7c/content
 	function getStageLoss(stageNumber, Re, bladeThicknessInMiddleMm, hBladeMm, chordMm, tipClearance, loadFactor) {
 		// assume e/h == 0.005 (0.5 %)
 		const zeroThicknessProfileLoss = 0.0339 * loadFactor;	// reaction = 0.5 => rotor loss +stator loss
 		const profileLossByThicnessPercent = 0.0129/(4.7*1.16) * loadFactor; // rotor + stator 
 		const endwallTipClearanceLossByPercent = (0.0113*1.04/(1.2*1.16)) * loadFactor; // 25/4;
 		const endwallLossAtZeroClearance = 0.0242*1.04 * loadFactor; // effective AR = 1.16 - 0.12; 
-		const lossByReExp6 = [[0.1, 0.2, 0.3,  0.4, 0.5, 0.6,  0.7, 0.8,  0.9,   1.0, 2.0, 3.0,  4.0,  5.0, 6.0,  7.0,   8.0,  9.0,  10],		// ReExp6
-							  [2.7, 2.42, 2.22, 2.08,2.0, 1.92, 1.85,1.805,1.770, 1.75,1.6, 1.50, 1.433, 1.37,1.325,1.295, 1.28, 1.27, 1.26]
-							  //,[2.7,  2.4, 2.2, 2.1,2.0, 1.96,1.93,1.905,1.8875,1.875,1.8, 1.755,1.715,1.68,1.655,1.6425,1.635,1.63,1.625]
-							  ];
-//							  [2.35, 2.2, 2.1, 2.05, 2.0, 1.96,1.93,1.905,1.8875,1.875,1.8, 1.755,1.715,1.68,1.655,1.6425,1.635,1.63,1.625]];
-		const stageLoss = [0.004/0.055, 0.002/0.06, 0.0015/0.062, 0.00075/0.0635, 0.00055/0.06425, 0.0004/0.06475, 0.00025/0.065, 0.00015/0.0651]; // 
-		//const referenceRe = 1.93;		// Reference constats measured at Re(c) 474137.93103448276 
-		const referenceRe = 2; // 2.0206896551724136;		// Reference constats measured at Re(c) 474137.93103448276 
-		//const referenceRe = 1.866695; //2.0258620689655173;		// Reference constats measured at Re(c) 474137.93103448276 
 		const maxThickness = bladeThicknessInMiddleMm / chordMm;
 		const AR = hBladeMm / chordMm;
 		const tipClearanceC = tipClearance * AR;
@@ -10103,23 +10122,9 @@ console.log(optAR+": stageLossRef 5.0="+getStageLoss(1, 500000*2.25/optAR, 1.5*o
 //			+ endwallLossAtZeroClearance / AR + (endwallTipClearanceLossByPercent + endwallTipClearanceLossByAR*AR)*tipClearance*100;
 		//const nRef = -0.19;
 		//var scaleToRe = Math.pow(Re, n ? n : nRef)/Math.pow(referenceRe,nRef);
+		const referenceRe = 2; // 2.0206896551724136;		// Reference constats measured at Re(c) 474137.93103448276 
 
-		var scaleToRe = 100, effRe = 0;
-		const ReExp6 = Re/1000000;
-		if (ReExp6 > lossByReExp6[0][0]) {
-			if (ReExp6 >= lossByReExp6[0][lossByReExp6[0].length-1]) {
-				scaleToRe = lossByReExp6[1][lossByReExp6[0].length-1]/referenceRe;
-			}
-			else {
-				for (i = 0; i < lossByReExp6[0].length -1; i++) {
-					if (ReExp6 >= lossByReExp6[0][i] && ReExp6 <= lossByReExp6[0][i+1]) {
-						effRe = lossByReExp6[1][i] + (lossByReExp6[1][i+1]-lossByReExp6[1][i])*((ReExp6 - lossByReExp6[0][i])/(lossByReExp6[0][i+1]-lossByReExp6[0][i]));
-						scaleToRe = effRe/referenceRe;
-						break;
-					}
-				}
-			}
-		}
+		const scaleToRe = scaleToReferenceReynoldsNum( Re, referenceRe );
 		//scaleToRe = 1;
 		// Endwall loss is about 50% less dependent on Re(c) => 
 		const baseLineLoss = (zeroThicknessProfileLoss + profileLossByThicnessPercent*maxThickness*100)*scaleToRe 
@@ -10131,17 +10136,53 @@ console.log(optAR+": stageLossRef 5.0="+getStageLoss(1, 500000*2.25/optAR, 1.5*o
 		var actualLoss = baseLineLoss;
 		//var referenceLoss = 0.0555;
 		var trace = "";
+		actualLoss = getCascadeStageLoss( actualLoss, stageNumber );
+//console.log(trace);		
+		//console.log(stageNumber+": ARopt="+getOptimalAR(bladeThicknessInMiddleMm, hBladeMm, tipClearance)+", loss at refernce Re(c) of maxThickness="+maxThickness+", tipClearance="+tipClearance+" => "+baseLineLossAtRefRe+" * (scaleToRe="+scaleToRe+") referenceLoss="+referenceLoss+" => stage 1 loss at Re="+myRound(ReExp6)+" = "+baseLineLoss+", actual loss of stage #"+stageNumber+"="+actualLoss);
+		return actualLoss;
+	}
+	//
+	// https://api.repository.cam.ac.uk/server/api/core/bitstreams/fbfb70fe-58b3-47fb-a338-859384279d7c/content
+	// 
+	function scaleToReferenceReynoldsNum( Re, scaleAtReferenceRe )
+	{
+		// same scale for profile and end wall loss
+		const lossByReExp6 = [[0.1, 0.2, 0.3,  0.4, 0.5, 0.6,  0.7, 0.8,  0.9,   1.0, 2.0, 3.0,  4.0,  5.0, 6.0,  7.0,   8.0,  9.0,  10],		// ReExp6
+							  [2.7, 2.42, 2.22, 2.08,2.0, 1.92, 1.85,1.805,1.770, 1.75,1.6, 1.50, 1.433, 1.37,1.325,1.295, 1.28, 1.27, 1.26]
+							  //,[2.7,  2.4, 2.2, 2.1,2.0, 1.96,1.93,1.905,1.8875,1.875,1.8, 1.755,1.715,1.68,1.655,1.6425,1.635,1.63,1.625]
+							  ];
+//							  [2.35, 2.2, 2.1, 2.05, 2.0, 1.96,1.93,1.905,1.8875,1.875,1.8, 1.755,1.715,1.68,1.655,1.6425,1.635,1.63,1.625]];
+		var scaleToRe = 100, effRe = 0;
+		const ReExp6 = Re/1000000;
+		if (ReExp6 > lossByReExp6[0][0]) {
+			if (ReExp6 >= lossByReExp6[0][lossByReExp6[0].length-1]) {
+				scaleToRe = lossByReExp6[1][lossByReExp6[0].length-1]/scaleAtReferenceRe;
+			}
+			else {
+				for (i = 0; i < lossByReExp6[0].length -1; i++) {
+					if (ReExp6 >= lossByReExp6[0][i] && ReExp6 <= lossByReExp6[0][i+1]) {
+						effRe = lossByReExp6[1][i] + (lossByReExp6[1][i+1]-lossByReExp6[1][i])*((ReExp6 - lossByReExp6[0][i])/(lossByReExp6[0][i+1]-lossByReExp6[0][i]));
+						scaleToRe = effRe/scaleAtReferenceRe;
+						break;
+					}
+				}
+			}
+		}
+console.log("Re="+Re+", scaleAtReferenceRe="+scaleAtReferenceRe+" => scaleToRe="+scaleToRe);
+		return scaleToRe;
+	}
+
+	function getCascadeStageLoss( actualLoss, stageNumber ) 
+	{
+		const stageLoss = [0.004/0.055, 0.002/0.06, 0.0015/0.062, 0.00075/0.0635, 0.00055/0.06425, 0.0004/0.06475, 0.00025/0.065, 0.00015/0.0651]; // 
 		for (i = 0; i < stageLoss.length && i < (stageNumber-1); i++) {
 //trace += (cumulativeStageLoss+" + "+(stageLoss[i]*actualLoss)+" = "+(cumulativeStageLoss + stageLoss[i]*actualLoss)+", ");
 			//referenceLoss += stageLoss[i]*referenceLoss;
 			actualLoss += stageLoss[i]*actualLoss;
 //trace += ("=>actualLoss="+actualLoss+", ");
 		}
-//console.log(trace);		
-		//console.log(stageNumber+": ARopt="+getOptimalAR(bladeThicknessInMiddleMm, hBladeMm, tipClearance)+", loss at refernce Re(c) of maxThickness="+maxThickness+", tipClearance="+tipClearance+" => "+baseLineLossAtRefRe+" * (scaleToRe="+scaleToRe+") referenceLoss="+referenceLoss+" => stage 1 loss at Re="+myRound(ReExp6)+" = "+baseLineLoss+", actual loss of stage #"+stageNumber+"="+actualLoss);
 		return actualLoss;
 	}
-
 	function drawCompressorSide(ctx, metrics, stageData, xPx, yPx, mToPx, upSide ) {
 		var side = upSide ? -1 : 1;
 		function toX( xM ) { return xPx + xM*mToPx; }
@@ -10497,6 +10538,224 @@ console.log("baseLineCompressor top="+elem.offsetTop+", left="+elem.offsetLeft+"
 	function stagesToHtmlTable( stageData )
 	{
 		//const tmp = {"flowM3":4173.533301242276,"speedOfSound":438.5292933044679,"v":142.52202032395206,"rTip":4.615800092373975,"rHub":3.4618500692804814,"w":431.884910072582,"rpm":893.4956052158383,"h":483243.00598183315,"t":464.66160353971225,"p":48895.79446968536,"d":0.35447548938912926,"flowCoefficient":0.33,"stageLoadingCoefficient":0.2,"deltaH":37304.91510968045,"wMach":0.9848484848484848};
+	}
+/*	
+	function calcLossedOfNACA65(stageData, stage) {
+		stage.effectiveLoadCoefficient = stage.midStageLoadingCoefficient/stage.workDone;
+
+		const stageLoadingCoefficient = stage.effectiveLoadCoefficient;
+		const flowCoefficient = stage.midFlowCoefficient;
+		const solidity = stageData.solidity;
+		const midβ1 = Math.atan((1/2 + stageLoadingCoefficient/2)/flowCoefficient);
+		const midβ2 = Math.atan((1/2 - stageLoadingCoefficient/2)/flowCoefficient);
+		
+		// The approximate DF formula on page 6/13 of https://www.seitzman.gatech.edu/classes/ae4803/compressor_cascadeperformance.pdf
+		// has wrong order for deltaRel = Math.tan(midβ2)-Math.tan(midβ1) < 0 => blade gets very strange values
+		stage.approximateDF = 1 - Math.cos(midβ1)/Math.cos(midβ2) +  Math.cos(midβ1) * (Math.tan(midβ1)-Math.tan(midβ2)) / (solidity*2);
+		stage.approximateDR = Math.cos(midβ2)/Math.cos(midβ1)*(1.12+0.61 * Math.pow(Math.cos(midβ1),2) * (Math.tan(midβ2)-Math.tan(midβ1))/solidity);
+	
+		testDF( stageData, stage );
+	}
+*/
+//console.log("Ψ="+stageLoadingCoefficient+", Φ="+flowCoefficient+", s/c="+solidity+" midβ2="+midβ2+", midβ1="+midβ1+"= > approximateDF="+approximateDF+", approximateDR="+approximateDR);
+
+	function calcLossedOfNACA65( stageData, stage, stageIndex )
+	{
+		// https://moodle.polymtl.ca/file.php/1047/HDVo/Module_04_-_Axial_Flow_Comp.pdf
+		// Calc first mid flow angles with reaction 0.5
+		// => β1 = atan((1/2 + Ψ/2)/Φ), 
+		//    β2 = atan((1/2 - Ψ/2)/Φ)
+		// With work done: 
+		// Ψ = Φ*workDone*(tan(midβ1)-tan(midβ2)) 
+		// => tan(midβ1) = Ψ / Φ*workDone + tan(midβ2);
+		// Reaction = 1/2*Φ*(tan(midβ1)+tan(midβ2));
+		// => Reaction = 1/2*Φ*(Ψ/(Φ*workDone) + 2 * tan(midβ2));
+		// => Reaction = Ψ / (2*workDone) + Φ*tan(midβ2);
+		// => midβ2 = atan((Reaction - Ψ/(2*workDone))/Φ):
+		stage.effectiveLoadCoefficient = stage.midStageLoadingCoefficient/stage.workDone;
+		const midβ1 = Math.atan((1/2 + stage.effectiveLoadCoefficient/2)/stage.midFlowCoefficient);
+		const midβ2 = Math.atan((1/2 - stage.effectiveLoadCoefficient/2)/stage.midFlowCoefficient);
+		const midα1 = midβ2;	// when the reaction == 0.5
+		const midα2 = midβ1;	// when the reaction == 0.5
+		const midα1Deg = midα1*180/Math.PI;
+		const midα2Deg = midα2*180/Math.PI;
+		const midβ1Deg = midα2Deg; // when the reaction == 0.5
+		const midβ2Deg = midα1Deg; // when the reaction == 0.5
+		const h = stage.rTip-stage.rHub;
+		const c = h / stage.aspectRatio;
+		const tMax =stage.bladeThicknessInMiddle/0.75;
+		const solidity = stageData.solidity;
+		// assume summetric flow => 
+		var camberAngle = midβ2Deg; // unkonw this is an approximation!!!
+
+		// Calc incidence angle iRef and deviation angle δ from flow (in degrees) to get surface speed on leading and tailing edge (vLE and vTE)
+		const Ksh = 1; //NACA65 series
+		const Kit = -0.0214 + 19.17*(tMax/c)-122.3*Math.pow(tMax/c,2) + 312.5*Math.pow(tMax/c,3); // a compressor blade thickness correction factor
+		const i010 = 0.0325-0.0764*solidity + (-0.002364+0.0913*solidity)*midα1Deg + (1.64/100000-2.38/10000*solidity)*midα1Deg*midα1Deg;
+		const n = 0.063-0.02274*solidity + (-0.0035+0.0029*solidity)*midα1Deg + (3.79/100000+1.11/100000*solidity)*midα1Deg*midα1Deg;
+		
+		// Calc deviation angle δ
+		const Kδ = 0.0142 + 6.172*(tMax/c)+36.61*Math.pow(tMax/c,2); // a compressor blade thickness correction factor
+		const δ010 = -0.0443+0.1057*solidity + (0.0209-0.0186*solidity)*midα1Deg + (-0.0004+0.00076*solidity)*midα1Deg*midα1Deg;
+		const mNACA65 = 0.017-3.33/10000*(1.0-0.1*midα1Deg)*midα1Deg;
+		const b = 0.9655+2.538/1000*midα1Deg+4.221/100000*midα1Deg*midα1Deg-1.3/1000000*midα1Deg*midα1Deg*midα1Deg;
+		const m = mNACA65 / Math.pow(solidity,b);
+
+		var iRef = Ksh*Kit*i010 + n*camberAngle;
+		var δRef = Ksh*Kδ*δ010 + m*camberAngle;
+		// assume constant axial speed stage.v everywhere
+		const vLE = stage.v/Math.cos((midβ1Deg+iRef)/180*Math.PI);	// relative inlet velocity to the compressor blade
+		const vTE = stage.v/Math.cos((midβ2Deg+δRef)/180*Math.PI);	// relative exit velocity from the compressor blade
+		const vRel1 = stage.v/Math.cos(midβ1);						// relative inlet flow velocity 
+		const vRel2 = stage.v/Math.cos(midβ2);						// relative exit flow velocity 
+		const deltaVrel = vRel1 - vRel2;
+		const vSSmax = vLE + deltaVrel/(2*solidity);					// max suction side speed
+		//const DF = 1 - Math.cos((midβ1Deg-iRef)/180*Math.PI)/Math.cos((midβ2Deg-δRef)/180*Math.PI) +  Math.cos((midβ1Deg-iRef)/180*Math.PI) * (Math.tan(midβ1)-Math.tan(midβ2)) / (solidity*2);
+		const DF = (vSSmax - vTE) / vLE;
+		const DR = vSSmax / vTE;
+		const inletMach = vLE / stage.mach;
+		const deHallerNum = vRel2 / vRel1;
+		const profileLossParam = getProfileLossParam( DR, inletMach);
+		const endWallLossParam = getEndWallLossParam( DF, stage.tipGap);
+		stage.profileLoss = 2*profileLossParam * Math.pow(deHallerNum,2) / Math.cos(midα2);
+		stage.endWallLoss = endWallLossParam / (stage.aspectRatio * Math.pow(vLE/vTE,2));
+		const loss = stage.profileLoss + stage.endWallLoss;
+		const cascadeLoss = getCascadeStageLoss( loss, stageIndex);
+		const scaleToRe = scaleToReferenceReynoldsNum( stage.cRe, 1.75 );  // relative loss at Re=1000000
+		stage.efficiencyNACA65 = 1 - cascadeLoss*scaleToRe;
+		stage.DF = DF;
+		stage.DR = DR;
+console.log("loss="+loss+", iRef="+iRef+"("+(Ksh*Kit*i010)+"+"+(n*camberAngle)+"), δRef="+δRef+"("+(Ksh*Kδ*δ010)+"+"+(m*camberAngle)+"), vLE="+vLE+", vTE="+vTE+", vSSmax="+vSSmax+", DF="+DF+", DR="+DR+", profileLossParam="+profileLossParam+",endWallLossParam ="+endWallLossParam
+			+", stage.profileLoss="+stage.profileLoss+", stage.endWallLoss="+stage.endWallLoss+", cascadeLoss="+cascadeLoss+", scaleToRe="+scaleToRe+", cRe="+stage.cRe);
+	}
+	function getProfileLossParam( DR, inletMach)
+	{
+		const machFactor = inletMach <= 0.7 ? 0.003/4*10*(inletMach - 0.3) : 0.003 + 0.002/3*10*(inletMach - 0.7);
+		if (DR <= 1.2) return 0.008+machFactor;
+		else if (DR <= 1.4) return 0.008+0.0025/0.2*(DR-1.2)+machFactor;
+		else if (DR <= 1.6) return 0.0105+0.0035/0.2*(DR-1.4)+machFactor;
+		else if (DR <= 1.8) return 0.014+0.0065/0.2*(DR-1.6)+machFactor;
+		else if (DR <= 2) return 0.0205+0.01/0.2*(DR-1.8)+machFactor;
+		else if (DR <= 2.2) return 0.0305+0.0125/0.2*(DR-2)+machFactor;
+		else return 0.043+0.014/0.2*(DR-2.2)+machFactor;
+	}
+	
+	function getEndWallLossParam( DF, tipGap)
+	{
+		var low, inc, base;
+		if (DF <= 0.35) {
+			if (tipGap <= 0.02) {
+				low = 0.036;
+				inc = 0.004/0.02;
+				base = 0;
+			}
+			else if (tipGap <= 0.04) {
+				low = 0.04;
+				inc = 0.008/0.02;
+				base = 0.02;
+			}
+			else if (tipGap <= 0.07) {
+				low = 0.048;
+				inc = 0.02/0.03;
+				base = 0.04;
+			}
+			else {
+				low = 0.068;
+				inc = 0.024/0.03;
+				base = 0.07;
+			}
+		}
+		else if (DF <= 0.4) {
+			if (tipGap <= 0.02) {
+				low = 0.039;
+				inc = 0.004/0.02;
+				base = 0;
+			}
+			else if (tipGap <= 0.04) {
+				low = 0.044;
+				inc = 0.008/0.02;
+				base = 0.02;
+			}
+			else if (tipGap <= 0.07) {
+				low = 0.057;
+				inc = 0.02/0.03;
+				base = 0.04;
+			}
+			else {
+				low = 0.079;
+				inc = 0.025/0.03;
+				base = 0.07;
+			}
+		}
+		else if (DF <= 0.45) {
+			if (tipGap <= 0.02) {
+				low = 0.041;
+				inc = 0.011/0.02;
+				base = 0;
+			}
+			else if (tipGap <= 0.04) {
+				low = 0.052;
+				inc = 0.022/0.02;
+				base = 0.02;
+			}
+			else if (tipGap <= 0.07) {
+				low = 0.077;
+				inc = 0.03/0.03;
+				base = 0.04;
+			}
+			else {
+				low = 0.107;
+				inc = 0.035/0.03;
+				base = 0.07;
+			}
+		}
+		else if (DF <= 0.5) {
+			if (tipGap <= 0.02) {
+				low = 0.048;
+				inc = 0.025/0.02;
+				base = 0;
+			}
+			else if (tipGap <= 0.04) {
+				low = 0.052;
+				inc = 0.022/0.02;
+				base = 0.02;
+			}
+			else if (tipGap <= 0.07) {
+				low = 0.107;
+				inc = 0.06/0.03;
+				base = 0.04;
+			}
+			else {
+				low = 0.142;
+				inc = 0.07/0.03;
+				base = 0.07;
+			}
+		}
+		else {
+			if (tipGap <= 0.02) {
+				low = 0.065;
+				inc = 0.055/0.02;
+				base = 0;
+			}
+			else if (tipGap <= 0.04) {
+				low = 0.125;
+				inc = 0.08/0.02;
+				base = 0.02;
+			}
+			else if (tipGap <= 0.07) {
+				low = 0.167;
+				inc = 0.12/0.03;
+				base = 0.04;
+			}
+			else {
+				low = 0.212;
+				inc = 0.14/0.03;
+				base = 0.07;
+			}
+		}
+// const ret = 
+// console.log("getEndWallLossParam( "+DF+", "+tipGap+")="+ret+"="+low+" + "+inc+" * "+(tipGap-base));
+		return low + inc * (tipGap-base);
 	}
 	//const test = getMetrics();
     </SCRIPT>

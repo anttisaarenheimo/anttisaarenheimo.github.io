@@ -103,15 +103,15 @@ th {
 </DIV>
 <DIV>
 	<LABEL>Average turbin stage efficiency: </LABEL>
-	<INPUT size="4" title="95-97% is the upper efficiency for a modern industrial size turbin" id="tEfficiency" type="float" value="0.971">
+	<INPUT size="4" title="95-97% is the upper efficiency for a modern industrial size turbin" id="tEfficiency" type="float" value="0.972">
 	<LABEL>Average cryo compressor stage efficiency: </LABEL>
-	<INPUT size="4" title="Industrial size cryo compressors do not yet exist, but compressors can be scaled to cryo temperatures" id="cLowEfficiency" type="float" value="0.961"> 
+	<INPUT size="4" title="Industrial size cryo compressors do not yet exist, but compressors can be scaled to cryo temperatures" id="cLowEfficiency" type="float" value="0.962"> 
 	<INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for turbin and compressor stage efficiencies </LABEL><INPUT size="4" id="tEfficiencyFrom" type="float" value="0.90"> - <INPUT size="4" id="tEfficiencyTo" type="float" value="0.98"></Div>
 <DIV>
 	<LABEL>Average compressor stage efficiency: </LABEL>
-	<INPUT size="4" title="94-95% is a typical efficiency range for a modern industrial size compressor stage" id="cEfficiency" type="float" value="0.951">
+	<INPUT size="4" title="94-95% is a typical efficiency range for a modern industrial size compressor stage" id="cEfficiency" type="float" value="0.952">
 	<LABEL>Average cryo turbin stage efficiency: </LABEL>
-	<INPUT size="4" title="Industrial size cryo turbins do not yet exist, but hot turbins can be scaled down to cryo temperatures" id="tLowEfficiency" type="float" value="0.981">
+	<INPUT size="4" title="Industrial size cryo turbins do not yet exist, but hot turbins can be scaled down to cryo temperatures" id="tLowEfficiency" type="float" value="0.982">
 	<!-- powerOnly option produces worse power back % than the combined power ????-->
 	<a href="https://www.renk.com/en/products/turbo-high-speed/vacuum-gearbox-systems/het">Vacuum gear efficiency: </a><INPUT size="4" id="gearEfficiency" type="float" value="0.993"> 
 	<LABEL>Generator efficiency: </LABEL><INPUT size="4" id="generatorEfficiency" type="float" value="0.99"> 
@@ -237,7 +237,7 @@ th {
 			<DIV>
 				<LABEL>Hub/Tip ratio from:</LABEL><INPUT type="float" size="4" id="hubToTipRatio" value="0.70"/>
 				<SPAN> to </SPAN><INPUT type="float" size="4" id="hubToTipRatioMax" value="0.80"/>
-				<LABEL>Solidity c/s:</LABEL><INPUT type="float"  size="4" id="solidity" value="2" title="Chord spacing: chord length/distance between chords"/>
+				<LABEL>Solidity c/s:</LABEL><INPUT type="float"  size="4" id="solidity" value="1.7" title="Chord spacing: chord length/distance between chords"/>
 				<LABEL>Min constant rpm tip gap:</LABEL><INPUT type="float"  size="4" id="tipGapMm" value="1" title="tip gap mm"/><SPAN> mm </SPAN><INPUT type="float"  size="4" id="tipGapPercent" value="1" title="tip gap/h %"/><SPAN> % (α/h)</SPAN>
 				<LABEL>Min blade average thickess in tip mm</LABEL><INPUT size="4" type="float" id="minTipThickness" value="1"/>
 			</DIV>
@@ -264,15 +264,15 @@ th {
 				<input id="hotCompressorTypeConstantRpm" name="hotCompressorType" type="radio" checked value="constantRpm"><LABEL>Synchronized with generator rpm</LABEL>
 			</DIV>
 			<DIV>
-				<LABEL>50% of max allowed steady stress of cryo compressor/turbin blades MPa</LABEL><INPUT size="4" type="float" id="cStressMaxMPaCold" value="175"/>
-					<a href="https://nickelinstitute.org/media/1723/materialsforcryogenicservice_engineeringpropertiesofausteniticstainlesssteel_4368_.pdf">Cryogenic austenitic steels</a>
-			</DIV>
-			<DIV>
 				<Label>Cryo compressor type:</Label>
 				<input id="coldCompressorTypeConstantH" name="coldCompressorType" type="radio" value="constantH"><Label>Constant number of stages and shafts with equal power:</label><INPUT size="5" type="float" id="cColdStages" value="14"/>
 				<input id="coldCompressorTypeConstantVrel" name="coldCompressorType" type="radio" value="constantVrel"><LABEL>Constant relative speed in mach:</LABEL><INPUT size="5" type="float" id="machMaxSpeedCold" value="0.752"/>
 				<input id="coldCompressorTypeConstantRpm" name="coldCompressorType" type="radio" checked value="constantRpm"><LABEL>Synchronized with generator rpm</LABEL>
 				<input id="coldCompressorTypeSingleRpm" name="coldCompressorType" type="radio" value="singleRpm"><LABEL>Single rpm</LABEL>
+			</DIV>
+			<DIV>
+				<LABEL>50% of max allowed steady stress of cryo compressor/turbin blades MPa</LABEL><INPUT size="4" type="float" id="cStressMaxMPaCold" value="175"/>
+					<a href="https://nickelinstitute.org/media/1723/materialsforcryogenicservice_engineeringpropertiesofausteniticstainlesssteel_4368_.pdf">Cryogenic austenitic steels</a>
 			</DIV>
 			<DIV>
 				<LABEL>Shaft bearing space mm:</LABEL><INPUT size="2" type="float" id="bearingsSpace" type="float" value="2"/>
@@ -9181,7 +9181,7 @@ if (!item.p) {
 				stage.aspectRatio = optEffAndAR.optimalAR;
 				stage.efficiency = optEffAndAR.efficiency;
 				stage.cRe = item.d * ((stage.rTip-stage.rHub)/stage.aspectRatio) * stage.v / visc;
-				getEfficiencyOfByDS_DR( stageData, stage, stageData.stages.length );
+				getEfficiencyWithDF_DR( stageData, stage, stageData.stages.length );
 
 				if (stageData.stageEfficiencies.length == stageData.stages.length) {
 					stageData.stageEfficiencies.push(stage.efficiencyDS_DR);
@@ -9208,7 +9208,7 @@ if (!item.p) {
 */
 			}
 //console.log("*****"+stageData.stages.length+":rMiddle="+rMiddle+", bladeThicknessIn hub/Middl//e/tip="+stage.bladeThicknessInHub+"/"+stage.bladeThicknessInMiddle+"/"+stage.bladeThicknessInTip+", AR:"+stage.aspectRatio);
-			//getEfficiencyOfByDS_DR( stageData, stage );
+			//getEfficiencyWithDF_DR( stageData, stage );
 			stage.stageWidth2h = Math.cos(stageData.β2) / (0.35*stage.aspectRatio);		// e.g: rotor:gap:stator:gap 35:15:35:15 
 			return deltaH;
 		}
@@ -9998,7 +9998,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		titles.push('Pipe in');
 
 		for (i = 0; i < stages.length; i++) {
-			//getEfficiencyOfByDS_DR( stageData, stages[i], i );
+			//getEfficiencyWithDF_DR( stageData, stages[i], i );
 			titles.push('Stage '+(i+1));
 			stages[i].getEfficiency = function( i, stage ){
 				//const loadingFactor = getLoadFactor(stage.pressureRiseCoefficient);	// must be the top value
@@ -10031,7 +10031,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		stageProps.push(getSheetValues('D mm', 'diameterMm', data));
 		stageProps.push(getSheetValues('h kJ/kg', 'h', data, 1000));
 		stageProps.push(getSheetValues('P2/P1', 'pRatio', data, 2));
-		stageProps.push(getSheetValues('Efficiency (NACA 65 or DCA)', 'efficiencyDS_DR', data, 3 ));
+		stageProps.push(getSheetValues('Efficiency (DF, DR)', 'efficiencyDS_DR', data, 3 ));
 		stageProps.push(getSheetValues('Analytical efficiency', 'getEfficiency', data));
 		stageProps.push(getSheetValues('Flow m3/s', 'flowM3', data));
 		stageProps.push(getSheetValues('Power MW', 'stagePower', data, 1000000, 1));
@@ -10075,8 +10075,8 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		stageProps.push(getSheetValues('Load coefficient', 'effectiveLoadCoefficient', data, 2));
 		stageProps.push(getSheetValues('Flow coefficient', 'midFlowCoefficient', data, 2));
 		//stageProps.push(getSheetValues('Δp/(d∙U²)', 'getPressureRiseCoeffcient', data, 2));
-		stageProps.push(getSheetValues('Diffusion factor', 'DF', data, 2));
-		stageProps.push(getSheetValues('Equivalent diffusion factor', 'DR', data, 2));
+		stageProps.push(getSheetValues('Diffusion factor DF', 'DF', data, 2));
+		stageProps.push(getSheetValues('Equivalent diffusion factor DR', 'DR', data, 2));
 		stageProps.push(getSheetValues('AN2 E08', 'AN2EXP8', data, 2));
 		stageData.stageProps = stageProps;
 		var eff = 0, analyticEff = 0, usedEff = 0;
@@ -10121,17 +10121,18 @@ console.log("Efficiency mismatch: "+$("#cEfficiency").val()+" != "+averageEffici
 			"speedOut":8.807401930615992,"pHigh":2517078.5346587086,"hEnd":202141.21278021956}	*/
 		stageData.titles = [
 			Math.round(totalPower/1000000)+" MW "+"Axial "+(stages[0].machRelTip <= 0.70 ? "Subsonic " : stages[0].machRelTip < 1.20 ? "Intersonic " : "Supersonic ")+(title.indexOf("Cold")==0 ? "Cryo ": "")+"Compressor"+(stageData.constantRpm ? " synchronized with Motor-Generator" : " with "+stageData.rpmCount+" pipe shafts and active tip gap control"),
-			"Adiabatic efficiency: "+myRound(stageData.adiabaticEfficiency,3)+", average stage efficiency: "+averageEfficiency +" ("+myRound(stageData.averageAnalyticEfficiency,3)+")", 
+			"Adiabatic efficiency: "+myRound(stageData.adiabaticEfficiency,3)+", average stage efficiency from DF and DR: "+averageEfficiency +" (analytical: "+myRound(stageData.averageAnalyticEfficiency,3)+")", 
 			"P-out/P-in: "+myRound(last.p/first.p,2)+", Mass flow: "+Math.round(stageData.massFlowInKg)+" kg/s",
-			stageData.rpmCount+" shafts, "+stageData.stages.length+" stages",
+			stageData.rpmCount+" shaft"+(stageData.rpmCount > 1 ? "s":"")+", "+stageData.stages.length+" stages, reaction: 50 %, solidity: "+stageData.solidity,
 			"Tip: Min stage loading coefficient: "+ stageData.stageLoadingCoefficientMin + ", min flow coefficient: "+ stageData.flowCoefficientMin,
 			"Hub: Max stage loading coefficient: "+myRound(stageData.stages[0].hubStageLoadingCoefficient,2)+ ", max flow coefficient: "+myRound(stageData.stages[0].hubFlowCoefficient,2),
-			"Aspect ratio h/c: adaptive, Hub/Tip ratio"+(stageData.hubToTipRatioMax == stageData.hubToTipRatio ? ": "+myRound(stageData.hubToTipRatio,2) : "s from "+myRound(stageData.hubToTipRatio,2)+" to "+myRound(stageData.hubToTipRatioMax,2))+(stageData.constantRpm ? "": ", Tip gap: 0.5%"),
+			"Aspect ratio h/c: adaptive, Hub/Tip ratio"+(stageData.hubToTipRatioMax == stageData.hubToTipRatio ? ": "+myRound(stageData.hubToTipRatio,2) : "s from "+myRound(stageData.hubToTipRatio,2)+" to "+myRound(stageData.hubToTipRatioMax,2)),
 			//"Relative velocity on blade tip inlet surface: "+stageData.machMaxSpeed+" mach",
 			//"Relative velocity on blade hub inlet surface: "+myRound(stageData.machRelHub,3)+" mach",
 			"Max/min relative flow angle in blade tip/hub inlet β1: "+ myRound(stageData.β1deg, 1)+'/'+ myRound(stageData.hubβ1deg, 1)+'°'
 		];
-		stageData.titles.push("Axial velocity: "+(stageData.constantDeltaH ? (myRound(stages[0].v)+" m/s") : (myRound(stageData.vMach,3)+" mach")));
+		stageData.titles.push("Axial velocity: "+(stageData.constantDeltaH ? (myRound(stages[0].v)+" m/s")+" (<="+(myRound(stages[0].v/stages[0].mach,3))+" mach)" : (myRound(stageData.vMach,3)+" mach"))
+			+ "; Stator hub: <="+(myRound(stages[0].v/stages[0].mach/Math.cos(stages[0].hubβ1),3))+" mach");
 
 		//if (!stageData.constantDeltaH) 
 		stageData.height = 2 * (stageData.stages[0].rTip + 0.052); // 50 mm for frame, 2 mm for tip gap
@@ -10157,14 +10158,14 @@ console.log("Efficiency mismatch: "+$("#cEfficiency").val()+" != "+averageEffici
 		var cMin =  c/2;
 		var cMax =  c*2;
 
-		var maxEff = getEfficiencyOfByDS_DR( stageData, stage, stageData.stages.length );
+		var maxEff = getEfficiencyWithDF_DR( stageData, stage, stageData.stages.length );
 		const orgEff = maxEff;
 		var i;
 		for (i = 0; i < 8; i++) {
 			var cTest = (c+cMax)/2;
 			stage.cRe = Re*cTest;
 			stage.aspectRatio = h/cTest;
-			var eff = getEfficiencyOfByDS_DR( stageData, stage, stageData.stages.length );
+			var eff = getEfficiencyWithDF_DR( stageData, stage, stageData.stages.length );
 			if (eff < maxEff) cMax = cTest;
 			else {
 				maxEff = eff;
@@ -10173,7 +10174,7 @@ console.log("Efficiency mismatch: "+$("#cEfficiency").val()+" != "+averageEffici
 			cTest = (c+cMin)/2;
 			stage.cRe = Re*cTest;
 			stage.aspectRatio = h/cTest;
-			eff = getEfficiencyOfByDS_DR( stageData, stage, stageData.stages.length );
+			eff = getEfficiencyWithDF_DR( stageData, stage, stageData.stages.length );
 			if (eff < maxEff) cMin = cTest;
 			else {
 				maxEff = eff;
@@ -10688,24 +10689,6 @@ console.log("baseLineCompressor top="+elem.offsetTop+", left="+elem.offsetLeft+"
 	{
 		//const tmp = {"flowM3":4173.533301242276,"speedOfSound":438.5292933044679,"v":142.52202032395206,"rTip":4.615800092373975,"rHub":3.4618500692804814,"w":431.884910072582,"rpm":893.4956052158383,"h":483243.00598183315,"t":464.66160353971225,"p":48895.79446968536,"d":0.35447548938912926,"flowCoefficient":0.33,"stageLoadingCoefficient":0.2,"deltaH":37304.91510968045,"wMach":0.9848484848484848};
 	}
-/*	
-	function getEfficiencyOfByDS_DR(stageData, stage) {
-		stage.effectiveLoadCoefficient = stage.midStageLoadingCoefficient/stage.workDone;
-
-		const stageLoadingCoefficient = stage.effectiveLoadCoefficient;
-		const flowCoefficient = stage.midFlowCoefficient;
-		const solidity = stageData.solidity;
-		const midβ1 = Math.atan((1/2 + stageLoadingCoefficient/2)/flowCoefficient);
-		const midβ2 = Math.atan((1/2 - stageLoadingCoefficient/2)/flowCoefficient);
-		
-		// The approximate DF formula on page 6/13 of https://www.seitzman.gatech.edu/classes/ae4803/compressor_cascadeperformance.pdf
-		// has wrong order for deltaRel = Math.tan(midβ2)-Math.tan(midβ1) < 0 => blade gets very strange values
-		stage.approximateDF = 1 - Math.cos(midβ1)/Math.cos(midβ2) +  Math.cos(midβ1) * (Math.tan(midβ1)-Math.tan(midβ2)) / (solidity*2);
-		stage.approximateDR = Math.cos(midβ2)/Math.cos(midβ1)*(1.12+0.61 * Math.pow(Math.cos(midβ1),2) * (Math.tan(midβ2)-Math.tan(midβ1))/solidity);
-	
-		testDF( stageData, stage );
-	}
-*/
 //console.log("Ψ="+stageLoadingCoefficient+", Φ="+flowCoefficient+", s/c="+solidity+" midβ2="+midβ2+", midβ1="+midβ1+"= > approximateDF="+approximateDF+", approximateDR="+approximateDR);
 	function getLoadFactor(pressureRiseCoefficient) {
 		// For analytical efficiency calculation
@@ -10723,7 +10706,7 @@ console.log("baseLineCompressor top="+elem.offsetTop+", left="+elem.offsetLeft+"
 		return loadingFactor;
 	}
 
-	function getEfficiencyOfByDS_DR( stageData, stage, stageIndex )
+	function getEfficiencyWithDF_DR( stageData, stage, stageIndex )
 	{
 		// https://moodle.polymtl.ca/file.php/1047/HDVo/Module_04_-_Axial_Flow_Comp.pdf
 		// Calc first mid flow angles with reaction 0.5
@@ -10749,8 +10732,6 @@ console.log("baseLineCompressor top="+elem.offsetTop+", left="+elem.offsetLeft+"
 		const c = h / stage.aspectRatio;
 		const tMax =stage.bladeThicknessInMiddle/0.75;
 		const solidity = stageData.solidity;
-		// assume summetric flow => 
-		var camberAngle = midβ2Deg; // unkonw! β2 is the best available approximation with a subsonic airfoil!!!
 
 		const isNACA65 = stage.machRelTip <= 0.9; 
 		// Calc incidence angle iRef and deviation angle δ from flow (in degrees) to get surface speed on leading and tailing edge (vLE and vTE)
@@ -10767,11 +10748,20 @@ console.log("baseLineCompressor top="+elem.offsetTop+", left="+elem.offsetLeft+"
 		const b = 0.9655+2.538/1000*midα1Deg+4.221/100000*midα1Deg*midα1Deg-1.3/1000000*midα1Deg*midα1Deg*midα1Deg;
 		const m = mBladeType / Math.pow(solidity,b);
 
+		// https://www.netl.doe.gov/sites/default/files/gas-turbine-handbook/2-0.pdf Page 4/33
+		var camberAngle = midβ1Deg - midβ2Deg; // Boyle: camber angle = β1 - β2! "The camber angle θ is the turning angle of the camber line."
 		var iRef = Ksh*Kit*i010 + n*camberAngle;
 		var δRef = Ksh*Kδ*δ010 + m*camberAngle;
+		var i;
+		// iterate to the correct camber angle
+		for (i = 0; i < 10; i++) {
+			camberAngle = midβ1Deg+iRef - (midβ2Deg+δRef);
+			iRef = Ksh*Kit*i010 + n*camberAngle;
+			δRef = Ksh*Kδ*δ010 + m*camberAngle;
+		}
 		// assume constant axial speed stage.v everywhere
-		const vLE = stage.v/Math.cos((midβ1Deg+iRef)/180*Math.PI);	// relative inlet velocity to the compressor blade
-		const vTE = stage.v/Math.cos((midβ2Deg+δRef)/180*Math.PI);	// relative exit velocity from the compressor blade
+		const vLE = stage.v/Math.cos((midβ1Deg+iRef)/180*Math.PI);	// relative inlet velocity on the compressor blade leading edge
+		const vTE = stage.v/Math.cos((midβ2Deg+δRef)/180*Math.PI);	// relative exit velocity on the compressor blade tailing edge
 		const vRel1 = stage.v/Math.cos(midβ1);						// relative inlet flow velocity 
 		const vRel2 = stage.v/Math.cos(midβ2);						// relative exit flow velocity 
 		const deltaVrel = vRel1 - vRel2;
@@ -10786,15 +10776,19 @@ console.log("baseLineCompressor top="+elem.offsetTop+", left="+elem.offsetLeft+"
 //console.log("DF="+DF+", tipGap/c="+(h*stage.tipGap/c)+" => endWallLossParam="+endWallLossParam+", Math.pow(vLE/vTE,2)="+Math.pow(vLE/vTE,2));
 		stage.profileLoss = 2*profileLossParam * Math.pow(deHallerNum,2) / Math.cos(midα2);
 		stage.endWallLoss = endWallLossParam / (stage.aspectRatio * Math.pow(vLE/vTE,2));
+		/* TBD: The loss when reaction != 0.5!
+		var ret = {};
+		ret.DF = DF;
+		ret.DR = DR;*/
+//console.log("loss="+loss+", iRef="+iRef);
+//console.log("loss="+loss+", iRef="+iRef+"("+(Ksh*Kit*i010)+"+"+(n*camberAngle)+"), δRef="+δRef+"("+(Ksh*Kδ*δ010)+"+"+(m*camberAngle)+"), vLE="+vLE+", vTE="+vTE+", vSSmax="+vSSmax+", DF="+DF+", DR="+DR+", profileLossParam="+profileLossParam+",endWallLossParam ="+endWallLossParam
+//			+", stage.profileLoss="+stage.profileLoss+", stage.endWallLoss="+stage.endWallLoss+", cascadeLoss="+cascadeLoss+", scaleToRe="+scaleToRe+", cRe="+stage.cRe);
 		const loss = stage.profileLoss + stage.endWallLoss;
 		const cascadeLoss = getCascadeStageLoss( loss, stageIndex);
 		const scaleToRe = scaleToReferenceReynoldsNum( stage.cRe, 1.75 );  // relative loss at Re=1000000
 		stage.efficiencyDS_DR = 1 - cascadeLoss*scaleToRe;
 		stage.DF = DF;
 		stage.DR = DR;
-//console.log("loss="+loss+", iRef="+iRef);
-//console.log("loss="+loss+", iRef="+iRef+"("+(Ksh*Kit*i010)+"+"+(n*camberAngle)+"), δRef="+δRef+"("+(Ksh*Kδ*δ010)+"+"+(m*camberAngle)+"), vLE="+vLE+", vTE="+vTE+", vSSmax="+vSSmax+", DF="+DF+", DR="+DR+", profileLossParam="+profileLossParam+",endWallLossParam ="+endWallLossParam
-//			+", stage.profileLoss="+stage.profileLoss+", stage.endWallLoss="+stage.endWallLoss+", cascadeLoss="+cascadeLoss+", scaleToRe="+scaleToRe+", cRe="+stage.cRe);
 		return stage.efficiencyDS_DR;
 	}
 	function getProfileLossParam( DR, inletMach, stage)

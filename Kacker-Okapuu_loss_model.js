@@ -81,8 +81,8 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     let aa = Math.max(0, -angle_in / angle_out);
     Y_p = Y_p * Math.pow((t_max / c) / 0.20, aa);
     Y_p = 0.914 * (2 / 3 * Y_p * Kp + Y_shock);
-console.log("Y_p="+Y_p+" = 0.914 * (2 / 3 * "+Y_p+" * "+Kp+" + "+Y_shock+", Y_p_reaction="+Y_p_reaction+", Y_p_impulse="+Y_p_impulse+
-		", Ma_rel_in="+Ma_rel_in+", Ma_rel_out="+Ma_rel_out+", angle_in/angle_out="+angle_in+"/"+angle_out+", (t_max / c)="+(t_max / c));
+//console.log("Y_p="+Y_p+" = 0.914 * (2 / 3 * "+Y_p+" * "+Kp+" + "+Y_shock+", Y_p_reaction="+Y_p_reaction+", Y_p_impulse="+Y_p_impulse+
+//		", Ma_rel_in="+Ma_rel_in+", Ma_rel_out="+Ma_rel_out+", angle_in/angle_out="+angle_in+"/"+angle_out+", (t_max / c)="+(t_max / c));
     return Y_p;
 }
 function secondary_loss(angle_in,angle_out,Ma_rel_in,Ma_rel_out,H,c,b)
@@ -101,6 +101,7 @@ function secondary_loss(angle_in,angle_out,Ma_rel_in,Ma_rel_out,H,c,b)
 function clearance_loss(type, angle_in, angle_out, H, c, t_cl) {
     let B;
     if (type === 'stator') {
+		// stator 
         B = 0.00; // Empirical parameter for the stator
 		return 0;
     } else if (type === 'rotor') {

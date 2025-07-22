@@ -4,9 +4,10 @@ function loss_model_KO(type, Re, angle_in, angle_out, c, s, H, t_cl, t_max, Ma_r
     // Author: Roberto Agromayor
 	const t_te = s / 40;  // "For the T106C cascade, increasing the trailing edge thickness from 1.9% pitch to 2.8% pitch has a small effect on the loss"
 	// incidence and deviation angles are assumed to be zero => metal angles are the same as angle_in and angle_out
-	const staggerAngle = (angle_in + angle_out) / 2;	
+	const staggerAngle = (Math.abs(angle_in) + Math.abs(angle_out)) / 2;	
 	const b = c * Math.cos(staggerAngle);
-	const o = s * Math.cos(angle_out);
+	const o = s * Math.cos(Math.abs(angle_out));
+
 
     // Compute the loss coefficients
     // Mach number correction factor

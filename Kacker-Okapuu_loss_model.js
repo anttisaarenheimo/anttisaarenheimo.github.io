@@ -3,8 +3,9 @@ function loss_model_KO(type, Re, angle_in, angle_out, c, s, H, t_cl, t_max, Ma_r
     // Compute the loss coefficient using the Kacker-Okapuu loss model
     // Author: Roberto Agromayor
 	const t_te = s / 40;  // "For the T106C cascade, increasing the trailing edge thickness from 1.9% pitch to 2.8% pitch has a small effect on the loss"
+
 	// incidence and deviation angles are assumed to be zero => metal angles are the same as angle_in and angle_out
-	const staggerAngle = (Math.abs(angle_in) + Math.abs(angle_out)) / 2;	
+	const staggerAngle = Math.abs(angle_in + angle_out) / 2;
 	const b = c * Math.cos(staggerAngle);
 	const o = s * Math.cos(Math.abs(angle_out));
 
@@ -70,7 +71,7 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     // The logic for this formula is quite tricky and I had to put a lot of
     // thought into it. See my handwritten notes for information
     // There is no need to change the sign of any angle in this formula
-    let Y_p = Y_p_reaction - Math.abs(angle_in / angle_out) * (angle_in / angle_out) * (Y_p_impulse - Y_p_reaction);
+    let Y_p = Y_p_reaction + Math.abs(angle_in / angle_out) * (angle_in / angle_out) * (Y_p_impulse - Y_p_reaction);
 
     // Limit the extrapolation of the profile loss to avoid negative values for
     // blade profiles with little deflection
@@ -79,7 +80,7 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     Y_p = Math.max(Y_p, 0.80 * Y_p_reaction);
 
     // Avoid unphysical effect on the thickness by defining the variable aa
-    let aa = Math.max(0, -angle_in / angle_out);
+    let aa = Math.max(0, angle_in / angle_out);
     Y_p = Y_p * Math.pow((t_max / c) / 0.20, aa);
     Y_p = 0.914 * (2 / 3 * Y_p * Kp + Y_shock);
 //console.log("Y_p="+Y_p+" = 0.914 * (2 / 3 * "+Y_p+" * "+Kp+" + "+Y_shock+", Y_p_reaction="+Y_p_reaction+", Y_p_impulse="+Y_p_impulse+
@@ -92,8 +93,8 @@ function secondary_loss(angle_in,angle_out,Ma_rel_in,Ma_rel_out,H,c,b)
 	// Limit excessively low values (it might be a problem during optimization)
 	// The limit to 0.1 is quite arbitrary, but it worked for me
 	const Ks      = Math.max(0.10,K_s(Ma_rel_in,Ma_rel_out,H/b));
-	const angle_m = Math.atan((Math.tan(angle_in)+Math.tan(angle_out))/2);
-	const Z       = 4*(Math.tan(angle_in)-Math.tan(angle_out))**2*Math.cos(angle_out)**2/Math.cos(angle_m);
+	const angle_m = Math.atan((Math.tan(angle_in)-Math.tan(angle_out))/2);
+	const Z       = 4*(Math.tan(angle_in)+Math.tan(angle_out))**2*Math.cos(angle_out)**2/Math.cos(angle_m);
 	const Y_s     = 1.2*Ks*0.0334*f_AR(H/c)*Math.cos(angle_out)/Math.cos(angle_in)*Z;
 	return Y_s;
 }
@@ -111,8 +112,8 @@ function clearance_loss(type, angle_in, angle_out, H, c, t_cl) {
         throw new Error("Specify the type of cascade: 'rotor' or 'stator'");
     }
 
-    const angle_m = Math.atan((Math.tan(angle_in) + Math.tan(angle_out)) / 2);
-    const Z = 4 * Math.pow((Math.tan(angle_in) - Math.tan(angle_out)), 2) * Math.pow(Math.cos(angle_out), 2) / Math.cos(angle_m);
+    const angle_m = Math.atan((Math.tan(angle_in) - Math.tan(angle_out)) / 2);
+    const Z = 4 * Math.pow((Math.tan(angle_in) + Math.tan(angle_out)), 2) * Math.pow(Math.cos(angle_out), 2) / Math.cos(angle_m);
     const Y_cl = B * (c / H) * Math.pow((t_cl / H), 0.78) * Z;
 
     return Y_cl;
@@ -134,7 +135,7 @@ function trailing_loss(angle_in, angle_out, t_te, o) {
     const d_phi2_reaction = linearInterpolation(r_to_data_reaction, phi_data_reaction, r_to);
     const d_phi2_impulse = linearInterpolation(r_to_data_impulse, phi_data_impulse, r_to);
 
-    let d_phi2 = d_phi2_reaction - Math.abs(angle_in / angle_out) * (angle_in / angle_out) * (d_phi2_impulse - d_phi2_reaction);
+    let d_phi2 = d_phi2_reaction + Math.abs(angle_in / angle_out) * (angle_in / angle_out) * (d_phi2_impulse - d_phi2_reaction);
 
     // Limit the extrapolation of the trailing edge loss
     d_phi2 = Math.max(d_phi2, d_phi2_impulse / 2);

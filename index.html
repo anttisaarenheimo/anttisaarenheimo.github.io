@@ -10607,20 +10607,22 @@ console.log("init: area="+area+", tip="+stage.rTip);
 												   (-stageData.reaction + midStageLoadingCoefficient/2)/midFlowCoefficient;
 			stage.tanβ2 = stageData.isCompressor ? (stageData.reaction - midStageLoadingCoefficient/2)/midFlowCoefficient :
 													(stageData.reaction + midStageLoadingCoefficient/2)/midFlowCoefficient;
+			var midβ1 = stage.midβ1 = Math.atan(stage.tanβ1);
+			var midβ2 = stage.midβ2 = Math.atan(stage.tanβ2);
 			if (stageData.reaction == 0.5) {
-				stage.tanα1 = stage.tanβ2;
+				stage.midα1 = midβ2;
+				stage.midα2 = midβ1;
 				stage.tanα2 = stage.tanβ1;
+				stage.tanα1 = stage.tanβ2;
 			}
 			else {
-				stage.tanα1 = stageData.isCompressor ? (1 - stageData.reaction - midStageLoadingCoefficient/2)/midFlowCoefficient :
-													   (1 - stageData.reaction + midStageLoadingCoefficient/2)/midFlowCoefficient;
-				stage.tanα2 = stageData.isCompressor ? (1 - stageData.reaction + midStageLoadingCoefficient/2)/midFlowCoefficient :
-													   (-(1 - stageData.reaction) + midStageLoadingCoefficient/2)/midFlowCoefficient;
+				stage.midα1 = stageData.isCompressor ? Math.atan(stage.tanα1 = (1 - stageData.reaction - midStageLoadingCoefficient/2)/midFlowCoefficient) :
+													   Math.atan(stage.tanα1 = (1 - stageData.reaction + midStageLoadingCoefficient/2)/midFlowCoefficient);
+				stage.midα2 = stageData.isCompressor ? Math.atan(stage.tanα2 = (1 - stageData.reaction + midStageLoadingCoefficient/2)/midFlowCoefficient) :
+													   Math.atan(stage.tanα2 = (-(1 - stageData.reaction) + midStageLoadingCoefficient/2)/midFlowCoefficient);
 			}
-			var midβ1 = Math.atan(stage.tanβ1);
-			var midβ2 = Math.atan(stage.tanβ2);
-			stage.midα1 = stageData.isCompressor ? Math.atan(((1-stageData.reaction) - midStageLoadingCoefficient/2)/(midFlowCoefficient)) :
-										 Math.atan((-(1-stageData.reaction) + midStageLoadingCoefficient/2)/(midFlowCoefficient));
+			//stageData.isCompressor ? Math.atan(((1-stageData.reaction) - midStageLoadingCoefficient/2)/(midFlowCoefficient)) :
+			//							 Math.atan((-(1-stageData.reaction) + midStageLoadingCoefficient/2)/(midFlowCoefficient));
 			var bladeHeight = stageData.isCompressor ? (stage.rTip - stage.rHub + stage.rTipMid - stage.rHubMid) / 2 :
 													   (stage.rTipMid - stage.rHubMid + stage.rTipOut - stage.rHubOut) / 2;
 			const Um = Math.sqrt(Math.abs(stage.hDeltaPower) / midStageLoadingCoefficient);
@@ -10697,7 +10699,7 @@ if (Number.isNaN(stage.centrifugalStressMpa)) throw new Error("NaN");
 			// P = stage.deltaH*massFlowInKg; // J/s == Nm/s)
 			// => stage.F = stage.deltaH*massFlowInKg / (rMidFlow*2*PI*rpm/60); // N
 			// force = gas massFlow * acceleration from c1 to c2 
-			stage.F2 = massFlowInKg*stage.v*(stage.tanα2-stage.tanα1) / (1-stageData.reaction);
+			stage.F2 = massFlowInKg*stage.v*Math.abs(stage.tanα2-stage.tanα1) / (1-stageData.reaction);
 			stage.F = Math.abs(stage.F2 / (stage.rotorSolidity*2*Math.PI*rMiddle)); //  stage.deltaH*massFlowInKg / (rMiddle*2*Math.PI*stage.rpm/60);
 
 /*
@@ -10846,18 +10848,28 @@ console.log("firstStageAccelerationForcePerM="+JSON.stringify(firstStageAccelera
 						}
 					}
 				}
-				const hubβ1 = stage.bladeHubProps ? stage.bladeHubProps.β1 : 
+				const hubβ1 = stage.hubβ1 = stage.bladeHubProps ? stage.bladeHubProps.β1 : 
 						stageData.isCompressor ? Math.atan((stageData.reaction + stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient)) :
 												 Math.atan((-stageData.reaction + stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient));
-				const hubβ2 = stage.bladeHubProps ? stage.bladeHubProps.β2 : 
+				const hubβ2 = stage.hubβ2 = stage.bladeHubProps ? stage.bladeHubProps.β2 : 
 						stageData.isCompressor ? Math.atan((stageData.reaction - stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient)) :
 											     Math.atan((stageData.reaction + stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient));
+				if (stageData.reaction == 0.5) {
+					stage.hubα1 = hubβ2;
+					stage.hubα2 = hubβ1;
+				}
+				else {
+					stage.hubα1 = stageData.isCompressor ? Math.atan((1 - stageData.reaction - stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient)) :
+														   Math.atan((1 - stageData.reaction + stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient));
+					stage.hubα2 = stageData.isCompressor ? Math.atan((1 - stageData.reaction + stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient)) :
+														   Math.atan((-(1 - stageData.reaction) + stage.hubStageLoadingCoefficient/2)/(stage.hubFlowCoefficient));
+				}
 				while (cLoop < 10) {
 					bladeData = 
 						getStatorAndRotorBlades( stageData, stage.rMid, stage.rTip, stage.rHub, 
 							stage.rMidMid, stage.rTipMid, stage.rHubMid, stage.rMidOut, stage.rTipOut, stage.rHubOut, stage.rotorSolidity, stage.statorSolidity, stage.cRe, stage.cRe, staggerAngle, 
 							stage.F2, stage.rpm, unusedTensileStress, stageData.minTipRe, reaction, stageData.maxTipThickness, 
-							c, stage.tipToHubSectionArea, stage.tipToMidSectionArea, hubStaggerAngle, tipStaggerAngle, null );
+							c, stage.tipToHubSectionArea, stage.tipToMidSectionArea, hubStaggerAngle, tipStaggerAngle, stageData.isCompressor ? null : stage );
 					if (stageData.isCompressor) {
 						const midAngle = getCamberAngle( midβ1*180/Math.PI, midβ2*180/Math.PI, bladeData.rotor.tMid, c, stage.rotorSolidity, true, stage.v/Math.cos(midβ1)/stage.mach);
 						const hubAngle = getCamberAngle( hubβ1*180/Math.PI, hubβ2*180/Math.PI, bladeData.rotor.tRoot, c, stage.rotorSolidity*stage.rMid/stage.rHub, true, stage.v/Math.cos(midβ1)/stage.mach );
@@ -11132,8 +11144,10 @@ if (false && i == (stageData.stages.length-1)) {
 				if (i == stageData.stages.length-1) {
 					var points2 = [];
 					if (stageData.isCompressor) {
-						points.push(toPoint(x+stageWidth, rTip-(rTip-nextTip)*stage.hBladeMm/1000));
-						points.push(p2 = toPoint(x+stageWidth, rHub-(rHub-nextHub)+(stage.tipGap ? stage.tipGap : tipGap)*stage.hBladeMm/1000));
+						points.push(p = toPoint(x+stageWidth*w85, rTipMid-(rTipMid-nextTip)*stageData.relativeBladeWidth+(stage.tipGap ? stage.tipGap : tipGap)*stage.hBladeMm/1000));
+						frameBottom.push(p);
+						points.push(p2 = toPoint(xFrom = x+stageWidth*w85, yFrom = rHubMid-(rHubMid-nextHub)*stageData.relativeBladeWidth));
+						frameBottom.push(p2);
 						/*
 						points2.push(toPoint(x+stageWidth + nextHub, 0));
 						const xDistM = stageWidth*w15/Math.cos(Math.PI/4);
@@ -11143,14 +11157,16 @@ if (false && i == (stageData.stages.length-1)) {
 						points2 = [];
 						*/
 					}
-					var xFrom, yFrom;
+					var xFrom, yFrom, xEndWall2;
 					if (stageData.isCompressor) {
-						const xEndWall = x+stageWidth + (stageData.isCompressor ? 0 : 0.010);
-						points2.push(toPoint(xEndWall, nextHub));
+						const xEndWall = x+stageWidth-stageWidth*w50;
+						xEndWall2 = xEndWall + Math.max(frameThickness, statorWidth);
+						points2.push(p = toPoint(x+stageWidth, nextHub));
+						points2.push(toPoint(xEndWall2, nextHub-Math.max(frameThickness, statorWidth)));
+						points2.push(toPoint(xEndWall2, stageData.stages[i].rShaft+0.002));
 						points2.push(toPoint(xEndWall, stageData.stages[i].rShaft+0.002));
-						points2.push(toPoint(xEndWall-stageWidth*w35, stageData.stages[i].rShaft+0.002));
-						points2.push(toPoint(xFrom = xEndWall-stageWidth*w35, yFrom = rHub));
-						points2.push(toPoint(xEndWall, nextHub));
+						points2.push(toPoint(xEndWall, rHub));
+						points2.push(p);
 					}
 					else {
 						const xEndWall = x+stageWidth + (stageData.isCompressor ? 0 : 0.010);
@@ -11179,8 +11195,8 @@ if (false && i == (stageData.stages.length-1)) {
 					points2.push(toPoint(xFrom, fromShaft));
 					points2.push(toPoint(xTo*2, fromShaft));				// the shaft goes through the pipes
 					points2.push(toPoint(xTo*2, fromShaft+frameThickness));
-					points2.push(toPoint(xFrom, fromShaft+frameThickness));
-					points2.push(toPoint(xFrom, fromShaft));
+					points2.push(toPoint(stageData.isCompressor ? xEndWall2 : xFrom, fromShaft+frameThickness));
+					points2.push(toPoint(stageData.isCompressor ? xEndWall2 : xFrom, fromShaft));
 					metrics.stators.push(points2);
 				}
 				else {
@@ -13203,14 +13219,15 @@ console.log("midK="+midK+"< minK="+minK+"=>tipToMidSectionArea = 0.01");
 								{
 console.log("K="+K+", midK="+midK+", minK="+minK+"=>tipToMidSectionArea = "+tipToMidSectionArea);
 								}
-									
+								var tanα1, tanα2;
 								const hStator = isCompressor ? (rTipMid-rHubMid + rTipOut-rHubOut)/2 : (rTipMid-rHubMid + rTip-rHub)/2;
 								var isMach = false;
 								var foundValue = false;
-								const β1 = stageData.isCompressor ? Math.atan((reaction + loadCoefficient/2)/flowCoefficient) :
-																    Math.atan((-reaction + loadCoefficient/2)/flowCoefficient);
-								const β2 = stageData.isCompressor ? Math.atan((reaction - loadCoefficient/2)/flowCoefficient) :
-																	Math.atan((reaction + loadCoefficient/2)/flowCoefficient);
+								
+								const β1 = stageData.isCompressor ? Math.atan(tanα2 = (reaction + loadCoefficient/2)/flowCoefficient) :
+																    Math.atan(tanα2 = (-reaction + loadCoefficient/2)/flowCoefficient);
+								const β2 = stageData.isCompressor ? Math.atan(tanα1 = (reaction - loadCoefficient/2)/flowCoefficient) :
+																	Math.atan(tanα2 = (reaction + loadCoefficient/2)/flowCoefficient);
 								const hubStageLoadingCoefficient = Math.pow(rMid/rHub,2)*loadCoefficient;
 								const hubflowCoefficient = flowCoefficient * rMid / rHub;
 								const hubU = U*rHub/rMid;
@@ -13221,17 +13238,39 @@ console.log("K="+K+", midK="+midK+", minK="+minK+"=>tipToMidSectionArea = "+tipT
 								const tipU = rTip*2*Math.PI*stage.rpm/60;
 								const tipStageLoadingCoefficient = stage.hDeltaPower/(tipU*tipU);
 								const tipFlowCoefficient = Vx/tipU;
-								const tipβ1 = stageData.isCompressor ? Math.atan((reaction + tipStageLoadingCoefficient/2)/tipFlowCoefficient):
-																	   Math.atan((-reaction + tipStageLoadingCoefficient/2)/tipFlowCoefficient);
-								const tipβ2 = stageData.isCompressor ? Math.atan((reaction - tipStageLoadingCoefficient/2)/tipFlowCoefficient) :
-																	   Math.atan((reaction + tipStageLoadingCoefficient/2)/tipFlowCoefficient);
+								const tipβ1 = stageData.isCompressor ? Math.atan(tanα2 = (reaction + tipStageLoadingCoefficient/2)/tipFlowCoefficient):
+																	   Math.atan(tanα2 = (-reaction + tipStageLoadingCoefficient/2)/tipFlowCoefficient);
+								const tipβ2 = stageData.isCompressor ? Math.atan(tanα1 = (reaction - tipStageLoadingCoefficient/2)/tipFlowCoefficient) :
+																	   Math.atan(tanα1 = (reaction + tipStageLoadingCoefficient/2)/tipFlowCoefficient);
 								var tipStaggerAngle;
+								var turbinAngles = null;
 								if (stageData.isCompressor) {
 									const tipAngle = getCamberAngle( tipβ1*180/Math.PI, tipβ2*180/Math.PI, stageData.maxTipThickness, c, stage.rotorSolidity*rTip/rMid, true, stage.v/Math.cos(β1)/stage.mach );
 									tipStaggerAngle = tipAngle.staggerAngle*Math.PI / 180;
+									if (reaction != 0.5) {
+										tanα1 = ((1-reaction) - loadCoefficient/2)/flowCoefficient;
+										tanα2 = ((1-reaction) + loadCoefficient/2)/flowCoefficient;
+									}
 								}
 								else {
 									tipStaggerAngle = (tipβ1+tipβ2)/2;
+									turbinAngles = {};
+									turbinAngles.midβ1 = β1;
+									turbinAngles.midβ2 = β2;
+									turbinAngles.hubβ1 = hubβ1;
+									turbinAngles.hubβ2 = hubβ2;
+									if (reaction == 0.5) {
+										turbinAngles.midα1 = β2;
+										turbinAngles.midα2 = β1;
+										turbinAngles.hubα1 = hubβ2;
+										turbinAngles.hubα2 = hubβ1;
+									}
+									else {
+										turbinAngles.midα2 = Math.atan(tanα2 = (-(1-reaction) + loadCoefficient/2)/flowCoefficient);
+										turbinAngles.midα1 = Math.atan(tanα1 = ((1-reaction) + loadCoefficient/2)/flowCoefficient);
+										turbinAngles.hubα2 = Math.atan((-(1-reaction) + hubStageLoadingCoefficient/2)/hubflowCoefficient);
+										turbinAngles.hubα1 = Math.atan(((1-reaction) + hubStageLoadingCoefficient/2)/hubflowCoefficient);
+									}
 								}
 								var midStaggerAngle = 0;
 								var hubStaggerAngle = 0;
@@ -13239,6 +13278,8 @@ console.log("K="+K+", midK="+midK+", minK="+minK+"=>tipToMidSectionArea = "+tipT
 								var tRoot = stage.rotor.tRoot*c/cOrg;
 								var blades, maxLoops = 0;
 								const cRe = Vx*c*(isCompressor ? stage.dynamicVisc : stage.dynamicVisc2);
+								const F2 = stageData.massFlowInKg*Vx*Math.abs(tanα2-tanα1) / (1-reaction);
+
 								while (maxLoops < 4) {
 									if (stageData.isCompressor) {
 										const midCamber = getCamberAngle( β1*180/Math.PI, β2*180/Math.PI, tMid, c, stage.rotorSolidity, true, stage.v/Math.cos(β1)/stage.mach );
@@ -13256,11 +13297,14 @@ console.log("K="+K+", midK="+midK+", minK="+minK+"=>tipToMidSectionArea = "+tipT
 									}
 									blades = 
 										getStatorAndRotorBlades( stageData, rMid, rTip, rHub, rMidMid, rTipMid, rHubMid, rMidOut, rTipOut, rHubOut, stage.rotorSolidity, stage.statorSolidity, cRe, cRe, midStaggerAngle, 
-											stage.F2, stage.rpm, stage.unusedTensileStress, stageData.minTipRe, reaction, 
-											stageData.maxTipThickness, c, tipToHubSectionArea, tipToMidSectionArea, hubStaggerAngle, tipStaggerAngle );
+											F2, stage.rpm, stage.unusedTensileStress, stageData.minTipRe, reaction, 
+											stageData.maxTipThickness, c, tipToHubSectionArea, tipToMidSectionArea, hubStaggerAngle, tipStaggerAngle, turbinAngles );
 									if (!stageData.isCompressor || 
 										 Math.abs(tMid - blades.rotor.tMid)/blades.rotor.tMid < 0.02 || 
-										 Math.abs(tRoot - blades.rotor.tRoot)/blades.rotor.tRoot < 0.02 ) break;
+										 Math.abs(tRoot - blades.rotor.tRoot)/blades.rotor.tRoot < 0.02 ) 
+									{
+										break;
+									}
 									tMid = blades.rotor.tMid;
 									tRoot = blades.rotor.tRoot;
 									maxLoops++;
@@ -14545,9 +14589,9 @@ Mean line algorithm cannot be usedto ceck spanwise efficiencies
 			[0.750000, 0.025450],[0.800000, 0.020400],[0.850000, 0.015350],[0.900000, 0.010300],
 			[0.950000, 0.005250],[1.000000, 0.000210]];
 	var sectionModulusNACA63A010 = 0;
-	const tNACA63A010 = 0.1;
+	const tMaxNACA63A010 = 0.1;		// max thickness of the model blade (chord 1 m, max thickess 0.1 m)
 	// scale 10% thickness to the actual one 
-	function getBladeMaxThicknessNACA63A0XX(neededSectionModulusPerM) {
+	function getBladeMaxThicknessNACA63A0XX(neededSectionModulusPerM ) {
 		if (sectionModulusNACA63A010 == 0) {
 			var i, j;
 			for (i = 0; i < 20; i++) {
@@ -14560,23 +14604,50 @@ if (!h || Number.isNaN(h)) throw Error("Bad h="+h);
 			sectionModulusNACA63A010 = sectionModulusNACA63A010 / 6;
 console.log("sectionModulusNACA63A010="+sectionModulusNACA63A010+", section modulus of 0.075 sheet:"+(0.075*0.075/6));
 		}
+
 /*
 			const hubMomentumPerM = stage.F*(rMiddle-stage.rHub) / (hubSolidity*2*stage.rHub*Math.PI)/Math.cos(staggerAngle)*Math.cos(staggerAngle-hubStaggerAngle);
 			stage.bladeThicknessInHub = Math.sqrt(6*hubMomentumPerM/unusedTensileStress);
 */
-		// t^2/neededSectionModulusPerM == tNACA63A010^2/sectionModulusNACA63A010 =>
-		// t = sqrt(neededSectionModulusPerM*tNACA63A010^2/sectionModulusNACA63A010) 
-		var t = Math.sqrt((tNACA63A010*tNACA63A010)*Math.abs(neededSectionModulusPerM)/sectionModulusNACA63A010);
-if (Number.isNaN(t)) {
-	console.log("getBladeMaxThicknessNACA63A0XX="+t+"=Math.sqrt(("+sectionModulusNACA63A010*sectionModulusNACA63A010+")*"+neededSectionModulusPerM+"/"+sectionModulusNACA63A010+")");
-	throw new Error("error");
-}
-		return t;
+		// t^2/neededSectionModulusPerM == tMaxNACA63A010^2/sectionModulusNACA63A010 =>
+		// t = sqrt(neededSectionModulusPerM*tMaxNACA63A010^2/sectionModulusNACA63A010) 
+		var tMax = Math.sqrt((tMaxNACA63A010*tMaxNACA63A010)*Math.abs(neededSectionModulusPerM)/sectionModulusNACA63A010);
+		if (Number.isNaN(tMax)) {
+			console.log("getBladeMaxThicknessNACA63A0XX="+tMax+"=Math.sqrt(("+tMaxNACA63A010*tMaxNACA63A010+")*"+neededSectionModulusPerM+"/"+sectionModulusNACA63A010+")");
+			throw new Error("error");
+		}
+		return tMax;
 	}
+	//
+	// 	Let's strech both ends of NACA63A010 airfoil on a circular arc with in/out angles α1/α2 and the same thickness in same X-cordinate.
+	// 
+	function getBladeMaxThicknessCircularNACA63A0XX(neededSectionModulusPerM, α1, α2 ) {
+		const radStep = (α2 - α1)/20;
+		var α = α1 + radStep/2;
+		var i;
+		var sectionModulusNACA63A010 = 0;
+		// divide the streched circular airfoil to 20 parts each having the same width (5 cm)
+		for (i = 0; i < 20; i++) {
+			// The thickness of section modulus is to the direction of the rotation (90 degrees from the axial direction) => divide the thickness by cos(|α|)!
+			var h = 2 * (NACA63A010[i][1]+(NACA63A010[i+1][1])/2/Math.cos(Math.abs(α)));
+			sectionModulusNACA63A010 += 0.05 * h*h;
+			α = α + radStep;
+		}
+		sectionModulusNACA63A010 = sectionModulusNACA63A010 / 6;
+//console.log("sectionModulusNACA63A010="+sectionModulusNACA63A010+", section modulus of 0.075 sheet:"+(0.075*0.075/6));
+		var tMax = Math.sqrt((tMaxNACA63A010*tMaxNACA63A010)*Math.abs(neededSectionModulusPerM)/sectionModulusNACA63A010);
+		if (Number.isNaN(tMax)) {
+			console.log("getBladeMaxThicknessNACA63A0XX="+tMax+"=Math.sqrt(("+tMaxNACA63A010*tMaxNACA63A010+")*"+neededSectionModulusPerM+"/"+sectionModulusNACA63A010+")");
+			throw new Error("error");
+		}
+		return tMax;
+	}
+
 //var traceStatorAndRotorBlades = true;
 	function getStatorAndRotorBlades( stageData, rMidIn, rTipIn, rHubIn, rMidMid, rTipMid, rHubMid, rMidOut, rTipOut, rHubOut, 
 									rotorSolidity, statorSolidity, cReRotor, cReStator, midStaggerAngle, radialForce, rpm, maxTensileStress, 
-									  minRe, reaction, tMaxTip, c, tipToHubSectionArea, tipToMidSectionArea, hubStaggerAngle, tipStaggerAngle, firstStageAccelerationForcePerM )
+								    minRe, reaction, tMaxTip, c, tipToHubSectionArea, tipToMidSectionArea, hubStaggerAngle, tipStaggerAngle, 
+									turbinAngles )
 	{
 		var rotor = {};
 		var stator = {};
@@ -14650,8 +14721,8 @@ if (Number.isNaN(t)) {
 			// stagger angle seems to increase in sync with the radius!
 			//curStaggerAngle = rMomentum > rMid ? midStaggerAngle + (tipStaggerAngle - midStaggerAngle)*(rMomentum-rMid)/(rTip-rMid) :
 			//									 hubStaggerAngle + (midStaggerAngle - hubStaggerAngle)*(rMomentum-rHub)/(rMid-rHub);
-			const F = forcePerM/10 + (firstStageAccelerationForcePerM ? firstStageAccelerationForcePerM[k] : 0);
-			const F_S = forcePerM_S/10 + (firstStageAccelerationForcePerM ? firstStageAccelerationForcePerM[k] : 0);
+			const F = forcePerM/10; // + (firstStageAccelerationForcePerM ? firstStageAccelerationForcePerM[k] : 0);
+			const F_S = forcePerM_S/10; // + (firstStageAccelerationForcePerM ? firstStageAccelerationForcePerM[k] : 0);
 			rotorHubMomentum += (rMomentum-rHub)*F;
 //if (traceStatorAndRotorBlades) console.log("rotorHubMomentum: "+rotorHubMomentum +"="+(rMomentum-rHub)+"*"+F+"/("+2*Math.PI*rHub*rotor.rootSolidity+")");
 			if (rMomentum > rMid) {
@@ -14677,11 +14748,13 @@ if (Number.isNaN(t)) {
 		rotor.rotorHubMomentum = rotorHubMomentum;
 */
 		// turn the radial force to the blade stagger angle
-		rotor.tRoot = getBladeMaxThicknessNACA63A0XX(rotorHubMomentum*Math.cos(hubStaggerAngle)/maxTensileStress);
+		rotor.tRoot = stageData.isCompressor ? getBladeMaxThicknessNACA63A0XX(rotorHubMomentum*Math.cos(hubStaggerAngle)/maxTensileStress) :
+											   getBladeMaxThicknessCircularNACA63A0XX(rotorHubMomentum/maxTensileStress, turbinAngles.hubβ1, turbinAngles.hubβ2 );
 		if (tMaxTip > rotor.tRoot) {
 			rotor.tRoot = tMaxTip;
 		}
-		rotor.tMid = getBladeMaxThicknessNACA63A0XX(rotorMidMomentum*Math.cos(midStaggerAngle)/maxTensileStress);
+		rotor.tMid = stageData.isCompressor ? getBladeMaxThicknessNACA63A0XX(rotorMidMomentum*Math.cos(midStaggerAngle)/maxTensileStress) :
+											  getBladeMaxThicknessCircularNACA63A0XX(rotorMidMomentum/maxTensileStress, turbinAngles.midβ1, turbinAngles.midβ2 );
 		if (tMaxTip > rotor.tMid) rotor.tMid = tMaxTip;
 if (!rotor.tMid || Number.isNaN(rotor.tMid)) throw new Error("error");
 		if (tipToHubSectionArea && tipToMidSectionArea) {
@@ -14699,8 +14772,10 @@ if (!rotor.tMid || Number.isNaN(rotor.tMid)) throw new Error("error");
 				rotor.tMid *= rotor.tipToMidSectionArea/tipToMidSectionArea;
 			}
 		}
-		stator.tRoot = getBladeMaxThicknessNACA63A0XX(statorRootMomentum*Math.cos(tipStaggerAngle)/maxTensileStress);
-		stator.tMid = getBladeMaxThicknessNACA63A0XX(statorMidMomentum*Math.cos(midStaggerAngle)/maxTensileStress);
+		stator.tRoot = stageData.isCompressor ? getBladeMaxThicknessNACA63A0XX(statorRootMomentum*Math.cos(tipStaggerAngle)/maxTensileStress) :
+												getBladeMaxThicknessCircularNACA63A0XX(statorRootMomentum/maxTensileStress, turbinAngles.hubα1, turbinAngles.hubα2 );
+		stator.tMid = stageData.isCompressor ? getBladeMaxThicknessNACA63A0XX(statorMidMomentum*Math.cos(midStaggerAngle)/maxTensileStress) :
+											   getBladeMaxThicknessCircularNACA63A0XX(statorMidMomentum/maxTensileStress, turbinAngles.midα1, turbinAngles.midα2 );
 		var ret = {};
 		ret.rotor = rotor;
 		ret.stator = stator;

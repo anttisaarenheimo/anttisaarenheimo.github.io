@@ -124,7 +124,7 @@ th {
 </DIV>
 <DIV>
 	<LABEL>Average hot compressor stage efficiency: </LABEL>
-	<INPUT size="4" id="cEfficiency" type="float" value="0.960" title="The efficiency resulted from the default hot compressor design parameters">
+	<INPUT size="4" id="cEfficiency" type="float" value="0.969" title="The efficiency resulted from the default hot compressor design parameters">
 	<LABEL>Average cryogenic turbin stage efficiency: </LABEL>
 	<INPUT size="4" id="tLowEfficiency" type="float" value="0.971" title="The default cryogenic turbin efficiency of is scaled from cryogenic compressor efficiency">
 	<LABEL>Efficiency of inlet and outlet diffusers: </LABEL>
@@ -132,14 +132,14 @@ th {
 </DIV>
 <DIV>
 	<LABEL>Average hot turbin stage efficiency: </LABEL>
-	<INPUT size="4" id="tEfficiency" type="float" value="0.972" title="The default hot turbin efficiency of is scaled from cryogenic compressor efficiency" >
+	<INPUT size="4" id="tEfficiency" type="float" value="0.973" title="The default hot turbin efficiency of is scaled from cryogenic compressor efficiency" >
 	<LABEL>Average cryogenic compressor stage efficiency: </LABEL>
-	<INPUT size="4" id="cLowEfficiency" type="float" value="0.973" title="The efficiency resulted from the default cryogenic compressor design parameters" > 
+	<INPUT size="4" id="cLowEfficiency" type="float" value="0.975" title="The efficiency resulted from the default cryogenic compressor design parameters" > 
 	<LABEL>Heat exchanger temp difference (K): </LABEL><INPUT size="4" id="heatExchangeDeltaT" type="float" value="2">
 </DIV>
 <DIV>
-	<LABEL>Heat pump compressor stage efficiency: </LABEL> <INPUT size="4" id="cHeatPumpEfficiency" type="float" value="0.969">
-	<LABEL>Heat pump turbin stage efficiency: </LABEL> <INPUT size="4" id="tHeatPumpEfficiency" type="float" value="0.976">
+	<LABEL>Heat pump compressor stage efficiency: </LABEL> <INPUT size="4" id="cHeatPumpEfficiency" type="float" value="0.979">
+	<LABEL>Heat pump turbin stage efficiency: </LABEL> <INPUT size="4" id="tHeatPumpEfficiency" type="float" value="0.978">
 	<LABEL>Relative pressure loss in each heat exchanger: </LABEL> <INPUT size="4" id="heatExchangePressureLoss" type="float" value="0.005">
 	<!--INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for turbin and compressor stage efficiencies </LABEL><INPUT size="4" id="tEfficiencyFrom" type="float" value="0.90"> - <INPUT size="4" id="tEfficiencyTo" type="float" value="0.98"-->
 </Div>
@@ -267,10 +267,10 @@ th {
 		<DIV id="compressorDesignParams" style="display:none">
 			<H3>Hot compressor design parameters</H3>
 			<DIV><!-- 0.216, 0.44-->
-				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="hotLoadCoefficient" value="0.375"/>
-				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="hotFlowCoefficient" value="0.70"/>
+				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="hotLoadCoefficient" value="0.45"/>
+				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="hotFlowCoefficient" value="0.67"/>
 				<LABEL>Hot compressors:</LABEL><INPUT size="2" id="cHotUnits2" value="2"/>
-				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesHot" value="14"/>
+				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesHot" value="19"/>
 				<LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="hotRpm" id="hotRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="hotRpm" id="hotRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="hotRpm" id="hotRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="hotRpm" id="hotRpm1800" value="1800"/><Span>1800</span>
 			</DIV>
 			<!--DIV>
@@ -282,15 +282,15 @@ th {
 			<DIV>
 				<Label>Hot compressor diameter:</LABEL>
 				<input id="hotCOD" name="hotCompressorDiameter" type="radio" value="COD"><LABEL>Constant outer diameter</LABEL>
-				<input id="hotCMD" name="hotCompressorDiameter" type="radio" checked value="CMD"><LABEL>Constant mean diameter</LABEL>
-				<input id="hotCID" name="hotCompressorDiameter" type="radio" value="CID"><LABEL>Constant inner diameter</LABEL>
+				<input id="hotCMD" name="hotCompressorDiameter" type="radio" value="CMD"><LABEL>Constant mean diameter</LABEL>
+				<input id="hotCID" name="hotCompressorDiameter" type="radio" checked value="CID"><LABEL>Constant inner diameter</LABEL>
 				<input id="hotHasIGV" type="checkbox" checked value="true"><LABEL>Has IGV</LABEL> 
 				<LABEL>, IGV AR:</LABEL><INPUT type="float"  size="4" id="hotIGV_AR" value="4">
 			</DIV>
 			<DIV>
 				<!--LABEL>Min Hub/Tip ratio</LABEL><INPUT type="float" size="4" id="hubToTipRatioHot" value="0.50"/>
 				<SPAN> to </SPAN><INPUT type="float" size="4" id="hubToTipRatioMaxHot" value="0.90"/-->
-				<LABEL>Solidity c/s: </LABEL><INPUT type="float"  size="4" id="solidityHot" value="1.5" title="Chord spacing of front rotor: chord length/distance between chords"/>
+				<LABEL>Solidity c/s: </LABEL><INPUT type="float"  size="4" id="solidityHot" value="2" title="Chord spacing of front rotor: chord length/distance between chords"/>
 				<!--LABEL>to </LABEL><INPUT type="float"  size="4" id="lastSolidityHot" value="2.5" title="Chord spacing of stators and rear stages"/-->
 				<LABEL>Min tip gap:</LABEL><INPUT type="float"  size="4" id="tipGapMmHot" value="0.25" title="tip gap mm"/><SPAN> mm </SPAN><INPUT type="float"  size="4" id="tipGapPercentHot" value="0.5" title="tip gap/h %"/><SPAN> % (α/h)</SPAN>
 				<LABEL>Rotor blade max thickess in tip mm</LABEL><INPUT size="4" type="float" id="maxTipThicknessHot" value="2"/>
@@ -303,7 +303,7 @@ th {
 				<!--LABEL>Cascaded stages loss factor: </LABEL><INPUT size="4" type="float" id="cascadeStageLossHot" value="1"/-->
 				<!--LABEL>Blockage factor (depends on AR): </LABEL><INPUT size="4" type="float" id="blockageFactorHot" value="0.86"/>
 				<LABEL>Reference AR for blockage: </LABEL><INPUT size="4" type="float" id="referenceARHot" value="1.7"/-->
-				<LABEL>Stage power distribution first/last: </LABEL><INPUT size="4" type="float" id="firstToLastDeltaH_Hot" value="1.04"/>
+				<LABEL>Stage power distribution first/last: </LABEL><INPUT size="4" type="float" id="firstToLastDeltaH_Hot" value="1.05"/>
 				<!--LABEL>Min Reynolds number of rotor tip:</LABEL><INPUT size="4" type="float" id="minTipReHot" value="800000"/-->
 			</DIV>
 			<DIV>
@@ -339,10 +339,10 @@ th {
 			<br/>
 			<H3>Hot turbin design parameters</H3>
 			<DIV><!-- 0.216, 0.44-->
-				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbinLoadCoefficient" value="0.30"/>
-				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbinFlowCoefficient" value="0.50"/>
+				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbinLoadCoefficient" value="0.40"/>
+				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbinFlowCoefficient" value="0.55"/>
 				<LABEL>Hot turbins:</LABEL><INPUT size="2" id="cHotTurbinUnits2" value="2"/>
-				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesHotTurbin" value="16"/>
+				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesHotTurbin" value="19"/>
 				<LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="hotTurbinRpm" id="hotTurbinRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="hotTurbinRpm" id="hotTurbinRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="hotTurbinRpm" id="hotTurbinRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="hotTurbinRpm" id="hotTurbinRpm1800" value="1800"/><Span>1800</span>
 			</DIV>
 			<!--DIV>
@@ -363,7 +363,7 @@ th {
 			<DIV>
 				<!--LABEL>Min Hub/Tip ratio</LABEL><INPUT type="float" size="4" id="hubToTipRatioHot" value="0.50"/>
 				<SPAN> to </SPAN><INPUT type="float" size="4" id="hubToTipRatioMaxHot" value="0.90"/-->
-				<LABEL>Solidity c/s: </LABEL><INPUT type="float"  size="4" id="solidityHotTurbin" value="1.2" title="Chord spacing of front rotor: chord length/distance between chords"/>
+				<LABEL>Solidity c/s: </LABEL><INPUT type="float"  size="4" id="solidityHotTurbin" value="1.05" title="Chord spacing of front rotor: chord length/distance between chords"/>
 				<!--LABEL>to </LABEL><INPUT type="float"  size="4" id="lastSolidityHotTurbin" value="2.5" title="Chord spacing of stators and rear stages"/-->
 				<LABEL>Min tip gap:</LABEL><INPUT type="float"  size="4" id="tipGapMmHotTurbin" value="0.25" title="tip gap mm"/><SPAN> mm </SPAN><INPUT type="float"  size="4" id="tipGapPercentHotTurbin" value="0.5" title="tip gap/h %"/><SPAN> % (α/h)</SPAN>
 				<LABEL>Rotor blade max thickess in tip mm</LABEL><INPUT size="4" type="float" id="maxTipThicknessHotTurbin" value="3"/>
@@ -393,7 +393,7 @@ th {
 			<br/>
 			<H3>Cryogenic compressor design parameters</H3>
 			<DIV>
-				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="coldLoadCoefficient" value="0.275"/>
+				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="coldLoadCoefficient" value="0.30"/>
 				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="coldFlowCoefficient" value="0.575"/>
 				<LABEL>Cryogenic compressors:</LABEL><INPUT size="2" id="cColdUnits2" value="2"/>
 				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesCold" value="16"/>
@@ -416,7 +416,7 @@ th {
 			<DIV>
 				<!--LABEL>Hub/Tip ratio from:</LABEL><INPUT type="float" size="4" id="hubToTipRatioCold" value="0.50"/>
 				<SPAN> to </SPAN><INPUT type="float" size="4" id="hubToTipRatioMaxCold" value="0.90"/-->
-				<LABEL>Solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityCold" value="1.5" title="Chord spacing: chord length/distance between chords"/>
+				<LABEL>Solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityCold" value="2" title="Chord spacing: chord length/distance between chords"/>
 				<!--LABEL>to </LABEL><INPUT type="float"  size="4" id="lastSolidityCold" value="2.5" title="Chord spacing of stators and rear stages"/-->
 				<LABEL>Min tip gap:</LABEL><INPUT type="float"  size="4" id="tipGapMmCold" value="0.25" title="tip gap mm"/>
 				<SPAN> mm </SPAN><INPUT type="float"  size="4" id="tipGapPercentCold" value="0.5" title="tip gap/h %"/><SPAN> % (α/h)</SPAN>
@@ -429,7 +429,7 @@ th {
 				<!--LABEL>Cascaded stages loss %: </LABEL><INPUT size="4" type="float" id="cascadeStageLossCold" value="1"/-->
 				<!--LABEL>Blockage factor: </LABEL><INPUT size="4" type="float" id="blockageFactorCold" value="0.86"/>
 				<LABEL>Reference AR for blockage: </LABEL><INPUT size="4" type="float" id="referenceARCold" value="1.7"/-->
-				<LABEL>Stage power distribution first/last: </LABEL><INPUT size="4" type="float" id="firstToLastDeltaH_Cold" value="1.0"/>
+				<LABEL>Stage power distribution first/last: </LABEL><INPUT size="4" type="float" id="firstToLastDeltaH_Cold" value="1.04"/>
 				<!--LABEL>Min Reynolds number of rotor tip:</LABEL><INPUT size="4" type="float" id="minTipReCold" value="500000"/-->
 				<!--LABEL>Max reaction in bladed root:</LABEL><INPUT size="4" type="float" id="maxReactionInRootCold" value="0.8"/-->
 			</DIV>
@@ -449,8 +449,8 @@ th {
 			<DIV>
 				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="coldTurbinLoadCoefficient" value="0.30"/>
 				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="coldTurbinFlowCoefficient" value="0.45"/>
-				<LABEL>Cryogenic turbins:</LABEL><INPUT size="4" id="cColdTurbinUnits2" value="4"/>
-				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesColdTurbin" value="13"/>
+				<LABEL>Cryogenic turbins:</LABEL><INPUT size="4" id="cColdTurbinUnits2" value="2"/>
+				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesColdTurbin" value="15"/>
 				<LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="coldRpm" id="coldTurbinRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="coldTurbinRpm" id="coldTurbinRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="coldTurbinRpm" id="coldTurbinRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="coldTurbinRpm" id="coldTurbinRpm1800" value="1800"/><Span>1800</span>
 			</DIV>
 			<!--DIV>
@@ -470,7 +470,7 @@ th {
 			<DIV>
 				<!--LABEL>Hub/Tip ratio from:</LABEL><INPUT type="float" size="4" id="hubToTipRatioColdTurbin" value="0.50"/>
 				<SPAN> to </SPAN><INPUT type="float" size="4" id="hubToTipRatioMaxColdTurbin" value="0.90"/-->
-				<LABEL>Solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityColdTurbin" value="1.2" title="Chord spacing: chord length/distance between chords"/>
+				<LABEL>Solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityColdTurbin" value="1.1" title="Chord spacing: chord length/distance between chords"/>
 				<!--LABEL>to </LABEL><INPUT type="float"  size="4" id="lastSolidityColdTurbin" value="2.5" title="Chord spacing of stators and rear stages"/-->
 				<LABEL>Min tip gap:</LABEL><INPUT type="float"  size="4" id="tipGapMmColdTurbin" value="0.25" title="tip gap mm"/>
 				<SPAN> mm </SPAN><INPUT type="float"  size="4" id="tipGapPercentColdTurbin" value="0.25" title="tip gap/h %"/><SPAN> % (α/h)</SPAN>
@@ -505,10 +505,10 @@ th {
 				<LABEL>Heat Pump fluid:</LABEL>
 				<SELECT id="hpFluid"><OPTION selected>Argon</OPTION><OPTION>Helium</OPTION><OPTION>Hydrogen</OPTION><OPTION>Methane</OPTION><OPTION>Nitrogen</OPTION>
 				</SELECT>
-				<LABEL>Heat pump units: </LABEL><INPUT size="2" id="cHpUnits2" value="4"/>
-				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient" value="0.55"/>
-				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="hpFlowCoefficient" value="1.00"/>
-				<LABEL>Compressor stages:</Label><INPUT size="5" type="float" id="cStagesHp" value="4"/>
+				<LABEL>Heat pump compressors: </LABEL><INPUT size="2" id="cHpUnits2" value="4"/>
+				<LABEL>Mean load coefficient: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient" value="0.37"/>
+				<LABEL>Mean flow coefficient: </LABEL><INPUT size="5" type="float" id="hpFlowCoefficient" value="0.65"/>
+				<LABEL>Compressor stages:</Label><INPUT size="5" type="float" id="cStagesHp" value="8"/>
 				<LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="hpRpm" id="hpRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="hpRpm" id="hpRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="hpRpm" id="hpRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="hpRpm" id="hpRpm1800" value="1800"/><Span>1800</span>
 			<DIV>
 			<DIV>
@@ -541,7 +541,7 @@ th {
 				<!--LABEL>Hub/Tip ratio from:</LABEL><INPUT type="float" size="4" id="hubToTipRatioHp" value="0.50"/>
 				<SPAN> to </SPAN><INPUT type="float" size="4" id="hubToTipRatioMaxHp" value="0.90"/-->
 				<LABEL>Compressor reaction: </LABEL><INPUT type="float" size="3" id="hpReaction" value="0.50"/>
-				<LABEL>Compressor solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityHp" value="1.5" title="Chord spacing: chord length/distance between chords"/>
+				<LABEL>Compressor solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityHp" value="2" title="Chord spacing: chord length/distance between chords"/>
 				<LABEL>Min tip gap:</LABEL><INPUT type="float"  size="4" id="tipGapMmHp" value="0.1" title="tip gap mm"/>
 				<SPAN> mm </SPAN><INPUT type="float"  size="4" id="tipGapPercentHp" value="0.1" title="tip gap/h %"/><SPAN> % (α/h)</SPAN>
 				<LABEL>Rotor blade max thickess in tip mm</LABEL><INPUT size="4" type="float" id="maxTipThicknessHp" value="0.5"/>
@@ -571,9 +571,10 @@ th {
 		<table id="hpCompressorData2"> </table>
 			<H3>Heat pump turbin design parameters</H3>
 			</DIV>
-				<LABEL>Load coefficient of turbin: </LABEL><INPUT size="5" type="float" id="hpTurbinLoadCoefficient" value="0.2"/>
-				<LABEL>Flow coefficient of turbin: </LABEL><INPUT size="5" type="float" id="hpTurbinFlowCoefficient" value="0.6"/>
-				<LABEL>Turbin stages:</Label><INPUT size="5" type="float" id="cStagesHpTurbin" value="7"/>
+				<LABEL>Load coefficient of turbin: </LABEL><INPUT size="5" type="float" id="hpTurbinLoadCoefficient" value="0.40"/>
+				<LABEL>Flow coefficient of turbin: </LABEL><INPUT size="5" type="float" id="hpTurbinFlowCoefficient" value="0.73"/>
+				<LABEL>Heat pump turbines: </LABEL><INPUT size="2" id="cHpTurbinUnits2" value="2"/>
+				<LABEL>Turbin stages:</Label><INPUT size="5" type="float" id="cStagesHpTurbin" value="8"/>
 			</DIV>
 			<DIV>
 				<Label>Heat pump turbin diameter:</LABEL>
@@ -583,7 +584,7 @@ th {
 			</DIV>
 			<DIV>
 				<LABEL>Turbin reaction: </LABEL><INPUT type="float" size="3" id="hpTurbinReaction" value="0.55"/>
-				<LABEL>Turbin solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityHpTurbin" value="1" title="Chord spacing: chord length/distance between chords"/>
+				<LABEL>Turbin solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityHpTurbin" value="1.2" title="Chord spacing: chord length/distance between chords"/>
 				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHpTurbin" value="0.20"/>
 				<LABEL>Max aspect ratio:</LABEL><INPUT size="4" type="float" id="maxAspectRatioHpTurbin" value="7"/>
 			</DIV>
@@ -960,6 +961,7 @@ console.log("setGasMassFlowFor1200MW");
 		}
 		else if (gas == 'Argon') {
 			massFlow = 3509;
+			$("#numberOfUnits").val("3");
 			$("#cEfficiency").val("0.948");
 			$("#tEfficiency").val("0.969");
 			$("#cLowEfficiency").val("0.961");
@@ -8933,7 +8935,7 @@ console.log("hpCompressor grossPower:"+grossPower+"=("+hpCompressor.workConsumed
 		const orgFluid = name;
 		const ctEfficiency = getFloatParam('tHeatPumpEfficiency', getFloatParam('tLowEfficiency', metrics.tEfficiency));
 		name = getInputParam('hpFluid', 'Argon' );
-		const cUnits2 = getIntParam('cHpUnits2', metrics.cUnits);
+		const cUnits2 = getIntParam('cHpTurbinUnits2', metrics.cUnits);
 		const grossPower = (hpTurbin.workProduced*1000)/cUnits2;
 console.log("hpTurbin grossPower: "+grossPower+"=("+hpTurbin.workProduced+"*"+hpTurbin.massFlow+"*1000)/"+cUnits2);
 		const hpTurbinStages = getTurbinStages(hpTurbin, FIRST_ITEM, hpTurbin.massFlow/cUnits2, 
@@ -9025,7 +9027,7 @@ console.log("hpTurbin grossPower: "+grossPower+"=("+hpTurbin.workProduced+"*"+hp
 			const averageEfficiency = myRound((hpOne.averageEfficiency + hpTwo.averageEfficiency)/2,3);
 			if ($("#cHeatPumpEfficiency").val() != averageEfficiency) {
 console.log("Efficiency mismatch: "+$("#cHeatPumpEfficiency").val()+" != "+averageEfficiency);
-				$("#cHeatPumptEfficiency").val(averageEfficiency);
+				$("#cHeatPumpEfficiency").val(averageEfficiency);
 				//$("#tHeatPumpEfficiency").val(myRound(0.97+(averageEfficiency-0.95)*3/5,3));
 				redrawTpGraf = true;
 			}
@@ -12097,6 +12099,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		var hDeltaKinetic = stageData.inlet.hDeltaKinetic; // stageData.stages[0].hKineticIn - 0.5*(first.v**2);
 		first.hDeltaKinetic = myRound(-hDeltaKinetic, 0);
 		var totalPowerMismatch = 0;
+		var cBladesTotal = 0;
 		for (i = 0; i < stages.length; i++) {
 			var p0, h0;
 			if (stageData.isCompressor) stages[i].efficiency = stages[i].efficiencyDS_DR;
@@ -12137,6 +12140,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 			eff += stageEfficiency*stages[i].stagePower/totalPower;
 			hDeltaKinetic += stages[i].hDeltaKinetic;
 			stages[i].hDeltaKinetic = myRound(-stages[i].hDeltaKinetic, 0);
+			cBladesTotal += stages[i].blades + stages[i].statorBlades;
 			//analyticEff += stages[i].efficiency*stages[i].stagePower/totalPower; 
 			//usedEff += stageData.stageEfficiencies[i]*stages[i].stagePower/totalPower; 
 		}
@@ -12178,8 +12182,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		stageProps.push(getSheetValues('Rotor chord mm', 'chordMm', data));
 		stageProps.push(getSheetValues('Aspect ratio h/c', 'aspectRatio', data, 2));
 		stageProps.push(getSheetValues('Rotor blades', 'blades', data));
-		if (stageData.isCompressor) stageProps.push(getSheetValues('Stator blades', 'statorBlades', data));
-		if (!stageData.isCompressor) stageProps.push(getSheetValues('Stator blades', 'statorBlades', data));
+		stageProps.push(getSheetValues('Stator blades', 'statorBlades', data));
 		stageProps.push(getSheetValues('Rotor mean tMax/c %', 'bladeMaxThicknessMid', data));
 		stageProps.push(getSheetValues('Rotor hub tMax/c %', 'bladeMaxThicknessHub', data));
 		stageProps.push(getSheetValues('Stator mean tMax/c %', 'statorMaxThicknessMid', data));
@@ -12270,7 +12273,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 
 		stageData.stageProps = stageProps;
 		var test;
-		if (!testResult( stageData.adiabaticEfficiency, eff*0.97, 0.999, stageData.adiabaticEfficiency/1000, 
+		if (!testResult( stageData.adiabaticEfficiency, eff*0.90, 0.999, stageData.adiabaticEfficiency/5000, 
 			function (stageEfficiency) {
 				stageData.averageEfficiency = stageEfficiency;
 				const ret = first.wetness ? 
@@ -12286,7 +12289,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		//verifyStaticValues(stageData.exit);
 
 		console.log("stageData.adiabaticEfficiencyOfStages="+stageData.adiabaticEfficiencyOfStages);
-		console.log(name+": Adiabatic efficiency:"+stageData.adiabaticEfficiency+" => Average efficiency changed from "+eff+" to "+stageData.averageEfficiency+", hDeltaKinetic="+hDeltaKinetic);
+		console.log(name+": Adiabatic efficiency:"+stageData.adiabaticEfficiency+" => Average efficiency changed from "+eff+" to "+stageData.averageEfficiency+", p1/p2="+(stageData.first.p0/stageData.exit.p0));
 
 //console.log("stages="+JSON.stringify(stageData.stages));
 //console.log("First="+JSON.stringify(first)+"\r\n, exit="+JSON.stringify(stageData.exit));
@@ -12335,6 +12338,8 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		if (stageData.inlet.wetness) {
 			stageData.titles.push("Wetness of fluid in inlet: "+myRound(stageData.inlet.wetness*100,1)+ "%");
 		}
+		stageData.titles.push("Total number of stator and rotor blades: "+cBladesTotal);
+		
 		//stageData.titles.push("Stall margin in the hub of the 1st stage: "+Math.round(stages[0].stallMargin)+" %");
 		//stageData.titles.push("Absolute velocity in 1st stator hub: "+(myRound(stages[0].hubMach,2))+" mach"+(stages[0].reaction > 0.5 ? " (with reaction: "+(myRound(stages[0].reaction,2))+")" : ""));
 

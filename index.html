@@ -573,7 +573,7 @@ th {
 			</DIV>
 				<LABEL>Load coefficient of turbin: </LABEL><INPUT size="5" type="float" id="hpTurbinLoadCoefficient" value="0.2"/>
 				<LABEL>Flow coefficient of turbin: </LABEL><INPUT size="5" type="float" id="hpTurbinFlowCoefficient" value="0.6"/>
-				<LABEL>Turbin stages:</Label><INPUT size="5" type="float" id="cStagesHpTurbin" value="6"/>
+				<LABEL>Turbin stages:</Label><INPUT size="5" type="float" id="cStagesHpTurbin" value="7"/>
 			</DIV>
 			<DIV>
 				<Label>Heat pump turbin diameter:</LABEL>
@@ -965,24 +965,50 @@ console.log("setGasMassFlowFor1200MW");
 			$("#cLowEfficiency").val("0.961");
 			$("#tLowEfficiency").val("0.977");
 			$("#tHigh").val('1173');
-			$("#hotLoadCoefficient").val('0.33');
-			$("#hotFlowCoefficient").val('0.63');
+			$("#hotLoadCoefficient").val('0.425');
+			$("#hotFlowCoefficient").val('0.775');
 			$("#cHotUnits2").val('3');
-			$("#cStagesHot").val('13');
+			$("#cStagesHot").val('16');
 			$("#solidityHot").val('1.5');
 			$("#firstToLastDeltaH_Hot").val('1.02');
 			$("#hotRpm1500").prop('checked', true);
-			$("#divOptARHot").val('1.03');
 
-			$("#coldLoadCoefficient").val('0.214');
-			$("#coldFlowCoefficient").val('0.55');
+			$("#hotTurbinLoadCoefficient").val('0.30');
+			$("#hotTurbinFlowCoefficient").val('0.50');
+			$("#cHotTurbinUnits2").val('3');
+			$("#cStagesHotTurbin").val('11');
+			$("#divOptARHotTurbin").val('1.0');
+			$("#solidityHotTurbin").val('1.2');
+			$("#hotTurbinRpm1500").prop('checked', true);
+
+			$("#coldLoadCoefficient").val('0.30');
+			$("#coldFlowCoefficient").val('0.65');
 			$("#cColdUnits2").val('3');
 			$("#cStagesCold").val('13');
-			$("#solidityCold").val('1.2');
-			$("#divOptARCold").val('1.06');
-			$("#firstToLastDeltaH_Cold").val('1.032');
+			$("#solidityCold").val('1.5');
+			//$("#divOptARCold").val('1.06');
+			$("#firstToLastDeltaH_Cold").val('1');
 			$("#coldRpm1500").prop('checked', true);
 			//$("#topFillUsedAsStorage").prop("checked", true );
+
+			$("#coldTurbinLoadCoefficient").val('0.30');
+			$("#coldTurbinFlowCoefficient").val('0.50');
+			$("#cColdTurbinUnits2").val('3');
+			$("#cStagesColdTurbin").val('11');
+			$("#solidityColdTurbin").val('1.2');
+			$("#firstToLastDeltaH_ColdTurbin").val('1');
+			$("#coldTurbinRpm1500").prop('checked', true);
+
+			$("#hpLoadCoefficient").val('0.55');
+			$("#hpFlowCoefficient").val('0.95');
+			$("#cHpUnits2").val('3');
+			$("#cStagesHp").val('7');
+			$("#solidityHp").val('1.5');
+
+			$("#hpTurbinLoadCoefficient").val('0.20');
+			$("#hpTurbinFlowCoefficient").val('0.65');
+			$("#cStagesHpTurbin").val('7');
+			$("#solidityHpTurbin").val('1.2');
 		}
 		else if (gas == 'Hydrogen') {
 			massFlow = 200;
@@ -5076,8 +5102,8 @@ console.log("Heat pump hCooled="+hCooled);
 		}
 */		
 		cycleData.mainHeatExchanger = mainHeatExchanger;
-		cycleData.constantRpmHot = $('#hotCompressorTypeConstantRpm').prop('checked');
-		cycleData.constantRpmCold = $('#coldCompressorTypeConstantRpm').prop('checked');
+		cycleData.constantRpmHot = true; // $('#hotCompressorTypeConstantRpm').prop('checked');
+		cycleData.constantRpmCold = true; // $('#coldCompressorTypeConstantRpm').prop('checked');
 		cycleData.tc = tc;
 
 		if (cryogenicCooling && coldCycle.length>2) {
@@ -9724,7 +9750,7 @@ if (!next.p || next.p == null) {
 		stageData.rpm = stageData.constantRpm ? stageData.rpm : 0;
 		stageData.rpmStages = 0;
 		stageData.rpmCount = 0;
-console.log("calcCompressorStages: efficiencies:"+JSON.stringify(stageData.stageEfficiencies)+", \r\nARs: "+JSON.stringify(stageData.aspectRatios)+", stageData.v="+stageData.v);
+//console.log("calcCompressorStages: efficiencies:"+JSON.stringify(stageData.stageEfficiencies)+", \r\nARs: "+JSON.stringify(stageData.aspectRatios)+", stageData.v="+stageData.v);
 //console.log("calcCompressorStages: ARs:"+JSON.stringify(stageData.aspectRatios));
 		var i;
 		for (i = 0; i < 100; i++) {
@@ -9900,7 +9926,6 @@ if (!item.p) {
 	}
 
 	var increaseLowPressure = false;
-	var rotorStatorGap;
 	var prevHeatPumpHighP;
 // TBD: design by the type subsonic, transonic, supersonic => subsonic => stage 1 vMach<=0.9, transonic => stage 1 vMach <= 1.2, supersonic => stage 1 vMach <= 1.5
 // Rule: each stage produces equal amout of power, chose the lowest number of stages matching with the selected type
@@ -9974,12 +9999,12 @@ if (!item.p) {
 		// TBD: typical spacing ratio s/C = 0.65 - 0.75 => s = C*cos(staggerAngle)*
 		// rotorStatorGap = C*cos(staggerAngle)*0.7/(C*cos(staggerAngle)*0.7 + C) == cos(staggerAngle)*spacingRatio/(cos(staggerAngle)*spacingRatio+1);
 		//rotorStatorGap = C*cos(staggerAngle)*0.7/(C*cos(staggerAngle)*0.7 + C) == cos(staggerAngle)*spacingRatio/(cos(staggerAngle)*spacingRatio+1);
-		rotorStatorGap = getFloatParam('rotorStatorGap', 20)/100;	// MUST BE GLOBAL!
+		stageData.rotorStatorGap = getFloatParam('rotorStatorGap', 20)/100;	
 		stageData.hasIGV = isCompressor && $('#'+cType+'HasIGV').prop('checked');
 		stageData.hasOGV = false; //!isCompressor && $('#'+cType+'HasIGV').prop('checked');
 		stageData.IGV_AR = getFloatParam(cType+'IGV_AR', 3);
 		if (stageData.IGV_AR < 2.5) stageData.IGV_AR = 2.5;
-		stageData.relativeBladeWidth = 1/(1 + rotorStatorGap);	//Before 0.30
+		stageData.relativeBladeWidth = 1/(1 + stageData.rotorStatorGap);	//Before 0.30
 		if (stageData.relativeBladeWidth < 0.5 || stageData.relativeBladeWidth > 0.95) {
 			stageData.relativeBladeWidth = 1/1.2;
 			
@@ -10343,10 +10368,25 @@ if (cLoops > 2) console.log(stageData.stages.length+": loop="+cLoops+", hDelta e
 				stage.pMid = Module.PropsSI('P','S', stage.s, 'H', stage.h+hActualWork*(stageData.isCompressor ? reaction : 1 - reaction), name);
 				stage.pOut = Module.PropsSI('P','S', stage.s, 'H', stage.h+hActualWork, name);
 				stage.hMid = stage.h+stage.deltaH*(stageData.isCompressor ? reaction : 1 - reaction);
-				stage.dMid = Module.PropsSI('D','P', stage.pMid, 'H', stage.hMid, name);
 				stage.hOut = stage.h+stage.deltaH;
 				stage.dOut = Module.PropsSI('D', 'P', stage.pOut, 'H', stage.hOut, name);
-
+				if (stage.pMid === Infinity) {
+					// we seems to be still wet
+					stage.tOut = Module.PropsSI('T','S', stage.s, 'H', stage.h+hActualWork, name);
+					stage.tMid = item.t + (stage.tOut-item.t)*(stageData.isCompressor ? reaction : 1 - reaction);
+					stage.pMid = Module.PropsSI('P','T', stage.tMid, 'Q', 1, name) - 100;	// 100 Pa below saturation point
+					console.log("h at p,t=("+stage.pMid+","+stage.tMid+") would be :"+Module.PropsSI('H','P', stage.pMid, 'T', stage.tMid, name));
+				}
+				if (stage.pMid === Infinity) {
+					const h = stage.h+hActualWork*(stageData.isCompressor ? reaction : 1 - reaction);
+					console.log("h="+h+" wet?, pSat="+Module.PropsSI('P','S', stage.s, 'Q', 1, name));
+					const pTriplePoint =  Module.PropsSI('P_TRIPLE', '', 0, '', 0, name);
+					const tTriplePoint =  Module.PropsSI('T_TRIPLE', '', 0, '', 0, name);
+					console.log(stageData.stages.length+": stage="+JSON.stringify(stage));
+					console.log("Some part of gas will be frozen in the inlet of "+title+". The gas temperature ("+myRound(item.t,2)+" K) and pressure ("+myRound(item.p)+" Pa) should not be below the tripple point temperature "+myRound(tTriplePoint,2)+" K / "+Math.round(pTriplePoint)+" Pa of "+name+"! Increase the low pressure or decrease the pressure ratio and try again.");
+					throw new Error("Too wet??");
+				}
+				stage.dMid = Module.PropsSI('D','P', stage.pMid, 'H', stage.hMid, name);
 				const nextAspectRatio = stageData.aspectRatios.length > stageData.stages.length ? stageData.aspectRatios[stageData.stages.length+1] : stage.aspectRatio;
 				stage.blockageFactor = getBlockageFactor(stageData, stageData.stages.length, stage.aspectRatio);
 				stage.blockageFactorOut = getBlockageFactor(stageData, stageData.stages.length+1, nextAspectRatio);
@@ -10514,7 +10554,7 @@ console.log("init: area="+area+", tip="+stage.rTip);
 					// We assume the pressure rise by speed decreasing is done by constant entropy (constant s)
 					//const hActualNow = item.h + stage.hKinetic - 0.5*stageData.vPipeOut*stageData.vPipeOut;
 					//const hTarget = Module.PropsSI('H','S', item.s, 'P', stageData.pHigh, name);
-	console.log(stageData.stages.length+" before: stage.deltaH="+stage.deltaH+", stage.hDeltaPower="+stage.hDeltaPower+", stage.hDeltaKinetic="+stage.hDeltaKinetic);
+//console.log(stageData.stages.length+" before: stage.deltaH="+stage.deltaH+", stage.hDeltaPower="+stage.hDeltaPower+", stage.hDeltaKinetic="+stage.hDeltaKinetic);
 					var exit = {};
 					{
 						const pEnd = stageData.isCompressor ? stageData.pHigh : stageData.pLow;
@@ -10555,10 +10595,10 @@ console.log("init: area="+area+", tip="+stage.rTip);
 						// set final value by actual stagnation enthalpy change
 						stage.hDeltaPower = Math.abs(item.h + stage.hKineticIn - exit.h0);	// enthalpy in/out from the system
 						if (Number.isNaN(stage.hDeltaPower)) throw new Error("stage.hDeltaPower="+stage.hDeltaPower);
-	console.log(stageData.stages.length+" after: stage.deltaH="+stage.deltaH+", stage.hDeltaPower="+stage.hDeltaPower+", hDeltaKineticInExit="+hDeltaKineticInExit+", stage.hDeltaKinetic="+stage.hDeltaKinetic);
+//console.log(stageData.stages.length+" after: stage.deltaH="+stage.deltaH+", stage.hDeltaPower="+stage.hDeltaPower+", hDeltaKineticInExit="+hDeltaKineticInExit+", stage.hDeltaKinetic="+stage.hDeltaKinetic);
 					}
 					stageData.exit = exit;
-	console.log("exit: "+JSON.stringify(exit)+", stage.hStagnOut="+(stage.hOut+stage.hKineticOut));
+//console.log("exit: "+JSON.stringify(exit)+", stage.hStagnOut="+(stage.hOut+stage.hKineticOut));
 					// recalc the last stage with correct in/out power
 					const rpm = stage.rpm;
 					stage.U = 2*Math.PI*stage.rTip*stage.rpm/60;
@@ -10582,8 +10622,14 @@ console.log("init: area="+area+", tip="+stage.rTip);
 			stage.pressureRiseCoefficient = 2*(stage.pMid-item.p)/(dPlus1*stage.U*stage.U);
 
 			stage.sMid = Module.PropsSI('S','P', stage.pMid, 'H', stage.hMid, name);
-			const visc2 = Module.PropsSI('V', 'P', stage.pMid, 'H', stage.hMid, name);
+			var visc2 = Module.PropsSI('V', 'P', stage.pMid, 'H', stage.hMid, name);
+			if (visc2 == Infinity || Number.isNaN(visc2)) visc2 = Module.PropsSI('V','P', stage.pMid, 'Q', 1, name);
+			if (visc2 == Infinity || Number.isNaN(visc2)) visc2 = Module.PropsSI('V', 'P', stage.pMid, 'H', stage.hMid+1000, name);
+			stage.dMid = Module.PropsSI('D','P', stage.pMid, 'H', stage.hMid, name);
+			if (stage.dMid == Infinity || Number.isNaN(stage.dMid)) stage.dMid = Module.PropsSI('D','P', stage.pMid, 'Q', 1, name);
+			if (stage.dMid == Infinity || Number.isNaN(stage.dMid)) stage.dMid = Module.PropsSI('D', 'P', stage.pMid, 'H', stage.hMid+1000, name);
 			stage.dynamicVisc2 = stage.dMid / visc2;
+			if (stage.dynamicVisc2 == Infinity || Number.isNaN(stage.dynamicVisc2)) throw new Error("stage.dynamicVisc2="+stage.dynamicVisc2);
 			stage.sOut = Module.PropsSI('S', 'P', stage.pOut, 'H', stage.hOut, name);
 			const visc3 = Module.PropsSI('V', 'P', stage.pOut, 'H', stage.hOut, name);
 			stage.dynamicVisc3 = stage.dOut / visc3;
@@ -10686,6 +10732,7 @@ if (Number.isNaN(stage.centrifugalStressMpa)) throw new Error("NaN");
 			if (stage.centrifugalStressMpa > stage.maxTensileStressMPa) {
 				console.log("Too high centrifugal stress in stage "+stageData.stages.length+":"+stage.centrifugalStressMpa+" > "+stage.maxTensileStressMPa+", stage.K="+stage.K+", stage.tipToHubSectionArea="+stage.tipToHubSectionArea+", minK="+minK+", K="+K);
 			}
+			//else console.log("Centrifugal stress of stage "+stageData.stages.length+":"+stage.centrifugalStressMpa+" <= "+stage.maxTensileStressMPa+", stage.K="+stage.K+", stage.tipToHubSectionArea="+stage.tipToHubSectionArea+", minK="+minK+", K="+K);
 //OK: console.log("*****"+stageData.stages.length+": d="+stage.tipToHubSectionArea+", K="+stage.K+"; hubToTip="+hubToTip);
 			// rTip*rTip - rMiddle*rMiddle = rMiddle*rMiddle - rHub*rHub;	// ever area in both sides =>
 			// rMiddle = sqrt((rTip*rTip+rHub*rHub)/2)
@@ -11561,7 +11608,7 @@ console.log("***grossPower="+grossPower+" => actualPower="+actualPower+", actual
 			stageData.hubToTipRatioMax = stageData.hubToTipRatio;		// keep it constant!
 			inlet = initCryogenicInlet( stageData, first );
 			inlet.flowM3 = stageData.massFlowInKg /inlet.d;
-console.log("First item:"+JSON.stringify(first)+", inlet="+JSON.stringify(inlet));
+//console.log("First item:"+JSON.stringify(first)+", inlet="+JSON.stringify(inlet));
 			calcCompressorStages( stageData, inlet ); 
 		}
 		item = inlet;
@@ -11721,8 +11768,10 @@ console.log(totalBladesMass+" = "+stages[i].F+" / ("+(stages[i].U*stages[i].U)+"
 			// => d=0.35 => K~0.65
 */
 	
-			stages[i].centrifugalStressMpa = 0.5*stages[i].U*stages[i].U*8000*(1-hubToTip*hubToTip)*stages[i].K/1000000; // Nimonics: 8000 kg/m3, austentic steel alloy density 7800kg/m3)
-if (Number.isNaN(stages[i].centrifugalStressMpa)) throw new Error("NaN");
+			if (!stages[i].centrifugalStressMpa) {
+				stages[i].centrifugalStressMpa = 0.5*stages[i].U*stages[i].U*8000*(1-hubToTip*hubToTip)*stages[i].K/1000000; // Nimonics: 8000 kg/m3, austentic steel alloy density 7800kg/m3)
+				if (Number.isNaN(stages[i].centrifugalStressMpa)) throw new Error("NaN");
+			}
 			stages[i].pRatio = stageData.isCompressor ? stages[i].pOut / stages[i].p : stages[i].p / stages[i].pOut;
 			if (!stages[i].cRe || typeof stages[i].cRe === 'undefined') {
 				// the viscosity very near to sat temp may be very high and not representative value for the whole stage
@@ -11982,7 +12031,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		first.pRatio = stageData.isCompressor ? stages[0].p / first.p : first.p / stages[0].p;
 		if (typeof first.h0 === 'undefined') first.h0 = first.h+0.5*(first.v**2);
 		first.hDeltaKinetic = stageData.inlet.hDeltaKinetic;
-console.log("first.hDeltaKinetic="+first.hDeltaKinetic);		
+//console.log("first.hDeltaKinetic="+first.hDeltaKinetic);
 		last.diameter = exitPipeDiameter;
 		last.diameterMm = exitPipeDiameter*1000;
 		last.pRatio = stageData.isCompressor ? last.p / stageData.hpExit.p : stageData.hpExit.p / last.p;
@@ -12239,9 +12288,9 @@ console.log("first.hDeltaKinetic="+first.hDeltaKinetic);
 		console.log("stageData.adiabaticEfficiencyOfStages="+stageData.adiabaticEfficiencyOfStages);
 		console.log(name+": Adiabatic efficiency:"+stageData.adiabaticEfficiency+" => Average efficiency changed from "+eff+" to "+stageData.averageEfficiency+", hDeltaKinetic="+hDeltaKinetic);
 
-		console.log("stages="+JSON.stringify(stageData.stages));
-		console.log("First="+JSON.stringify(first)+"\r\n, exit="+JSON.stringify(stageData.exit));
-		console.log("items="+JSON.stringify(test.items));
+//console.log("stages="+JSON.stringify(stageData.stages));
+//console.log("First="+JSON.stringify(first)+"\r\n, exit="+JSON.stringify(stageData.exit));
+//console.log("items="+JSON.stringify(test.items));
 
 //		stageData.averageEfficiency = eff;
 		//eff = stageData.averageEfficiency;
@@ -12275,7 +12324,7 @@ console.log("first.hDeltaKinetic="+first.hDeltaKinetic);
 		];
 		//+", Tip of 1st blade: "+(myRound(stages[0].U/stages[0].mach,2))+" mach")
 		if (stageData.isCompressor) {
-			stageData.titles.push("Max suction side relative velocity of the 1st stage: "+(myRound(stages[0].vMaxMach,2))+ " Mach"); //+" mach (absolute "+(myRound(stages[0].vMaxMachAbs,2))+" mach)");
+			stageData.titles.push("Max suction side relative velocity: "+(myRound(Math.max(stages[0].vMaxMach, stages[1].vMaxMach),2))+ " Mach"); //+" mach (absolute "+(myRound(stages[0].vMaxMachAbs,2))+" mach)");
 		}
 		else {
 			stageData.titles.push("Max relative exit velocity of the last rotor: "+(myRound(stages[stages.length-1].vMaxMach,2))+ " Mach"); //+" mach (absolute "+(myRound(stages[0].vMaxMachAbs,2))+" mach)");
@@ -12329,16 +12378,14 @@ console.log("Efficiency mismatch: "+$("#cEfficiency").val()+" != "+averageEffici
 		//console.log("stages:"+JSON.stringify(stageData.stages));
 
 		console.log(title+ " compressor stages: "+stageData.stages.length+", rpm speeds: "+stageData.rpmCount+
-		", efficiency: "+myRound(stageData.adiabaticEfficiency,3)+", power: "+Math.round(totalPower/1000000)+" MW"+
-		", compressor length, height, width: "+myRound(stageData.length,2)+", "+myRound(stageData.height,2)+", "+myRound(stageData.height,2)+" m");
+			", efficiency: "+myRound(stageData.adiabaticEfficiency,3)+", power: "+Math.round(totalPower/1000000)+" MW"+
+			", compressor length, height, width: "+myRound(stageData.length,2)+", "+myRound(stageData.height,2)+", "+myRound(stageData.height,2)+" m");
 		console.log("pHigh pipe diameter:"+exitPipeDiameter+", calculated gas properties:"+JSON.stringify(stageData.exit));
 		//console.log("pHigh pipe expected, properties:"+JSON.stringify(last));
 		console.log("pLow pipe diameter="+inletPipeDiameter+", gas properties:"+JSON.stringify(first));
 		//console.log(JSON.stringify(stageData.stages, null, 2));
-
 		return stageData;
 	}
-
 	// Calcs tip, mid and hub properties of first blade row, that accelerates the absolute inlet velocity inletC1 to absolute C2 
 	function getBladeProperties( stageData, hasIGV, stageLoadingCoefficient, flowCoefficient, v, inletC1, C1, C2, deltaH )
 	{	
@@ -13365,7 +13412,8 @@ throw new Error("bad blockageFactor:"+blockageFactor);
 										losses.push(loss);
 										if (isCompressor && iCheck == iStage) {
 											const α2 = isStall ? Math.atan((U-Math.tan(β2)*Vx)/Vx) : Math.atan((hubU-Math.tan(hubβ2)*Vx)/Vx);
-											var ΔZ = 2*reaction*c*rotorStatorGap;	// 0.2 is typical space between blade rows 
+											var ΔZ = 2*reaction*c*stageData.rotorStatorGap	// 0.2 is typical space between blade rows 
+												*Math.cos(midStaggerAngle)/Math.cos(hubStaggerAngle); 	// scale the gap to hub, c is equal!
 											hub = isStall ?  
 												getLossParameters( 
 													stage.dynamicVisc, hRotor, 0, c, blades.rotor.tMid, stage.rotorSolidity, β1, β2, 
@@ -13374,7 +13422,7 @@ throw new Error("bad blockageFactor:"+blockageFactor);
 												getLossParameters( 
 													stage.dynamicVisc, hRotor, 0, c, blades.rotor.tRoot, stage.rotorSolidity*rMid/rHub, hubβ1, hubβ2, 
 													Vx, Vx, stage.mach, "Rotor hub", 0, 0,	// do not calc eqDR, cannot do it for root thickness!
-													rHub, rHubMid, hubU, α2, stage.deltaH, stage.dynamicVisc2, ΔZ*Math.cos(hubStaggerAngle)/Math.cos(midStaggerAngle) );
+													rHub, rHubMid, hubU, α2, stage.deltaH, stage.dynamicVisc2, ΔZ );
 		if (selfTest) console.log(flowCoefficient+"/"+loadCoefficient+": Hub stagger angle="+hub.staggerAngle+", hub.Cp="+hub.Cp+", hub.CpMax="+hub.CpMax+", stageTested="+stageTested);
 											if (hub != null && (hub.staggerAngle < 2 || hub.Cp > hub.CpMax)) {
 		//console.log(flowCoefficient+"/"+loadCoefficient+": Hub stagger angle="+hub.staggerAngle+", hub.Cp="+hub.Cp+", hub.CpMax="+hub.CpMax+", stageTested="+stageTested);
@@ -13837,8 +13885,8 @@ if (loadingFactor > 1)
 			/*var hub = getCamberAngle( hubβ1*180/Math.PI, hubβ2*180/Math.PI, stage.rotor.tRoot, 
 										2*stage.rotor.rootReaction*c, stage.rotorSolidity*stage.rMid/stage.rHub, isNACA65, 
 										stageData.stages.length<3 ? "Rotor hub" : null);*/
-			const ΔZ = 2*reaction*c*rotorStatorGap	// 0.2 is typical space between blade rows 
-						*Math.cos(stage.hubStaggerAngleRad)/Math.cos(stage.staggerAngleRad); 	// scale the gap to hub, c is equal!
+			const ΔZ = 2*reaction*c*stageData.rotorStatorGap	// 0.2 is typical space between blade rows 
+						*Math.cos(stage.staggerAngleRad)/Math.cos(stage.hubStaggerAngleRad); 	// scale the gap to hub, c is equal!
 			// make stall chack with the higest static entahlpy rise => hDeltaPower when accelerating 1st stage and elsewhere hDelta including decrease of kinetic enthalpy
 			const hub = stageData.isCompressor ? 
 				getLossParameters( 
@@ -14021,7 +14069,7 @@ if (loadingFactor > 1)
 				stage.vMaxMach = tipC2/Math.cos(tipβ2) / stage.machOut;
 			}
 		}
-		if (reaction < 0.5) {
+		if (stageData.isCompressor && stageIndex < 2) {
 			const tipα1 = stageData.isCompressor ? Math.atan(((1-reaction) - stage.stageLoadingCoefficient/2)/stage.flowCoefficient) :
 												Math.atan(((1-reaction) + stage.stageLoadingCoefficient/2)/stage.flowCoefficient);
 
@@ -14194,8 +14242,17 @@ if (loadingFactor > 1)
 		const gamma = (r1*C_theta_in-r2*C_theta_out) / (solidity*vRel1*(r1+r2)/2);
 		//% Lieblein diffusion factor
 		ret.DF_lbl = 1-ret.deHallerNum+Math.abs(gamma)/2;
-		ret.DF = (vSSmax-vRel2)/vRel1;
+		ret.DF = (vSSmax-vRel2)/vRel1;    	// produces 0.04-0.06 lower DF values => smaller endwall loss
 		//ret.DF = ret.DF_lbl;	// produces ~0.005% % lower round trip efficiency
+
+		/* And yet another incorrect axial compressor diffusion factor suggested by Google AI,
+		it's incorrect because it is not divided by (r1+r2)/2
+		ε = (1 - V2/V1) + (r2ω2 - r1ω1) / (2 * V1)
+		where:
+		V1 and V2 are the absolute (or relative) velocities at the blade inlet and outlet, respectively. 
+		r1 and r2 are the radii at the blade inlet and outlet. 
+		ω1 and ω2 are the angular velocities at the blade inlet and outlet. 
+		*/
 
 		// Koch & Smith equivalent diffusion ratio
 		// This source code is based on https://pdfcoffee.com/axial-flow-compressor-10-pdf-free.html by Niclas Falc
@@ -14237,6 +14294,7 @@ if (loadingFactor > 1)
 			ret.cRe = cRe;
 			var profileLoss = scaleToRe*2*profileLossParam * Math.pow(ret.deHallerNum,2) / Math.cos(β2);
 			var endWallLoss = scaleToRe*endWallLossParam * Math.pow(ret.deHallerNum,2) * c / h;  // Math.pow(vLE/vTE,2));  // );
+			//var endWallLoss = endWallLossParam * Math.pow(ret.deHallerNum,2) * c / h;  // Math.pow(vLE/vTE,2));  // );
 //			if (c < 0.001 || Number.isNaN(profileLoss + endWallLoss) || (profileLoss + endWallLoss)>1
 //				|| typeof profileLoss === 'undefined' || typeof endWallLoss === 'undefined') throw new Error("Bad chord="+c+", vRel1="+vRel1+", scaleToRe="+scaleToRe+", cRe="+cRe+"; profileLoss="+profileLoss+", endWallLoss="+endWallLoss);
 			ret.profileLoss = profileLoss;
@@ -14296,7 +14354,7 @@ if (modLg2 < 0 && !doingEfficiencyScan) console.log("modLg2: "+modLg2+"="+solidi
 				(camberAngleRad * Math.sin(refCamberAngleRad/2)*Math.cos(κ2-refCamberAngleRad/2+camberAngleRad/2))
 				/ (refCamberAngleRad*Math.sin(camberAngleRad/2)*Math.cos(κ2)), 2);
 			if (typeof ΔZ === 'undefined') {
-				ΔZ = c*rotorStatorGap;	// 0.2 is typical space between blade rows 
+				ΔZ = c*stageData.rotorStatorGap;	// 0.2 is typical space between blade rows 
 			}
 			var Z = Math.round(2*Math.PI*r1/s);		// number of blades on row
 			var g = Math.PI*(r1+r2)/2*(Math.cos(ret.midβ1θ)+Math.cos(ret.midβ2θ))/Z;
@@ -14982,7 +15040,7 @@ if (!rotor.tMid || Number.isNaN(rotor.tMid)) throw new Error("error");
 				//return 1/2*c1*c1*(1/Math.pow(Math.cos(hubα2),2) - 1/Math.pow(Math.cos(hubα1),2))/reaction;	
 			}
 			//);
-			const ΔZ = 2*reaction*chord*rotorStatorGap	// 0.2 is typical space between blade rows 
+			const ΔZ = 2*reaction*chord*stageData.rotorStatorGap	// 0.2 is typical space between blade rows 
 						*Math.cos(stage.hubStaggerAngleRad)/Math.cos(stage.staggerAngleRad); 	// scale the gap to hub, c is equal!
 			if (Number.isNaN(ΔZ)) throw Error("Bad hub ΔZ");
 

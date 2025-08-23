@@ -1,4 +1,5 @@
 // See: https://www.lth.se/fileadmin/tpe/Kurser/Chapter_4.pdf
+// https://www.mdpi.com/2504-186X/4/3/32
 function loss_model_KO(type, Re, angle_in, angle_out, c, s, H, t_cl, t_max, Ma_rel_in, Ma_rel_out, r_ht_in, p_in, p0rel_in, p_out, p0rel_out ) {
     // Compute the loss coefficient using the Kacker-Okapuu loss model
     // Author: Roberto Agromayor

@@ -58,7 +58,8 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     // Compressible flow correction factor
     // Limit excessively low values (it might be a problem during optimization)
     // The limit to 0.1 is quite arbitrary, but it worked for me
-    let Kp = Math.max(0.1, K_p(Ma_rel_in, Ma_rel_out));
+    //let Kp = Math.max(0.1, K_p(Ma_rel_in, Ma_rel_out));
+    let Kp = K_p(Ma_rel_in, Ma_rel_out);	// IVG Kp may be very low, if Ma_rel_in is low
 
     // Compute the profile loss coefficient
     // The absolute value of the outlet angle is used as input

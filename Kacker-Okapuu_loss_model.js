@@ -47,9 +47,12 @@ function shock_loss(type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out) 
     let a = Math.max(0, f_hub(r_ht_in, type) * Ma_rel_in - 0.40);
 //console.log(f_hub(r_ht_in, type)+" * "+Ma_rel_in+" - "+0.40+"="+a);
     let Y_shock = 0.75 * Math.pow(a, 1.75) * r_ht_in * (p0rel_in - p_in) / (p0rel_out - p_out);
-//console.log("0.75 * "+Math.pow(a, 1.75)+" * "+r_ht_in+" * ("+p0rel_in+" - "+p_in+") / ("+p0rel_out+" - "+p_out+")="+Y_shock);
     // Avoid unphysical results if r_ht_in becomes negative during the optimization iterations
     Y_shock = Math.max(0, Y_shock);
+/*if (debugKO) {
+	if (p_in < 1) throw new Error("zero pressure: p_in="+p_in);
+	console.log(debugKO+" Y_shock: "+Y_shock+"=0.75*"+Math.pow(a, 1.75)+" * "+r_ht_in+" * ("+p0rel_in+" - "+p_in+") / ("+p0rel_out+" - "+p_out+"), a="+f_hub(r_ht_in, type)+" * "+Ma_rel_in)+" - 0.4";
+}*/
 	return Y_shock;
 }
 
@@ -91,14 +94,17 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     let aa = Math.max(0, angle_in / angle_out);
     Y_p = Y_p * Math.pow((t_max / c) / 0.20, aa);
     Y_p = 0.914 * (2 / 3 * Y_p * Kp + Y_shock);
-//console.log("Y_p="+Y_p+" = 0.914 * (2 / 3 * "+Y_p+" * "+Kp+" + "+Y_shock+", Y_p_reaction="+Y_p_reaction+", Y_p_impulse="+Y_p_impulse+
-//		", Ma_rel_in="+Ma_rel_in+", Ma_rel_out="+Ma_rel_out+", angle_in/angle_out="+angle_in+"/"+angle_out+", (t_max / c)="+(t_max / c));
+if (debugKO) {
+	console.log(debugKO+": Y_p="+Y_p+" = 0.914 * (2 / 3 * "+Y_p+" * "+Kp+" + "+Y_shock+", Y_p_reaction="+Y_p_reaction+", Y_p_impulse="+Y_p_impulse+
+			", Ma_rel_in="+Ma_rel_in+", Ma_rel_out="+Ma_rel_out+", angle_in/angle_out="+angle_in+"/"+angle_out+", (t_max / c)="+(t_max / c));
+}
     return Y_p;
 }
 function update_KO_shock_loss(lossParams, type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out) {
 	// p_out and p0_rel:out changes only shock loss
     let Y_shock = shock_loss( type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out);
 	lossParams.Y_p += 0.914*(Y_shock - lossParams.Y_shock);
+	lossParams.Y_shock = Y_shock;
 	return lossParams;
 }
 
@@ -112,6 +118,10 @@ function secondary_loss(angle_in,angle_out,Ma_rel_in,Ma_rel_out,H,c,b)
 	const angle_m = Math.atan((Math.tan(angle_in)-Math.tan(angle_out))/2);
 	const Z       = 4*(Math.tan(angle_in)+Math.tan(angle_out))**2*Math.cos(angle_out)**2/Math.cos(angle_m);
 	const Y_s     = 1.2*Ks*0.0334*f_AR(H/c)*Math.cos(angle_out)/Math.cos(angle_in)*Z;
+if (debugKO) {
+	console.log(debugKO+": Y_s="+Y_s+" = 1.2*"+Ks+"*0.0334*f_AR("+(H/c)+")*"+(Math.cos(angle_out)/Math.cos(angle_in))+"*"+Z+
+			", Ma_rel_in="+Ma_rel_in+", Ma_rel_out="+Ma_rel_out+", angle_in/angle_out="+angle_in+"/"+angle_out);
+}
 	return Y_s;
 }
 
@@ -145,7 +155,7 @@ function trailing_loss(angle_in, angle_out, t_te, o) {
     const phi_data_impulse = [0.000, 0.010, 0.025, 0.047, 0.075];
 
     // Numerical trick to avoid too big r_to's
-    const r_to = Math.min(0.400, t_te / o);
+    const r_to = t_te / o; // Math.min(0.400, t_te / o);
 
     // Interpolate data
     const d_phi2_reaction = linearInterpolation(r_to_data_reaction, phi_data_reaction, r_to);
@@ -157,6 +167,9 @@ function trailing_loss(angle_in, angle_out, t_te, o) {
     d_phi2 = Math.max(d_phi2, d_phi2_impulse / 2);
     const Y_te = 1 / (1 - d_phi2) - 1;
 
+if (debugKO) {
+	console.log(debugKO+": Y_te: "+Y_te+" = 1 / (1 - "+d_phi2+") - 1, t_te/o="+(t_te/o));
+}
     return Y_te;
 }
 
@@ -167,7 +180,6 @@ function f_hub(r_ht, type) {
         r_ht = 0.50; // Numerical trick to prevent extrapolation
     }
 	*/
-
     // Stator curve
     const r_ht_data_S = [0.50, 0.60, 0.70, 0.80, 0.90, 1.00];
     const f_data_S = [1.40, 1.18, 1.05, 1.00, 1.00, 1.00];

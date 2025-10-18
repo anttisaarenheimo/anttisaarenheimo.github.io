@@ -135,13 +135,13 @@ th {
 </DIV>
 <DIV>
 	<LABEL>Average hot turbine stage efficiency: </LABEL>
-	<INPUT size="4" id="tEfficiency" type="float" value="0.963" title="The default hot turbine efficiency of is scaled from cryogenic compressor efficiency" >
+	<INPUT size="4" id="tEfficiency" type="float" value="0.962" title="The default hot turbine efficiency of is scaled from cryogenic compressor efficiency" >
 	<LABEL>Average cryogenic compressor stage efficiency: </LABEL>
 	<INPUT size="4" id="cLowEfficiency" type="float" value="0.924" title="The efficiency resulted from the default cryogenic compressor design parameters" > 
 	<LABEL>Heat exchanger temp difference (K): </LABEL><INPUT size="4" id="heatExchangeDeltaT" type="float" value="2">
 </DIV>
 <DIV>
-	<LABEL>Heat pump compressor stage efficiency: </LABEL> <INPUT size="4" id="cHeatPumpEfficiency" type="float" value="0.932">
+	<LABEL>Heat pump compressor stage efficiency: </LABEL> <INPUT size="4" id="cHeatPumpEfficiency" type="float" value="0.933">
 	<LABEL>Heat pump turbine stage efficiency: </LABEL> <INPUT size="4" id="tHeatPumpEfficiency" type="float" value="0.965">
 	<LABEL>Relative pressure loss in each heat exchanger: </LABEL> <INPUT size="4" id="heatExchangePressureLoss" type="float" value="0.005">
 	<!--INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for turbine and compressor stage efficiencies </LABEL><INPUT size="4" id="tEfficiencyFrom" type="float" value="0.90"> - <INPUT size="4" id="tEfficiencyTo" type="float" value="0.98"-->
@@ -357,7 +357,7 @@ th {
 			<br/>
 			<H3>Hot turbine design parameters</H3>
 			<DIV><!-- 0.216, 0.44-->
-				<LABEL>Mean line load coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineLoadCoefficient" value="0.64"/>
+				<LABEL>Mean line load coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineLoadCoefficient" value="0.66"/>
 				<LABEL>Mean line flow coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineFlowCoefficient" value="0.46"/>
 				<LABEL>Hot turbines:</LABEL><INPUT size="2" id="cHotTurbineUnits2" value="2"/>
 				<LABEL>Stages:</Label><INPUT size="5" type="float" id="cStagesHotTurbine" value="13"/>
@@ -388,7 +388,7 @@ th {
 				<LABEL>Gap between rotor and stator (% of rotor chord length):</LABEL> <INPUT type="float"  size="4" id="rotorStatorGapTurbine" value="40" title=""/><SPAN> %</SPAN>
 			</DIV>
 			<DIV>
-				<LABEL>Reaction:</LABEL><INPUT type="float" size="3" id="hotTurbineReaction" value="0.44"/>
+				<LABEL>Reaction:</LABEL><INPUT type="float" size="3" id="hotTurbineReaction" value="0.5"/>	<!-- 0.44 => +0.1%-->
 				<!--LABEL>Max reaction in bladed root:</LABEL><INPUT size="4" type="float" id="maxReactionInHubHotTurbine" value="0.8"/-->
 				<!--LABEL>Divide optimal AR by:</LABEL><INPUT size="4" type="float" id="divOptARHotTurbine" value="1"/-->
 				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHotTurbine" value="0.15"/>
@@ -592,7 +592,7 @@ th {
 		<table id="hpCompressorData2"> </table>
 			<H3>Heat pump turbine design parameters</H3>
 			</DIV>
-				<LABEL>Load coefficient of turbine: </LABEL><INPUT size="5" type="float" id="hpTurbineLoadCoefficient" value="0.55"/>
+				<LABEL>Load coefficient of turbine: </LABEL><INPUT size="5" type="float" id="hpTurbineLoadCoefficient" value="0.70"/>
 				<LABEL>Flow coefficient of turbine: </LABEL><INPUT size="5" type="float" id="hpTurbineFlowCoefficient" value="0.55"/>
 				<LABEL>Heat pump turbines: </LABEL><INPUT size="2" id="cHpTurbineUnits2" value="2"/>
 				<LABEL>Turbine stages:</Label><INPUT size="5" type="float" id="cStagesHpTurbine" value="7"/>
@@ -606,7 +606,7 @@ th {
 				<LABEL>, IGV AR:</LABEL><INPUT type="float"  size="4" id="hpTurbineIGV_AR" value="3"-->
 			</DIV>
 			<DIV>
-				<LABEL>Turbine reaction: </LABEL><INPUT type="float" size="3" id="hpTurbineReaction" value="0.45"/>
+				<LABEL>Turbine reaction: </LABEL><INPUT type="float" size="3" id="hpTurbineReaction" value="0.46"/>
 				<LABEL>Turbine solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityHpTurbine" value="1.1" title="Chord spacing: chord length/distance between chords"/>
 				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHpTurbine" value="0.15"/>
 				<LABEL>Max aspect ratio:</LABEL><INPUT size="4" type="float" id="maxAspectRatioHpTurbine" value="7"/>

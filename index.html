@@ -130,7 +130,7 @@ th {
 </DIV>
 <DIV>
 	<LABEL>Average hot compressor stage efficiency: </LABEL>
-	<INPUT size="4" id="cEfficiency" type="float" value="0.907" title="The efficiency resulted from the default hot compressor design parameters">
+	<INPUT size="4" id="cEfficiency" type="float" value="0.910" title="The efficiency resulted from the default hot compressor design parameters">
 	<LABEL>Average cryogenic turbine stage efficiency: </LABEL>
 	<INPUT size="4" id="tLowEfficiency" type="float" value="0.965" title="The default cryogenic turbine efficiency of is scaled from cryogenic compressor efficiency">
 	<LABEL>Efficiency of inlet and outlet diffuser: </LABEL>
@@ -140,11 +140,11 @@ th {
 	<LABEL>Average hot turbine stage efficiency: </LABEL>
 	<INPUT size="4" id="tEfficiency" type="float" value="0.963" title="The default hot turbine efficiency of is scaled from cryogenic compressor efficiency" >
 	<LABEL>Average cryogenic compressor stage efficiency: </LABEL>
-	<INPUT size="4" id="cLowEfficiency" type="float" value="0.927" title="The efficiency resulted from the default cryogenic compressor design parameters" > 
+	<INPUT size="4" id="cLowEfficiency" type="float" value="0.929" title="The efficiency resulted from the default cryogenic compressor design parameters" > 
 	<LABEL>Heat exchanger temp difference (K): </LABEL><INPUT size="4" id="heatExchangeDeltaT" type="float" value="2">
 </DIV>
 <DIV>
-	<LABEL>Heat pump compressor stage efficiency: </LABEL> <INPUT size="4" id="cHeatPumpEfficiency" type="float" value="0.933">
+	<LABEL>Heat pump compressor stage efficiency: </LABEL> <INPUT size="4" id="cHeatPumpEfficiency" type="float" value="0.932">
 	<LABEL>Heat pump turbine stage efficiency: </LABEL> <INPUT size="4" id="tHeatPumpEfficiency" type="float" value="0.966">
 	<LABEL>Relative pressure loss in each heat exchanger: </LABEL> <INPUT size="4" id="heatExchangePressureLoss" type="float" value="0.005">
 	<!--INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for turbine and compressor stage efficiencies </LABEL><INPUT size="4" id="tEfficiencyFrom" type="float" value="0.90"> - <INPUT size="4" id="tEfficiencyTo" type="float" value="0.98"-->
@@ -203,8 +203,9 @@ th {
 </DIV>
 <DIV>
 	<LABEL>Cost of ice storage roof and walls €/m2: </LABEL><INPUT size="4" id="costOfIceStorageWallAndRoofIceM2" type="float" value="100" onchange="metricsChanged()">
-	<LABEL>Cost of turbomachinery power €/kW: </LABEL><INPUT size="4" id="tcCostOfKW" type="float" value="40" onchange="metricsChanged()">
-	<LABEL>Costs of power plant and generator €/kW: </LABEL><INPUT size="4" id="otherCostOfKW" type="float" value="200" onchange="metricsChanged()">
+	<!--LABEL>Cost of turbomachinery power €/kW: </LABEL><INPUT size="4" id="tcCostOfKW" type="float" value="40" onchange="metricsChanged()"-->
+	<LABEL>Cost of turbomachinery €/blade: </LABEL><INPUT size="4" id="tcCostOfBlade" type="float" value="1000" onchange="metricsChanged()">
+	<LABEL>Cost of power plant and generator €/kW: </LABEL><INPUT size="4" id="otherCostOfKW" type="float" value="200" onchange="metricsChanged()">
 	<!--LABEL>Cost of generator €/kW: </LABEL><INPUT size="4" id="generatorCostOfKW" type="float" value="50" onchange="metricsChanged()"-->
 	<LABEL>Cost of heat exchage €/kW: </LABEL><INPUT size="4" id="heCostOfKW" type="float" value="40" onchange="metricsChanged()">
 </DIV>
@@ -535,7 +536,7 @@ th {
 				<LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="hpRpm" id="hpRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="hpRpm" id="hpRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="hpRpm" id="hpRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="hpRpm" id="hpRpm1800" value="1800"/><Span>1800</span>
 			</DIV>
 			<DIV>
-				<LABEL>Mean line load coefficient 1: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient" value="0.36"/>
+				<LABEL>Mean line load coefficient 1: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient" value="0.35"/>
 				<LABEL>Mean flow coefficient 1: </LABEL><INPUT size="5" type="float" id="hpFlowCoefficient" value="0.575"/>
 				<LABEL>Mean line load coefficient 2: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient2" value="0.37"/>
 				<LABEL>Mean flow coefficient 2: </LABEL><INPUT size="5" type="float" id="hpFlowCoefficient2" value="0.59"/>
@@ -2336,7 +2337,8 @@ function getMetrics(pRatio, storageSize) {
 		costOfSurfaceM2 : getFloatParam('costOfSurfaceM2', 1200 ),
 		costOfMiningM3 : getFloatParam('costOfMiningM3', 12 ),
 		generatorCostOfKW : getFloatParam('generatorCostOfKW', 0),
-		tcCostOfKW : getFloatParam('tcCostOfKW', 50),		// cost of tubin or compressor power
+		tcCostOfKW : getFloatParam('tcCostOfKW', 40),		// cost of tubine or compressor power
+		tcCostOfBlade : getFloatParam('tcCostOfBlade', 1000),		// tubine or compressor cost divided by blade count
 		heCostOfKW : getFloatParam('heCostOfKW', 50),		// cost of heat exchangers  
 		otherCostOfKW: getFloatParam('otherCostOfKW', 50),	// all other power plant cost
 		rockDensityHp : getFloatParam('rockDensityHp', 3.0 ), 
@@ -4810,6 +4812,7 @@ console.log(xVals.length+"="+extra.length+"="+extra2.length+", extra2="+JSON.str
 console.log("tc="+JSON.stringify(tc, null, 2));
 			return tc;
 	}
+	var gDebugVersion = 1;
 
 	function doChargeDischargeCycle( hotCycle, coldCycle, tHigh, tLow, pHigh, pLow, tEfficiency, cEfficiency, cryogenicCooling, adjustedCompressorPlow, showLog, ctEfficiency, ccEfficiency )
 	{
@@ -4865,6 +4868,8 @@ console.log("tc="+JSON.stringify(tc, null, 2));
 
 		//  Main turbine process producing the gross electricity
 		hotCycle.push(mainTurbin);
+		hotCycle[0].version = gDebugVersion++;
+		//console.trace("hotCycle[0].version = "+hotCycle[0].version);
 		var mainHeatExchanger;
 		const compressorMassFlow = powerAndHeat ? turbinMassFlow/1.255 : turbinMassFlow/1.0809;/// APPROXIMATION TO CALC THE PRESSURE DROPS!!!
 		// Main charge process, the compression from warm pLow => hot pHigh calculated as reverse turbin, because we we know only the high temperature
@@ -5376,20 +5381,34 @@ console.log("Average Cp ("+hotCycle[1].tIn+"-"+hotCycle[0].tIn+")="+getAverageRo
 			cycleData.heatPumpCompressorOne.workConsumed *= coldCycle[3].massFlow;
 			cycleData.heatPumpCompressorTwo.workConsumed *= coldCycle[3].massFlow;
 		}
-		cycleData.costOfMachineryKW = metrics.generatorCostOfKW + 
-			(metrics.tcCostOfKW * (hotCycle[0].workProduced*hotCycle[0].getRelativeSize() + 
-								   coldCycle[0].workConsumed*coldCycle[0].getRelativeSize() + 
-								   hotCycle[1].workConsumed*hotCycle[1].getRelativeSize() + 
-								   coldCycle[1].workProduced*coldCycle[1].getRelativeSize() + 
-					(cryogenicCooling ? (coldCycle[3].workConsumed*coldCycle[3].getRelativeSize() + 
-										 coldCycle[2].workProduced*coldCycle[2].getRelativeSize()) : 0))  + 
-			metrics.heCostOfKW * (cycleData.heatPumpHeating + cycleData.cooling + cycleData.heatPumpHeatExchange + (hotCycle[0].hOut - hotCycle[1].hIn) * hotCycle[0].massFlow))
-			/ cycleData.netWorkOut;
+		if (hotCycle[0].cBlades) {
+			cycleData.costOfMachineryKW = //metrics.generatorCostOfKW + 
+				 (metrics.tcCostOfBlade * (hotCycle[0].cBlades + 
+									   coldCycle[0].cBlades + 
+									   hotCycle[1].cBlades + 
+									   coldCycle[1].cBlades + 
+									(cryogenicCooling ? coldCycle[3].cBlades + 
+														 coldCycle[2].cBlades : 0)) + 
+				metrics.heCostOfKW * (cycleData.heatPumpHeating + cycleData.cooling + cycleData.heatPumpHeatExchange + (hotCycle[0].hOut - hotCycle[1].hIn) * hotCycle[0].massFlow))
+				/ cycleData.netWorkOut;
+		}
+		else {
+			cycleData.costOfMachineryKW = //metrics.generatorCostOfKW + 
+				(metrics.tcCostOfKW * (hotCycle[0].workProduced*hotCycle[0].getRelativeSize() + 
+									   coldCycle[0].workConsumed*coldCycle[0].getRelativeSize() + 
+									   hotCycle[1].workConsumed*hotCycle[1].getRelativeSize() + 
+									   coldCycle[1].workProduced*coldCycle[1].getRelativeSize() + 
+						(cryogenicCooling ? (coldCycle[3].workConsumed*coldCycle[3].getRelativeSize() + 
+											 coldCycle[2].workProduced*coldCycle[2].getRelativeSize()) : 0))  + 
+				metrics.heCostOfKW * (cycleData.heatPumpHeating + cycleData.cooling + cycleData.heatPumpHeatExchange + (hotCycle[0].hOut - hotCycle[1].hIn) * hotCycle[0].massFlow))
+				/ cycleData.netWorkOut;
+		}
 console.log("*****"+tHigh+": metrics.otherCostOfKW="+metrics.otherCostOfKW+", cycleData.costOfMachineryKW="+cycleData.costOfMachineryKW);
 		cycleData.costOfPowerKW = metrics.otherCostOfKW + cycleData.costOfMachineryKW;
 		cycleData.costOfPower = cycleData.costOfMachineryKW * cycleData.netWorkOut;
 		cycleData.costOfPlant = metrics.otherCostOfKW * cycleData.netWorkOut;
 
+			
 		if (motorGenerator) {
 			// 
 			cycleData.efficiency = (cycleData.netWorkIn*metrics.generatorEfficiency - cycleData.heatPumpLoss)*metrics.generatorEfficiency/cycleData.netWorkIn;
@@ -5401,12 +5420,44 @@ console.log("*****"+tHigh+": metrics.otherCostOfKW="+metrics.otherCostOfKW+", cy
 		//if (showLog) 
 
 		heatPumpMassFlow = coldCycle[2].massFlow;
-		hotCycleG = hotCycle;
-		coldCycleG = coldCycle;
+		hotCycleG = cycleData.hotCycle = hotCycle;
+		coldCycleG = cycleData.coldCycle = coldCycle;
 
 		//console.log("cycleData:"+JSON.stringify(cycleData, null, 2));
 		return cycleData;
 	}
+	var cBladesTotalG = 0;
+	function updateCostOfPlant( cycleData ) {
+		const hotCycle = cycleData.hotCycle ? cycleData.hotCycle : hotCycleG;
+		const coldCycle = cycleData.coldCycle ? cycleData.coldCycle : coldCycleG;
+		var cBladesTotal = cBladesTotalG; 
+		var tmCosts, heCosts;
+		if (hotCycle) {
+			if (cBladesTotal) {
+				cycleData.heCost = heCostG;
+				cycleData.costOfMachineryKW = //metrics.generatorCostOfKW + 
+					 (tmCosts = metrics.tcCostOfBlade * cBladesTotal)/ cycleData.netWorkOut + 
+					(heCosts = cycleData.heCost) / cycleData.netWorkOut;
+				cycleData.costOfMachinery = tmCosts;
+			}
+			else {
+				cycleData.costOfMachineryKW = //metrics.generatorCostOfKW + 
+					 (tmCosts = metrics.tcCostOfKW * (hotCycle[0].workProduced*hotCycle[0].getRelativeSize() + 
+										   coldCycle[0].workConsumed*coldCycle[0].getRelativeSize() + 
+										   hotCycle[1].workConsumed*hotCycle[1].getRelativeSize() + 
+										   coldCycle[1].workProduced*coldCycle[1].getRelativeSize() + 
+							(cryogenicCooling ? coldCycle[3].workConsumed*coldCycle[3].getRelativeSize() + 
+												coldCycle[2].workProduced*coldCycle[2].getRelativeSize() : 0)))/cycleData.netWorkOut  + 
+					(heCosts = metrics.heCostOfKW * (cycleData.heatPumpHeating + cycleData.cooling + cycleData.heatPumpHeatExchange + (hotCycle[0].hOut - hotCycle[1].hIn) * hotCycle[0].massFlow))
+					/ cycleData.netWorkOut;
+			}
+	console.log("***** metrics.otherCostOfKW="+metrics.otherCostOfKW+", cycleData.costOfMachineryKW="+cycleData.costOfMachineryKW+", tmCosts="+Math.round(tmCosts)+", heCosts="+Math.round(heCosts)+", cBladesTotal="+cBladesTotal);
+			cycleData.costOfPowerKW = metrics.otherCostOfKW + cycleData.costOfMachineryKW;
+			cycleData.costOfPower = cycleData.costOfMachineryKW * cycleData.netWorkOut;
+			cycleData.costOfPlant = metrics.otherCostOfKW * cycleData.netWorkOut;
+		}
+	}
+	
 	function getLpExpansion( cycleData, length ) {
 		return length * (cycleData.hotCycle[1].tIn-cycleData.coldCycle[1].tOut)/metrics.lpGravelExpansionIn100K;
 	}
@@ -8797,12 +8848,149 @@ console.log("item="+JSON.stringify(item));
 			showPointData(ctx, coldCycle[1], FIRST_ITEM, -15, -25, coldCycle[1].massFlow  );
 			const item0 = coldCycle[0].items[0];
 			showPointData(ctx, coldCycle[1], LAST_ITEM, 40, -40, coldCycle[1].massFlow, coldCycle[0].massFlow, item0.p, item0.t, item0.wetness );
+		}
+	
+		// draw temp and temp lines, 
+		// some max-min temps values: 0.1 Hydrogen: 30, Nitrogen: 65, Methane: 120, CarbonDioxide: 200, Water: 340
+		// some max-min pressure values: Hydrogen(0.3): 350 kPa, Nitrogen: 600 kPa,  Methane: 2000 kPa, CarbonDioxide: 4000 kPa, Water: 2000 kPa
+
+		$("#"+canvasId).css('display','block');
+		//$("#drawTurbine").css('display','block');
+		$("#output").html("");
+		ctx.setLineDash([]);
+
+		$("#compressorDesignParams").css('display','block');
+		if (name != 'TEST_Helium' && drawCompressors) {
+		
+			//setup_S_H_P_caches( name, coldCycle[0].sIn, hotCycle[0].sOut, coldCycle[0].hIn, hotCycle[0].hIn, coldCycle[0].pIn, hotCycle[0].pIn );
+
+			//if (redrawTpGraf) throw new Error("We should not be here!!!");
+			var cUnits = getIntParam('cHotUnits2', metrics.cUnits);
+
+			var rel = Math.sqrt(metrics.cUnits/cUnits);
+			const hotCompressor = 
+				getCompressorStages(hotCycle[1], LAST_ITEM, hotCycle[1].massFlow/cUnits, "Hot compressor", metrics.chargePDrops.diameterPipeToHotCompressor*rel, 
+								metrics.chargePDrops.diameterPipeFromHotCompressor*rel, metrics.cEfficiency, (hotCycle[1].workConsumed*1000)/cUnits, cUnits);
+			drawCompressor( "hotCompressorImage", hotCompressor, 125 );  // 1 m == 100 px
+			hotCycle[1].cBlades = hotCompressor.cBladesTotal * cUnits;
+			cUnits = getIntParam('cColdUnits2', metrics.cUnits);
+			{
+				const wetStore = null;
+/*			
+	We cannot inject wetness (~0.37 for nitrogen) in the compression, because the both cryogenic simulations were dry.
+	The current algorithm does not work with a wet fluid.
+				var last = coldCycle[1].items[coldCycle[1].items.length-1];
+				if (coldCycle[1].items[0].p < last.p) last = coldCycle[1].items[0];
+				const wetStore = {};
+				wetStore.wetness = last.wetness;
+				if (wetStore.wetness) {
+					wetStore.t = last.t;
+					wetStore.p = last.p;
+					wetStore.hLiq = Module.PropsSI('H', 'T', wetStore.t, 'Q', 0, name );
+				}
+				console.log("turbin outlet="+JSON.stringify(last)+", wetStore="+JSON.stringify(wetStore));
+*/
+				rel = Math.sqrt(metrics.cUnits/cUnits);
+				const coldCompressor = 
+					getCompressorStages(coldCycle[0], FIRST_ITEM, coldCycle[0].massFlow/cUnits, "Cold compressor", metrics.dischargePDrops.diameterPipeToColdCompressor*rel, 
+						metrics.dischargePDrops.diameterPipeFromColdCompressor*rel, metrics.cLowEfficiency, (coldCycle[0].workConsumed*1000)/cUnits, cUnits, wetStore);//, true
+				drawCompressor( "coldCompressorImage", coldCompressor, 150 );  // 1 m == 150 px
+				coldCycle[0].cBlades = coldCompressor.cBladesTotal * cUnits;
+			}
+
+			cUnits = getIntParam('cHotTurbineUnits2', metrics.cUnits);
+			rel = Math.sqrt(metrics.cUnits/cUnits);
+			const hotTurbin = 
+				getTurbinStages(hotCycle[0], FIRST_ITEM, hotCycle[0].massFlow/cUnits, "Hot turbine", metrics.dischargePDrops.diameterPipeToHotTurbin*rel, 
+								metrics.dischargePDrops.diameterPipeFromHotTurbin*rel, metrics.tEfficiency, (hotCycle[0].workProduced*1000)/cUnits, cUnits);
+			drawCompressor( "hotTurbineImage", hotTurbin, 150 );  // 1 m == 100 px
+			hotCycle[0].cBlades = hotTurbin.cBladesTotal * cUnits;
+console.log("*** hotCycle[0].cBlades:"+hotCycle[0].cBlades+" = "+hotCompressor.cBladesTotal+" * "+cUnits+", hotCycle[0].version="+hotCycle[0].version);
+
+			cUnits = getIntParam('cColdTurbineUnits2', metrics.cUnits);
+			rel = Math.sqrt(metrics.cUnits/cUnits);
+			const coldTurbin = 
+				getTurbinStages(coldCycle[1], LAST_ITEM, coldCycle[1].massFlow/cUnits, "Cold turbine", metrics.chargePDrops.diameterPipeToColdExpander*rel, 
+					metrics.chargePDrops.diameterPipeFromColdExpander*rel, metrics.tLowEfficiency, (coldCycle[1].workProduced*1000)/cUnits, cUnits);//, true
+			drawCompressor( "coldTurbineImage", coldTurbin, 225 );  // 1 m == 150 px
+			coldCycle[1].cBlades = coldTurbin.cBladesTotal * cUnits;
+
+			cUnits = getIntParam('cHpUnits2', metrics.cUnits);
+			const hpCompressor1 = cycleData.heatPumpCompressorOne;
+			const hpCompressor2 = cycleData.heatPumpCompressorTwo;
+			const hpTurbin = coldCycle[2];
+			const orgFluid = name;
+//console.log("hpCompressor1="+JSON.stringify(cycleData.heatPumpCompressorOne));
+//console.log("hpCompressor2="+JSON.stringify(cycleData.heatPumpCompressorTwo));
+
+			const ccEfficiency = getFloatParam('cHeatPumpEfficiency', getFloatParam('cLowEfficiency', metrics.cEfficiency));
+			name = getInputParam('hpFluid', 'Argon' );
+			//setup_S_H_P_caches( name, hpTurbin.sIn, hpCompressor2.sOut, hpTurbin.hIn, hpCompressor2.hOut, hpCompressor1.pIn, hpCompressor2.pOut );
+
+			const tIn_PLow = Module.PropsSI('T', 'P', hpTurbin.pOut, 
+					'H', Module.PropsSI('H', 'P', hpTurbin.pOut, 'T', hpTurbin.tOut, name)+coldCycle[1].massFlow*(coldCycle[0].hOut-coldCycle[1].hIn)/hpTurbin.massFlow, name);
+			gHeatExchangers.internal = calcHeatExchanger( hpCompressor1.massFlow*1000/cUnits, hpCompressor1.tIn, tIn_PLow, cycleData.heatPumpCompressorTwo.pOut, hpTurbin.pIn, 0.005,
+						{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, pLowFluid : name, pHighFluid : name, hpCrossArea : 0.45 }, 'Internal '+name+" to "+name+" counter flow plate heat exchanger");
+			gHeatExchangers.cooler = calcHeatExchanger( coldCycle[1].massFlow*1000/cUnits, coldCycle[0].tOut, coldCycle[1].tIn, coldCycle[2].pOut, coldCycle[1].pIn, 0.005,
+							{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, 
+							 pLowFluid : orgFluid, pHighFluid : name, tHotHigh : tIn_PLow, tColdHigh : hpTurbin.tOut}, orgFluid+' to '+name+' counter flow plate heat exchanger');
+			gHeatExchangers.heater1 = calcHeatExchanger( hpCompressor1.massFlow*1000/cUnits, hpCompressor1.tOut, hpCompressor2.tIn, 120000, hpCompressor1.pOut, 0.001,
+							{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, pLowFluid : name, pHighFluid : 'Water', hpCrossArea : 0.45}, name+' to water counter flow plate heat exchanger 1');
+			gHeatExchangers.heater2 = calcHeatExchanger( hpCompressor2.massFlow*1000/cUnits, hpCompressor2.tOut, metrics.coolingWaterTemp+metrics.heatExchangeDeltaT, 120000, hpCompressor2.pOut, 0.001,
+							{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, pLowFluid : name, pHighFluid : 'Water', hpCrossArea : 0.45}, name+' to water counter flow plate heat exchanger 2');
+			cycleData.hpDiameterIn = Math.sqrt(gHeatExchangers.internal.totalCrossAreaM2/Math.PI)*2;
+			cycleData.hpDiameterOut = Math.sqrt(gHeatExchangers.heater2.totalCrossAreaM2/Math.PI)*2;
+			cycleData.hpTurbineDiameterIn = Math.sqrt(gHeatExchangers.internal.totalCrossAreaM2/Math.PI)*2;
+			cycleData.hpTurbineDiameterOut = Math.sqrt(gHeatExchangers.cooler.totalCrossAreaM2/Math.PI)*2;
+			cycleData.heVolumeM3 = cUnits*(gHeatExchangers.internal.volumeM3 + gHeatExchangers.cooler.volumeM3 + gHeatExchangers.heater1.volumeM3 + gHeatExchangers.heater2.volumeM3);
+			heCostG = cycleData.heCost = cUnits*(gHeatExchangers.internal.cost + gHeatExchangers.cooler.cost + gHeatExchangers.heater1.cost + gHeatExchangers.heater2.cost);
 			
+			gCycleData = cycleData;
+			const hpOne = drawHpCompressor( true, 225 );
+			const hpTwo = drawHpCompressor( false, 225 );
+			coldCycle[3].cBlades = hpOne.cBladesTotal * cUnits + hpTwo.cBladesTotal * cUnits;
+			const averageEfficiency = (hpOne.averageEfficiency + hpTwo.averageEfficiency)/2;
 
+			name = orgFluid;
+			const updateCompressorEfficiencies = document.getElementById('updateCompressorEfficiencies').checked;
+			const updateTurbineEfficiencies = document.getElementById('updateTurbineEfficiencies').checked;
+
+			if ($("#cHeatPumpEfficiency").val() != myRound(averageEfficiency,3)) {
+console.log("Efficiency mismatch: "+$("#cHeatPumpEfficiency").val()+" != "+averageEfficiency);
+if (typeof hpOne.averageEfficiency === 'undefined') console.log("Hp compressor 1:"+JSON.stringify(hpOne));
+else if (typeof hpTwo.averageEfficiency === 'undefined') console.log("Hp compressor 2:"+JSON.stringify(hpTwo));
+				if (updateCompressorEfficiencies) {
+					$("#cHeatPumpEfficiency").val(myRound(averageEfficiency,3));
+					redrawTpGraf = true;
+				}
+			}
+			const hpTurbineData = drawHpTurbine( 225 );
+			coldCycle[2].cBlades = hpTurbineData.cBladesTotal * cUnits;
+			
+			if (saveThermodynamicCaches) {
+				//console.log("P_H_to_X_caches="+JSON.stringify(P_H_to_X_caches));
+				//console.log("S_H_to_P_caches="+JSON.stringify(S_H_to_P_caches));
+				saveThermodynamicCaches = false;
+			}
+			const cryogenicCooling = true;// getBooleanParam('cryogenicCooling');
+
+			//drawLossParamDiagrams();
+			cBladesTotalG = hotCycle[0].cBlades + 
+						   coldCycle[0].cBlades + 
+						   hotCycle[1].cBlades + 
+						   coldCycle[1].cBlades + 
+						(cryogenicCooling ? coldCycle[3].cBlades + coldCycle[2].cBlades : 0);
+		}
+		if (redrawTpGraf) {
+			redrawTpGraf = false;
+			drawIt(true, false, false);
+		}
+		else {
+			updateCostOfPlant( cycleData );
+			var y, x1, x2;
 			const powerAndHeat = metrics.powerAndHeat ? metrics.powerAndHeat : !getBooleanParam('powerOnly', false );
-
 			ctx.font = "15px serif";
-			x = width/5-25;
+			x = width/6-25;
 			y = height/2.5;
 			ctx.fillStyle = 'black'; 
 			textOnWhite( ctx, "Energy storage charge/discharge power for "+name+" gas flow "+Math.round(hotCycle[1].massFlow*1000)+"/"+Math.round(hotCycle[0].massFlow*1000)+" kg/s and turbin/compressor stage efficiency "+getFloatParam('tEfficiency', 0.90)+"/"+getFloatParam('cEfficiency', 0.90), x, y );
@@ -8875,7 +9063,10 @@ console.log("item="+JSON.stringify(item));
 			y += 20;
 			textOnWhite( ctx, "Cost of storage "+myRound(cycleData.costOfStoragekWh,2)+" €/kWh and cost of electric power capasity "+Math.round(cycleData.costOfPowerKW)+" €/kW", x, y );
 			y += 20;
-			textOnWhite( ctx, "Total cost "+Math.round((cycleData.costOfStorage+cycleData.costOfPower+cycleData.costOfPlant)/1000000)+" million Eur (storage: "+Math.round(cycleData.costOfStorage/1000000)+", power plant and generators: "+Math.round(cycleData.costOfPlant/1000000)+", turbomachinery: "+Math.round(cycleData.costOfPower/1000000)+")", x, y );
+			textOnWhite( ctx, "Total cost "+Math.round((cycleData.costOfStorage+cycleData.costOfPower+cycleData.costOfPlant)/1000000)+" million Eur (storage: "+Math.round(cycleData.costOfStorage/1000000)+", power plant and generators: "+Math.round(cycleData.costOfPlant/1000000)+
+				(cycleData.costOfMachinery && cycleData.heCost ? 
+					", turbomachinery: "+Math.round(cycleData.costOfMachinery/1000000)+" and heat exchangers: "+Math.round(cycleData.heCost/1000000)+")" :
+					", turbomachinery and heat exchangers: "+Math.round(cycleData.costOfPower/1000000)+")"), x, y );
 			y += 20;
 			if (metrics.topFillWithIceWithStorage) {
 				textOnWhite( ctx, "Hot storage size "+myRound(metrics.totalMiningVolume*metrics.rockDensity/1000000,1)
@@ -8887,127 +9078,6 @@ console.log("item="+JSON.stringify(item));
 			else {
 				textOnWhite( ctx, "Storage size "+myRound(metrics.totalMiningVolume*metrics.rockDensity/1000000,1)+" Mt crushed stone", x, y );
 			}
-		}
-	
-		// draw temp and temp lines, 
-		// some max-min temps values: 0.1 Hydrogen: 30, Nitrogen: 65, Methane: 120, CarbonDioxide: 200, Water: 340
-		// some max-min pressure values: Hydrogen(0.3): 350 kPa, Nitrogen: 600 kPa,  Methane: 2000 kPa, CarbonDioxide: 4000 kPa, Water: 2000 kPa
-
-		$("#"+canvasId).css('display','block');
-		//$("#drawTurbine").css('display','block');
-		$("#output").html("");
-		ctx.setLineDash([]);
-
-		$("#compressorDesignParams").css('display','block');
-		if (name != 'TEST_Helium' && drawCompressors) {
-		
-			//setup_S_H_P_caches( name, coldCycle[0].sIn, hotCycle[0].sOut, coldCycle[0].hIn, hotCycle[0].hIn, coldCycle[0].pIn, hotCycle[0].pIn );
-
-			//if (redrawTpGraf) throw new Error("We should not be here!!!");
-			var cUnits = getIntParam('cHotUnits2', metrics.cUnits);
-
-			var rel = Math.sqrt(metrics.cUnits/cUnits);
-			const hotCompressor = 
-				getCompressorStages(hotCycle[1], LAST_ITEM, hotCycle[1].massFlow/cUnits, "Hot compressor", metrics.chargePDrops.diameterPipeToHotCompressor*rel, 
-								metrics.chargePDrops.diameterPipeFromHotCompressor*rel, metrics.cEfficiency, (hotCycle[1].workConsumed*1000)/cUnits, cUnits);
-			drawCompressor( "hotCompressorImage", hotCompressor, 125 );  // 1 m == 100 px
-
-			cUnits = getIntParam('cColdUnits2', metrics.cUnits);
-			{
-				const wetStore = null;
-/*			
-	We cannot inject wetness (~0.37 for nitrogen) in the compression, because the both cryogenic simulations were dry.
-	The current algorithm does not work with a wet fluid.
-				var last = coldCycle[1].items[coldCycle[1].items.length-1];
-				if (coldCycle[1].items[0].p < last.p) last = coldCycle[1].items[0];
-				const wetStore = {};
-				wetStore.wetness = last.wetness;
-				if (wetStore.wetness) {
-					wetStore.t = last.t;
-					wetStore.p = last.p;
-					wetStore.hLiq = Module.PropsSI('H', 'T', wetStore.t, 'Q', 0, name );
-				}
-				console.log("turbin outlet="+JSON.stringify(last)+", wetStore="+JSON.stringify(wetStore));
-*/
-				rel = Math.sqrt(metrics.cUnits/cUnits);
-				const coldCompressor = 
-					getCompressorStages(coldCycle[0], FIRST_ITEM, coldCycle[0].massFlow/cUnits, "Cold compressor", metrics.dischargePDrops.diameterPipeToColdCompressor*rel, 
-						metrics.dischargePDrops.diameterPipeFromColdCompressor*rel, metrics.cLowEfficiency, (coldCycle[0].workConsumed*1000)/cUnits, cUnits, wetStore);//, true
-				drawCompressor( "coldCompressorImage", coldCompressor, 150 );  // 1 m == 150 px
-			}
-
-			cUnits = getIntParam('cHotTurbineUnits2', metrics.cUnits);
-			rel = Math.sqrt(metrics.cUnits/cUnits);
-			const hotTurbin = 
-				getTurbinStages(hotCycle[0], FIRST_ITEM, hotCycle[0].massFlow/cUnits, "Hot turbine", metrics.dischargePDrops.diameterPipeToHotTurbin*rel, 
-								metrics.dischargePDrops.diameterPipeFromHotTurbin*rel, metrics.tEfficiency, (hotCycle[0].workProduced*1000)/cUnits, cUnits);
-			drawCompressor( "hotTurbineImage", hotTurbin, 150 );  // 1 m == 100 px
-
-			cUnits = getIntParam('cColdTurbineUnits2', metrics.cUnits);
-			rel = Math.sqrt(metrics.cUnits/cUnits);
-			const coldTurbin = 
-				getTurbinStages(coldCycle[1], LAST_ITEM, coldCycle[1].massFlow/cUnits, "Cold turbine", metrics.chargePDrops.diameterPipeToColdExpander*rel, 
-					metrics.chargePDrops.diameterPipeFromColdExpander*rel, metrics.tLowEfficiency, (coldCycle[1].workProduced*1000)/cUnits, cUnits);//, true
-			drawCompressor( "coldTurbineImage", coldTurbin, 225 );  // 1 m == 150 px
-
-			cUnits = getIntParam('cHpUnits2', metrics.cUnits);
-			const hpCompressor1 = cycleData.heatPumpCompressorOne;
-			const hpCompressor2 = cycleData.heatPumpCompressorTwo;
-			const hpTurbin = coldCycle[2];
-			const orgFluid = name;
-//console.log("hpCompressor1="+JSON.stringify(cycleData.heatPumpCompressorOne));
-//console.log("hpCompressor2="+JSON.stringify(cycleData.heatPumpCompressorTwo));
-
-			const ccEfficiency = getFloatParam('cHeatPumpEfficiency', getFloatParam('cLowEfficiency', metrics.cEfficiency));
-			name = getInputParam('hpFluid', 'Argon' );
-			//setup_S_H_P_caches( name, hpTurbin.sIn, hpCompressor2.sOut, hpTurbin.hIn, hpCompressor2.hOut, hpCompressor1.pIn, hpCompressor2.pOut );
-
-			const tIn_PLow = Module.PropsSI('T', 'P', hpTurbin.pOut, 
-					'H', Module.PropsSI('H', 'P', hpTurbin.pOut, 'T', hpTurbin.tOut, name)+coldCycle[1].massFlow*(coldCycle[0].hOut-coldCycle[1].hIn)/hpTurbin.massFlow, name);
-			gHeatExchangers.internal = calcHeatExchanger( hpCompressor1.massFlow*1000/cUnits, hpCompressor1.tIn, tIn_PLow, cycleData.heatPumpCompressorTwo.pOut, hpTurbin.pIn, 0.005,
-						{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, pLowFluid : name, pHighFluid : name, hpCrossArea : 0.45 }, 'Internal '+name+" to "+name+" counter flow plate heat exchanger");
-			gHeatExchangers.cooler = calcHeatExchanger( coldCycle[1].massFlow*1000/cUnits, coldCycle[0].tOut, coldCycle[1].tIn, coldCycle[2].pOut, coldCycle[1].pIn, 0.005,
-							{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, 
-							 pLowFluid : orgFluid, pHighFluid : name, tHotHigh : tIn_PLow, tColdHigh : hpTurbin.tOut}, orgFluid+' to '+name+' counter flow plate heat exchanger');
-			gHeatExchangers.heater1 = calcHeatExchanger( hpCompressor1.massFlow*1000/cUnits, hpCompressor1.tOut, hpCompressor2.tIn, 120000, hpCompressor1.pOut, 0.001,
-							{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, pLowFluid : name, pHighFluid : 'Water', hpCrossArea : 0.45}, name+' to water counter flow plate heat exchanger 1');
-			gHeatExchangers.heater2 = calcHeatExchanger( hpCompressor2.massFlow*1000/cUnits, hpCompressor2.tOut, metrics.coolingWaterTemp+metrics.heatExchangeDeltaT, 120000, hpCompressor2.pOut, 0.001,
-							{sheetThickness : 0.00005, sheetDistance :0.001, heatExchangeDeltaT: metrics.heatExchangeDeltaT, pLowFluid : name, pHighFluid : 'Water', hpCrossArea : 0.45}, name+' to water counter flow plate heat exchanger 2');
-			cycleData.hpDiameterIn = Math.sqrt(gHeatExchangers.internal.totalCrossAreaM2/Math.PI)*2;
-			cycleData.hpDiameterOut = Math.sqrt(gHeatExchangers.heater2.totalCrossAreaM2/Math.PI)*2;
-			cycleData.hpTurbineDiameterIn = Math.sqrt(gHeatExchangers.internal.totalCrossAreaM2/Math.PI)*2;
-			cycleData.hpTurbineDiameterOut = Math.sqrt(gHeatExchangers.cooler.totalCrossAreaM2/Math.PI)*2;
-			cycleData.heVolumeM3 = cUnits*(gHeatExchangers.internal.volumeM3 + gHeatExchangers.cooler.volumeM3 + gHeatExchangers.heater1.volumeM3 + gHeatExchangers.heater2.volumeM3);
-			cycleData.heCost = cUnits*(gHeatExchangers.internal.cost + gHeatExchangers.cooler.cost + gHeatExchangers.heater1.cost + gHeatExchangers.heater2.cost);
-			gCycleData = cycleData;
-			const hpOne = drawHpCompressor( true, 225 );
-			const hpTwo = drawHpCompressor( false, 225 );
-			const averageEfficiency = (hpOne.averageEfficiency + hpTwo.averageEfficiency)/2;
-
-			name = orgFluid;
-			const updateCompressorEfficiencies = document.getElementById('updateCompressorEfficiencies').checked;
-			const updateTurbineEfficiencies = document.getElementById('updateTurbineEfficiencies').checked;
-
-			if ($("#cHeatPumpEfficiency").val() != myRound(averageEfficiency,3)) {
-console.log("Efficiency mismatch: "+$("#cHeatPumpEfficiency").val()+" != "+averageEfficiency);
-if (typeof hpOne.averageEfficiency === 'undefined') console.log("Hp compressor 1:"+JSON.stringify(hpOne));
-else if (typeof hpTwo.averageEfficiency === 'undefined') console.log("Hp compressor 2:"+JSON.stringify(hpTwo));
-				if (updateCompressorEfficiencies) {
-					$("#cHeatPumpEfficiency").val(myRound(averageEfficiency,3));
-					redrawTpGraf = true;
-				}
-			}
-			drawHpTurbine( 225 );
-			if (redrawTpGraf) {
-				redrawTpGraf = false;
-				drawIt(true, false, false);
-			}
-			if (saveThermodynamicCaches) {
-				//console.log("P_H_to_X_caches="+JSON.stringify(P_H_to_X_caches));
-				//console.log("S_H_to_P_caches="+JSON.stringify(S_H_to_P_caches));
-				saveThermodynamicCaches = false;
-			}
-			//drawLossParamDiagrams();
 		}
 
 //console.log(JSON.stringify(compressorStages[0].items));
@@ -9023,7 +9093,7 @@ console.log("drawBraytonCycle done");
 	var gHeatExchangers = {};
 	var gIsHpCompressorOne = true;
 	var saveThermodynamicCaches = true;
-
+	var heCostG = 0;
 
 	function changeHeatPumpPressure(orgFluid, showLog)
 	{
@@ -12619,8 +12689,8 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		stageProps.push(getSheetValues('Rotor chord mm', 'chordMm', data));
 		stageProps.push(getSheetValues('Aspect ratio h/c', 'aspectRatio', data, 2));
 		//stageProps.push(getSheetValues('Rotor/stator solidity', 'rotorStatorSolidity', data ));
-		stageProps.push(getSheetValues('Rotor blades', 'blades', data));
-		stageProps.push(getSheetValues('Stator blades', 'statorBlades', data));
+		stageProps.push(getSheetValues('Rotor blades', 'blades', data, 0));
+		stageProps.push(getSheetValues('Stator blades', 'statorBlades', data, 0));
 		stageProps.push(getSheetValues('Rotor mean tMax/c %', 'bladeMaxThicknessMid', data));
 		stageProps.push(getSheetValues('Rotor hub tMax/c %', 'bladeMaxThicknessHub', data));
 		stageProps.push(getSheetValues('Stator mean tMax/c %', 'statorMaxThicknessMid', data));
@@ -12706,7 +12776,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 			stageProps.push(getSheetValues('Pressure loss error', 'pLossError', data, 3));
 			stageProps.push(getSheetValues('Rotor/stator loss error ‰', 'enthaplyLossErrors', data ));
 		}
-		stageProps.push(getSheetValues('Machine loss/P0 loss', 'pLoss2hLoss', data, 2));
+		stageProps.push(getSheetValues('Machine loss/P0 loss coefficient', 'pLoss2hLoss', data, 2));
 		
 		//stageProps.push(getSheetValues('2∙∆𝑝/(𝜌∙𝑈²) of rotor tip', 'tipStaticPressureRise', data, 2));
 		//stageProps.push(getSheetValues('∆𝑝/𝜌Vx²', 'pressureChange', data, 2));
@@ -12805,6 +12875,7 @@ console.log("*** stage "+i+": minRpm="+minRpm+", rGear="+stages[i].rGear+", rSha
 		if (stageData.inlet.wetness) {
 			stageData.titles.push("Wetness of fluid in inlet: "+myRound(stageData.inlet.wetness*100,1)+ "%");
 		}
+		stageData.cBladesTotal = cBladesTotal;
 		stageData.titles.push("Total number of "+(stageData.isCompressor ? "cantilevered" : "shrouded") +" stator and rotor blades: "+cBladesTotal);
 		if (isHp && gIsHpCompressorOne) {
 			stageData.titles.push("Size and cost of 4 heat exchangers: "+Math.round(gCycleData.heVolumeM3)+" m3, "+Math.round(gCycleData.heCost/1000000)+" million Eur");

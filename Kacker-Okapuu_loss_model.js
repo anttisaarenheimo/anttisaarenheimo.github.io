@@ -26,7 +26,8 @@ function loss_model_KO(type, Re, angle_in, angle_out, c, s, H, t_cl, t_max, Ma_r
     let Y_p = profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_out, Y_shock);
 
     // Corrected profile loss coefficient
-    Y_p *= f_Ma * f_Re;
+	const Y_corr = f_Ma * f_Re;
+    Y_p *= Y_corr;
 
     // Secondary loss coefficient
     const Y_s = secondary_loss(angle_in, angle_out, Ma_rel_in, Ma_rel_out, H, c, b);
@@ -39,7 +40,15 @@ function loss_model_KO(type, Re, angle_in, angle_out, c, s, H, t_cl, t_max, Ma_r
 
     // Overall loss coefficient
     const Y = Y_p + Y_s + Y_cl + Y_te;
-    return { 'Y' : Y, 'Y_p' : Y_p, 'Y_s' : Y_s, 'Y_cl': Y_cl, 'Y_te' : Y_te, 'Y_shock':Y_shock };	// need to know if total loss is independent from 
+
+
+    const ret = { 'Y' : Y, 'Y_p' : Y_p, 'Y_s' : Y_s, 'Y_cl': Y_cl, 'Y_te' : Y_te, 'Y_shock':0.914*Y_shock*Y_corr,
+				 'Y_corr' : Y_corr};	// need to know if total loss is independent from 
+	
+	if (ret.Y_p < ret.Y_shock) {
+		console.log("Unexpected shock loss: "+JSON.stringify(ret));
+	}
+	return ret;
 }
 function shock_loss(type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out) {
     // Inlet shock loss
@@ -94,16 +103,16 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     let aa = Math.max(0, angle_in / angle_out);
     Y_p = Y_p * Math.pow((t_max / c) / 0.20, aa);
     Y_p = 0.914 * (2 / 3 * Y_p * Kp + Y_shock);
-if (debugKO) {
-	console.log(debugKO+": Y_p="+Y_p+" = 0.914 * (2 / 3 * "+Y_p+" * "+Kp+" + "+Y_shock+", Y_p_reaction="+Y_p_reaction+", Y_p_impulse="+Y_p_impulse+
-			", Ma_rel_in="+Ma_rel_in+", Ma_rel_out="+Ma_rel_out+", angle_in/angle_out="+angle_in+"/"+angle_out+", (t_max / c)="+(t_max / c));
-}
     return Y_p;
 }
 function update_KO_shock_loss(lossParams, type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out) {
 	// p_out and p0_rel:out changes only shock loss
-    let Y_shock = shock_loss( type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out);
-	lossParams.Y_p += 0.914*(Y_shock - lossParams.Y_shock);
+    let Y_shock = 0.914*lossParams.Y_corr*shock_loss( type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out);
+	const Y_p = lossParams.Y_p;
+	lossParams.Y_p += Y_shock - lossParams.Y_shock;
+	if (lossParams.Y_p < Y_shock) {
+		console.log("Unexpected shock loss: Y_p:"+Y_p+"->"+lossParams.Y_p+", Y_shock:"+Y_shock+"->"+lossParams.Y_shock);
+	}
 	lossParams.Y_shock = Y_shock;
 	return lossParams;
 }

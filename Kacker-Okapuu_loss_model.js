@@ -42,8 +42,13 @@ function loss_model_KO(type, Re, angle_in, angle_out, c, s, H, t_cl, t_max, Ma_r
     const Y = Y_p + Y_s + Y_cl + Y_te;
 
 
+
     const ret = { 'Y' : Y, 'Y_p' : Y_p, 'Y_s' : Y_s, 'Y_cl': Y_cl, 'Y_te' : Y_te, 'Y_shock':0.914*Y_shock*Y_corr,
 				 'Y_corr' : Y_corr};	// need to know if total loss is independent from 
+
+    let aa = angle_out < 0 ? Math.abs(angle_in / (angle_out - Math.max(angle_in, 0))) :
+							 Math.abs(angle_in / (angle_out - Math.min(angle_in, 0)));
+    ret.tFactor = Math.pow((t_max / c) / 0.20, aa);
 	
 	if (ret.Y_p < ret.Y_shock) {
 		console.log("Unexpected shock loss: "+JSON.stringify(ret));
@@ -100,7 +105,10 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     Y_p = Math.max(Y_p, 0.80 * Y_p_reaction);
 
     // Avoid unphysical effect on the thickness by defining the variable aa
-    let aa = Math.max(0, angle_in / angle_out);
+	// Antti: THIS CANNOT BE RIGHT, angle_in / angle_out is always negative => aa == 1 for all thickness values
+    //let aa = Math.max(0, angle_in / angle_out);
+    let aa = angle_out < 0 ? Math.abs(angle_in / (angle_out - Math.max(angle_in, 0))) :
+							 Math.abs(angle_in / (angle_out - Math.min(angle_in, 0)));
     Y_p = Y_p * Math.pow((t_max / c) / 0.20, aa);
     Y_p = 0.914 * (2 / 3 * Y_p * Kp + Y_shock);
     return Y_p;

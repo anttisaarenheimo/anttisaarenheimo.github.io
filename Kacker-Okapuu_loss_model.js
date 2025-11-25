@@ -105,8 +105,8 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     Y_p = Math.max(Y_p, 0.80 * Y_p_reaction);
 
     // Avoid unphysical effect on the thickness by defining the variable aa
-	// Antti: THIS CANNOT BE RIGHT, angle_in / angle_out is always negative => aa == 1 for all thickness values
     //let aa = Math.max(0, angle_in / angle_out);
+	// Antti: THIS CANNOT BE RIGHT, angle_in / angle_out is always when load coefficient < 2 * R, => aa == 1 for all thickness values
     let aa = angle_out < 0 ? Math.abs(angle_in / (angle_out - Math.max(angle_in, 0))) :
 							 Math.abs(angle_in / (angle_out - Math.min(angle_in, 0)));
     Y_p = Y_p * Math.pow((t_max / c) / 0.20, aa);

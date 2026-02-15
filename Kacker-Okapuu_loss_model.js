@@ -13,7 +13,9 @@ function loss_model_KO(type, Re, angle_in, angle_out, c, s, H, t_cl, t_max, Ma_r
     // Compute the loss coefficients
     // Mach number correction factor
     const f_Ma = mach_correction(Ma_rel_out);
-//console.log(f_Ma+" = mach_correction("+Ma_rel_out+")");
+	/*if (f_Ma > 1) {
+		console.log(f_Ma+" = mach_correction("+Ma_rel_out+")");
+	}*/
     // const f_Ma = 1; // Uncomment this line to ignore the supersonic penalty
 
     // Reynolds number correction factor
@@ -63,10 +65,10 @@ function shock_loss(type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out) 
     let Y_shock = 0.75 * Math.pow(a, 1.75) * r_ht_in * (p0rel_in - p_in) / (p0rel_out - p_out);
     // Avoid unphysical results if r_ht_in becomes negative during the optimization iterations
     Y_shock = Math.max(0, Y_shock);
-/*if (debugKO) {
+if (Y_shock > 0.5 || debugKO) {
 	if (p_in < 1) throw new Error("zero pressure: p_in="+p_in);
 	console.log(debugKO+" Y_shock: "+Y_shock+"=0.75*"+Math.pow(a, 1.75)+" * "+r_ht_in+" * ("+p0rel_in+" - "+p_in+") / ("+p0rel_out+" - "+p_out+"), a="+f_hub(r_ht_in, type)+" * "+Ma_rel_in)+" - 0.4";
-}*/
+}
 	return Y_shock;
 }
 
@@ -113,7 +115,9 @@ function profile_loss(type, angle_in, angle_out, c, s, t_max, Ma_rel_in, Ma_rel_
     Y_p = 0.914 * (2 / 3 * Y_p * Kp + Y_shock);
     return Y_p;
 }
+/*
 function update_KO_shock_loss(lossParams, type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out) {
+
 	// p_out and p0_rel:out changes only shock loss
     let Y_shock = 0.914*lossParams.Y_corr*shock_loss( type, Ma_rel_in, r_ht_in, p_in, p0rel_in, p_out, p0rel_out);
 	const Y_p = lossParams.Y_p;
@@ -124,7 +128,7 @@ function update_KO_shock_loss(lossParams, type, Ma_rel_in, r_ht_in, p_in, p0rel_
 	lossParams.Y_shock = Y_shock;
 	return lossParams;
 }
-
+*/
 
 function secondary_loss(angle_in,angle_out,Ma_rel_in,Ma_rel_out,H,c,b)
 {
@@ -311,3 +315,92 @@ function linearInterpolation(x, y, x0) {
     return y1 + (y2 - y1) * ((x0 - x1) / (x2 - x1));
 }
 */
+
+// Incidence angle loss by Moustapha & Kacker
+// MK loss system
+// Source: https://www.diva-portal.org/smash/get/diva2:878059/FULLTEXT01.pdf
+// d == leading edge diameter, s = blade spacing 
+function getIncidenceAngleLossoefficientMK( incidence_angle_in, incidence_angle_des, angle_in, angle_out, s, tMax, γ, mach2 )
+{
+	const d = tMax/2;	// turbine blade leading edge diameters seems to be ~50% tmax
+	const X = (d/s)**-1.6 * (Math.cos(angle_in)/Math.cos(angle_out))**-2 * (incidence_angle_in - incidence_angle_des);
+	var keLossCE;
+	
+	if (X == 0) return 0;
+	else if (X > 0) {	// 800 > X > 0
+		keLossCE = (0.778*10**-5) * X + (0.56*10**-7) * X**2 + (0.4*10**-10) * X**3 + (2.054*10**-19) * X**6;
+	}
+	else {	// -800 = X < 0
+		keLossCE = (-5.1734*10**-6) * X + (7.6902*10**-9) * X**2;
+	}
+
+	// Transform it to pressure loss coefficient with outlet mach number and ratio of specific heats of the fluid
+	Y = ((1 - (γ-1)/2*mach2**2*(1/keLossCE - 1))**-(γ/(γ-1)) - 1)
+		/ (1 - (1 + (γ-1)/2*mach2**2)**-(γ/(γ-1)));
+	
+	console.log("incidence angle="+(incidence_angle_in-incidence_angle_des)+" => X="+X+", keLossCE="+keLossCE+", Y="+Y);
+
+	return Y;	// pressure loss coefficient of turbine incidence angle loss
+}
+ 
+ 
+ // by  Benner/Sjolander/Moustapha
+// Source: https://www.diva-portal.org/smash/get/diva2:878059/FULLTEXT01.pdf
+function getProfileIncidenceLossByBennerSjolanderMoustapha( incidence_angle_in, angle_in_ref, angle_out_ref, s, tMax, γ, mach2 )
+{
+	// only positive values makes sense, stator and rotor signs are mirror images
+	// and negative angles would cause NaN error
+	if (incidence_angle_in<0) incidence_angle_in = -incidence_angle_in;
+	if (angle_in_ref<0) angle_in_ref = -angle_in_ref;
+	if (angle_out_ref<0) angle_out_ref = -angle_out_ref;
+	const incidence_angle_des = angle_in_ref;	// zero incidence at design point
+	const d = 0.5*tMax;	// guess: turbine blade leading edge diameter could be 20-100% tMax
+//Common configurations for modern gas turbine blades often feature a leading-edge wedge angle of approximately 30 degrees, 
+// optimized for aerodynamic efficiency, cooling, and managing high-incidence
+	const We = 30; // 
+	const X = (d/s)**-0.05 * We**-0.2*(Math.cos(angle_in_ref*Math.PI/180)/Math.cos(angle_out_ref*Math.PI/180))**-1.4 
+				* (incidence_angle_in - incidence_angle_des);
+	var keLossCE;
+	
+	if (X == 0) return 0;
+	else if (X > 0) {	// X >= 0
+		keLossDelta = (3.711*10**-7) * X**8 - (5.318*10**-6) * X**7 + (1.106*10**-5) * X**6 
+			+ (9.017*10**-5) * X**5 - (1.542*10**-4) * X**4 - (2.506*10**-4) * X**3
+ 			+ (1.327*10**-3) * X**2 - (6.149*10**-5) * X;
+	}
+	else {	//  X < 0
+		keLossDelta = (1.358*10**-4) * X**2 - (8.720*10**-4) * X;
+	}
+	// Delta to absolute transformation from https://scispace.com/pdf/an-improved-incidence-losses-prediction-method-for-turbine-3o9ypjmutu.pdf
+	// (1 - keLoss)*incidence_angle = incidence_angle_des * keLossDelta =>
+	// (1 - keLoss) = keLossDelta*incidence_angle_des/incidence_angle =>
+	keLoss = 1 - keLossDelta*incidence_angle_des/incidence_angle_in;
+	
+	// Transform it to pressure loss coefficient with outlet mach number and ratio of specific heats of the fluid
+	// keLossCE is delta => the absolute value for transformation is (1-keLossCE)
+	Y = ((1 - (γ-1)/2*mach2**2*(1/keLoss - 1))**-(γ/(γ-1)) - 1)
+		/ (1 - Math.abs((1 + (γ-1)/2*mach2**2))**-(γ/(γ-1)));
+	
+//	console.log("incidence angle deviation="+(incidence_angle_in-incidence_angle_des)+" => X="+X+", keLoss="+keLoss+", keLossDelta="+keLossDelta+" => Y="+Y);
+if (Number.isNaN(Y)) throw new Error();
+	return Y;	// extra profile pressure loss coefficient of turbine incidence angle loss
+}
+	
+// Source: https://scispace.com/pdf/an-improved-incidence-losses-prediction-method-for-turbine-3o9ypjmutu.pdf
+function getSecondaryIncidenceLoss( angle_in, angle_in_ref, angle_out_ref, c, tMax, refY_s )
+{
+	// and negative angles would cause NaN error
+	if (angle_in<0) angle_in = -angle_in;
+	if (angle_in_ref<0) angle_in_ref = -angle_in_ref;
+	if (angle_out_ref<0) angle_out_ref = -angle_out_ref;
+	const d = 0.5*tMax;	// guess: turbine blade leading edge diameter could be 20-100% tmax
+	const X = (angle_in - angle_in_ref) / (angle_in_ref+angle_out_ref)
+		* ((Math.cos(angle_in_ref*Math.PI/180)/Math.cos(angle_out_ref*Math.PI/180))**-1.5)*(d/c)**-0.3;
+	const Y_s = refY_s * (X > 0 ? 0.9**X + 13*X**2 + 400*X**4 : 0.9**X);
+
+//console.log("X="+X+" => Y_s: "+refY_s+"=>"+Y_s+", (Y_s-refY_s)="+(Y_s - refY_s));
+	return Y_s - refY_s;		// extra loss coefficient because of secondary incidence loss
+}
+
+
+		

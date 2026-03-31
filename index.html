@@ -21,6 +21,7 @@ https://github.com/anttisaarenheimo/anttisaarenheimo.github.io
 <SCRIPT src="index_files/jquery-ui.js"></SCRIPT>
 <SCRIPT src="coolprop.js"></SCRIPT>
 <SCRIPT src="Kacker-Okapuu_loss_model.js?v=2.0"></SCRIPT>
+<SCRIPT src="PlantSimulation.js?v=18"></SCRIPT>
 <!--BAD IDEA, P of S & H is quite nonlinear and thus hard to cache: SCRIPT src="thermodynamicCache.js"></SCRIPT-->
 
 <!--SCRIPT type="javascript">
@@ -84,14 +85,14 @@ th {
 <DIV><LABEL>Fluid:</LABEL>
 	<SELECT id="name" onchange="setGasMassFlowFor1200MW(this)"><OPTION>Argon</OPTION><!--OPTION>CarbonDioxide</OPTION--><OPTION>Helium</OPTION><OPTION>Hydrogen</OPTION><OPTION>Methane</OPTION><OPTION selected>Nitrogen</OPTION><!--OPTION>CarbonDioxide</OPTION--><!--OPTION>R134a</OPTION><OPTION>Water</OPTION--></SELECT>
 	<BUTTON onClick="drawTpDiagram(true)">Update storage, T-P diagram and turbomachines</BUTTON>
-	<INPUT id="drawCompressors" type="checkbox" value="true"><LABEL>Design the turbomachines of the plant or update the efficiencies when the power level is below 100%</LABEL>
+	<INPUT id="drawCompressors" type="checkbox" checked value="true"><LABEL>Design the turbomachines of the plant or update the efficiencies when the power level is below 100%</LABEL>
 	<!--<INPUT id="noDistrictHeat" checked type="checkbox" value="true"><LABEL>Use stored liqued nitrogen to maximize electric output</LABEL>-->
 	<!--BUTTON 
 	onClick="zoomToTpDiagram(10)">Zoom to T-P diagram</BUTTON> <INPUT id="zoom" type="float" value="10"-->
 </DIV>
 <DIV style="border:1px solid; border-bottom: none">
 	<DIV>
-		<LABEL>Mass flow of main turbines (kg/s): </LABEL><INPUT size="4" id="dischargeMassFlow" type="float" value="3480" onchange="metricsChanged()">
+		<LABEL>Mass flow of main turbines (kg/s): </LABEL><INPUT size="4" id="dischargeMassFlow" type="float" value="4062" onchange="metricsChanged()">
 		<LABEL>Number of power units: </LABEL><INPUT id="numberOfUnits" type="text" value="2" size="2" maxlength="2" onchange="updateUnitCounts(this);metricsChanged()">
 		<LABEL>Operating pressure % </LABEL><SELECT disabled="true" id="massFlowPercent"><Option>100</OPTION><Option>90</OPTION><Option>80</OPTION><Option>70</OPTION><Option>60</OPTION><Option>50</OPTION><Option>40</OPTION><Option>30</OPTION><Option>20</OPTION><Option>10</OPTION><Option>5</OPTION></SELECT>
 		<!--INPUT TYPE="checkbox" name="hasLiquidStorage" id="hasLiquidStorage" checked value="true"><LABEL>Use liquid tank to balance pressure for charge level</LABEL-->
@@ -110,7 +111,7 @@ th {
 	</DIV>
 	<DIV>
 		<LABEL>Average hot compressor stage efficiency: </LABEL>
-		<INPUT size="4" id="cEfficiency" type="float" value="0.914" title="The efficiency resulted from the default hot compressor design parameters">
+		<INPUT size="4" id="cEfficiency" type="float" value="0.915" title="The efficiency resulted from the default hot compressor design parameters">
 		<LABEL>Average cryogenic turbine stage efficiency: </LABEL>
 		<INPUT size="4" id="tLowEfficiency" type="float" value="0.967" title="The default cryogenic turbine efficiency of is scaled from cryogenic compressor efficiency">
 		<LABEL>Efficiency of inlet and outlet diffuser: </LABEL>
@@ -253,6 +254,7 @@ th {
 		<LABEL>Time resolution (s):</LABEL><INPUT id="heSimulationTimeResolution" type="text" size="4" value="900"> 
 		<LABEL>Iterations:</LABEL><INPUT id="heSimulations" type="text" size="2" value="2">
 	</DIV>
+ 
 	<DIV>
 		<LABEL>Idle time (not charging or discharging) %: </LABEL><INPUT type="float" id="idleTime" size="2" value="50">
 		<!-- Always included: INPUT type="checkbox" id="includeHeatLeaks" checked><LABEL>Include heat leaks</LABEL-->
@@ -325,6 +327,41 @@ th {
 		<canvas id="diagramDR" width="500" height="350" data-height="350" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagramDF" width="500" height="350" data-height="350" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagramRe" width="500" height="350" data-height="350"style="border:1px solid #000000;display:none"></canvas>
+		<DIV id="salesSimulationParams" style="display:none">
+			<H3>Plant's electricity trading simulation in finnish electricity market 1.1.2021 - 20.3.2026</H3>
+			<DIV>
+				<LABEL>Plant in/out power MW: </LABEL><INPUT size="5" type="float" id="netPowerInMW" value=""/>/<INPUT size="5" type="float" id="netPowerOutMW" value=""/>
+				<LABEL>In/Out power units: </LABEL><INPUT size="3" type="float" id="cPowerIn" value=""/>/<INPUT size="3" type="float" id="cPowerOut" value=""/>
+				<LABEL>Operating costs million €/year (excluding electricity): </LABEL><INPUT size="3" type="float" id="opexMEur" value=""/>
+			</DIV>
+			<DIV>
+				<LABEL>Storage capasity GWh: </LABEL><INPUT size="3" type="float" id="storageCapasityGWh" value=""/>
+				<LABEL>Minimum charge time in hours: </LABEL><INPUT size="3" type="float" id="minChargeHours" value=""/>
+				<LABEL>Price yield  % up/down for each additional purchased/sold 500 MW: </LABEL><INPUT size="3" type="float" id="yield500MW" value=""/>
+			</DIV>
+			<DIV>
+				<LABEL>Selling price limit (Eur/MWh) at charge level </LABEL>
+				<Span>0 %</span><INPUT size="3" type="float" id="sellOutStep0" value=""/>
+				<Span>20 %</span><INPUT size="3" type="float" id="sellOutStep1" value=""/>
+				<Span>40 %</span><INPUT size="3" type="float" id="sellOutStep2" value=""/>
+				<Span>60 %</span><INPUT size="3" type="float" id="sellOutStep3" value=""/>
+				<Span>80 %</span><INPUT size="3" type="float" id="sellOutStep4" value=""/>
+				<Span>100 %</span><INPUT size="3" type="float" id="sellOutStep5" value=""/>
+			</DIV>
+			<DIV>
+				<LABEL>Purchase price limit (Eur/MWh) at charge level </LABEL>
+				<Span>0%</span><INPUT size="3" type="float" id="buyInStep0" value=""/>
+				<Span>20 %</span><INPUT size="3" type="float" id="buyInStep1" value=""/>
+				<Span>40 %</span><INPUT size="3" type="float" id="buyInStep2" value=""/>
+				<Span>60 %</span><INPUT size="3" type="float" id="buyInStep3" value=""/>
+				<Span>80 %</span><INPUT size="3" type="float" id="buyInStep4" value=""/>
+				<Span>100 %</span><INPUT size="3" type="float" id="buyInStep5" value=""/>
+			</DIV>
+			<DIV>
+				<BUTTON onClick="simulateNordpoolFi()">Simulate operation in Finland 2021-2026</BUTTON> 
+			</DIV>
+			<table id="simulateHtmlTable" style"border:solid"></table>
+		</DIV>
 		<DIV id="compressorDesignParams" style="display:none">
 			<H3>Hot compressor design parameters</H3>
 			<DIV><!-- 0.216, 0.44-->
@@ -412,7 +449,7 @@ th {
 			<DIV><!-- 0.216, 0.44-->
 				<LABEL>Mean line load coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineLoadCoefficient" value="0.70"/>
 				<LABEL>Mean line flow coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineFlowCoefficient" value="0.46"/>
-				<LABEL>Hot turbines:</LABEL><INPUT size="2" data-type="unit" id="cHotTurbineUnits2" value="4"/>
+				<LABEL>Hot turbines:</LABEL><INPUT size="2" data-type="unit" id="cHotTurbineUnits2" value="8"/>
 				<LABEL>Initial stages:</Label><INPUT size="5" type="float" id="cStagesHotTurbine" value="14"/>
 				<LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm1800" value="1800"/><Span>1800</span>
 			</DIV>
@@ -775,6 +812,323 @@ th {
 <SCRIPT>
 var fnSimulateChargeDischarge;
 var stopChargeDischargeSimulation = false;
+
+function compare_yyyyMMdd( yyyyMMdd, item ) {
+	// dd/MM/yyyy 00.00.00 => yyyyMMdd 00.00.00
+	//
+	const yyyyMMdd2 = item[0].substring(6,10)+item[0].substring(3,5)+item[0].substring(0,2)+item[0].substring(10);
+	if (yyyyMMdd < yyyyMMdd2) return -1;
+	if (yyyyMMdd > yyyyMMdd2) return 1;
+	return 0;
+} 
+
+function binarySearch(arr, el, compare_fn) {
+    let m = 0;
+    let n = arr.length - 1;
+    while (m <= n) {
+        let k = (n + m) >> 1;
+        let cmp = compare_fn(el, arr[k]);
+        if (cmp > 0) {
+            m = k + 1;
+        } else if(cmp < 0) {
+            n = k - 1;
+        } else {
+            return k;
+        }
+    }
+    return ~m;
+}
+
+function getPriceOfChargeLevel(priceSteps, chargeLevel ) {
+	const i = chargeLevel*5;
+	const iLow = Math.floor(i);
+	const iHigh = iLow+1;
+	const ret = priceSteps[iLow] + (priceSteps[iHigh]-priceSteps[iLow])*(i-iLow);
+	if (Number.isNaN(ret)) throw new Error();
+	return ret;
+}
+// gCycleData.switchMWhMin = switchPowerMW*timeMin*2/3600;
+// gCycleData.switchMWhMax = switchPowerMW*timeMax*2/3600;
+//gCycleData.storedElectricity_kWh/1000, 0.5, gCycleData.netWorkIn/1000, gCycleData.netWorkOut/1000, gCycleData.efficiency, 
+
+function getSetFloatParam(key,def) {
+	var val = $('#'+key).val();
+	if (!val) {
+		$('#'+key).val(val = Math.round(def));
+	}
+	else {
+		val = parseFloat(val);
+	}
+	return val;
+}
+
+// VVVVVVVVVVVVV
+function simulateCashFlow(title, iFrom, iTo, data, chargeLevelIn, i15minFrom, years ) {
+	var cPowerIn = getSetFloatParam('cPowerIn',getIntParam('cHotUnits2',4));
+	var cPowerOut = getSetFloatParam('cPowerOut',getIntParam('cHotTurbineUnits2',4));
+	// TBD VVVVVV: Min charge period length 5 hours => less short switches, and then continues until end
+	// TBD Up/down Yield percent & absolute 
+	// Negative price 
+	const ctx = {
+		//data: datesAndMWhPrices,
+		maxChargeMWh: getSetFloatParam('storageCapasityGWh',gCycleData.storedElectricity_kWh/1000000)*1000,
+		chargeLevel: chargeLevelIn,
+		minChargeSlots: getSetFloatParam('minChargeHours',5)*4,
+		yield500MW: 1+getSetFloatParam('yield500MW',12)/100,
+		powerInUnits: cPowerIn,
+		powerInMW: getSetFloatParam('netPowerInMW',gCycleData.netWorkIn/1000)/cPowerIn,
+		powerOutUnits: cPowerOut,
+		powerOutMW: getSetFloatParam('netPowerOutMW',gCycleData.netWorkOut/1000)/cPowerOut,
+		efficiency: gCycleData.efficiency, 
+		switchMWhMin: gCycleData.switchMWhMin,
+		switchMWhMax: gCycleData.switchMWhMax,
+		sellOutSteps: [getSetFloatParam('sellOutStep0',350),getSetFloatParam('sellOutStep1',250),
+					   getSetFloatParam('sellOutStep2',130),getSetFloatParam('sellOutStep3',70),
+					   getSetFloatParam('sellOutStep4',50), getSetFloatParam('sellOutStep5',30)],
+		buyInSteps:   [getSetFloatParam('buyInStep0',150),  getSetFloatParam('buyInStep1',100), 
+					   getSetFloatParam('buyInStep2',80),	getSetFloatParam('buyInStep3',45),
+					   getSetFloatParam('buyInStep4',20),    getSetFloatParam('buyInStep5',5)],
+		chargeSum: 0,
+		operation: {
+			name: title,
+			chargeLevelIn: chargeLevelIn,
+			soldOutMWh: 0,
+			boughtInMWh: 0,
+			soldOutEur: 0,
+			boughtInEur: 0,
+			hours: 0,
+			toChargeSwitches: 0,
+			switchWork: 0,
+			dischargeHours: 0,
+			chargeHours: 0,
+			minCharge: chargeLevelIn,
+			maxCharge: chargeLevelIn,
+			hours: 0,
+			idleHours: 0},
+			
+		getSwitchWorkMWh: function () {
+			const ret = this.switchMWhMax - this.chargeLevel*(this.switchMWhMax-this.switchMWhMin);
+			if (!ret || Number.isNaN(ret)) throw new Error();
+			return ret;
+		},
+		getSellOutPrice: function () {
+			return getPriceOfChargeLevel(this.sellOutSteps, this.chargeLevel );
+		},
+		getBuyInPrice: function () {
+			return getPriceOfChargeLevel(this.buyInSteps, this.chargeLevel);
+		},
+		operate: function(iFrom, iTo, i15minFrom, trace) {
+			var i, k, price, newSum = 0, oldSum = 0, newUp = 0, oldUp = 0,newDown = 0, oldDown = 0;
+			var wasCharging = false;
+
+			console.log(JSON.stringify(this.operation));
+
+			for (i = iFrom; i < iTo; i += i < i15minFrom ? 4 : 1) {
+				const hTime = i < i15minFrom ? 1 : 0.25;
+				const minPrice = this.getSellOutPrice();
+				var curCharge = this.maxChargeMWh*this.chargeLevel;
+				oldSum += data[i][1]*hTime;
+				for (k = this.powerOutUnits; k > 0; k--) {
+					var power = k*this.powerOutMW;
+	if (Number.isNaN(power)) throw new Error();
+					if (curCharge > power) {
+						price = data[i][1]*Math.pow(1/this.yield500MW,power/500);
+	if (Number.isNaN(price) || Number.isNaN(minPrice)) throw new Error();
+						if (price >= minPrice) {
+							power = power*hTime;
+							wasCharging = false;
+							this.operation.soldOutEur += price*power;
+							this.operation.soldOutMWh += power;
+							this.chargeLevel = (curCharge-power)/this.maxChargeMWh;
+							this.operation.dischargeHours += hTime;
+							newDown += price;
+							oldDown += data[i][1];
+							break;
+						}
+					}
+				}
+				if (k == 0) {
+					const maxPrice = this.getBuyInPrice();
+					for (k = this.powerInUnits; k > 0; k--) {
+						var power = k*this.powerInMW;
+	if (Number.isNaN(power)) throw new Error();
+						if (this.maxChargeMWh*(1-this.chargeLevel) > power) {
+							price = data[i][1];
+							const pYield = Math.pow(this.yield500MW, power/500);
+							if (price > 0) price *= pYield;
+	if (Number.isNaN(price) || Number.isNaN(maxPrice)) throw new Error();
+							if (price < maxPrice) {
+								if (!wasCharging) {
+									var j;
+									for (j = 0; j < this.minChargeSlots && (i+j) < data.length; j++) {
+										const curPrice = data[i+j][1] * pYield;
+										if (curPrice > maxPrice) break;
+									}
+									if (j < this.minChargeSlots) continue;	//too short charge slot
+									wasCharging = true;
+									const switchWork = this.getSwitchWorkMWh();
+									this.operation.boughtInEur += price*switchWork;
+									this.operation.boughtInMWh += switchWork;
+									this.operation.toChargeSwitches++;
+									this.operation.switchWork += switchWork;
+									// TBD: 
+								}
+								power = power*hTime;
+								this.chargeLevel = (curCharge+power*this.efficiency)/this.maxChargeMWh;
+								this.operation.boughtInEur += price*power;
+								this.operation.boughtInMWh += power;
+								this.operation.chargeHours += hTime;
+//if (this.operation.name=="To 20.3.2026") console.log(data[i][0]+": power="+power+"=>MWh="+this.operation.boughtInMWh+", charge="+this.chargeLevel);
+								newUp += price;
+								oldUp += data[i][1];
+								break;
+							}
+						}
+					}
+					if (k == 0) {
+						this.operation.idleHours += hTime;
+						price = data[i][1];	// unchanged
+					}
+				}
+				if ((i%4)==0) this.chargeSum += this.chargeLevel;
+				this.operation.hours += hTime;
+				newSum += price*hTime;
+				if (this.operation.minCharge > this.chargeLevel) this.operation.minCharge = this.chargeLevel;
+				if (this.operation.maxCharge < this.chargeLevel) this.operation.maxCharge = this.chargeLevel;
+			}
+			this.operation.oldSum = oldSum;
+			this.operation.newSum = newSum;
+			console.log("Price yield up:"+Math.round(100*newUp/oldUp)+"%, down="+Math.round(100*newDown/oldDown)+"%");
+		}
+	// TBD
+	}
+	if (Number.isNaN(ctx.powerInMW)) throw new Error();
+	if (iFrom < iTo) {
+		ctx.operate(iFrom, iTo, i15minFrom);
+		ctx.operation.chargeLevelOut = ctx.chargeLevel;
+		ctx.operation.chargeLevelAve = ctx.chargeLevelSum/ctx.operation.hours;
+		ctx.operation.priceMWhIn = ctx.operation.boughtInEur/ctx.operation.boughtInMWh;
+		ctx.operation.priceMWhOut = ctx.operation.soldOutEur/ctx.operation.soldOutMWh;
+		ctx.operation.netEur = ctx.operation.soldOutEur - ctx.operation.boughtInEur;
+		if (title) {
+			//console.log(JSON.stringify(ctx.operation,null,2));
+			if (!simulateHtmlTable) {
+				simulateHtmlTable = '<tr><th>Year</th><th>Cash flow</th><th colspan=3>Sold electricity</th><th colspan=3>Purchased electricity</th>'+
+							'<th>Charging</th><th>Discharging</th><th>Idle</th><th>Charge periods</th><th>Min charge</th>'+
+							'<th>EOY charge</th><th>Price change</th></tr>';
+			}
+			const o = ctx.operation;
+			
+			const priceChange = Math.round(100*(o.newSum-o.oldSum)/o.oldSum);
+			//console.log("Math.round("+(o.newSum-o.oldSum)+"/"+o.oldSum+")="+priceChange);
+			const net = o.netEur/1000000 - getSetFloatParam('opexMEur',10)*(years ? years : 1);
+			simulateHtmlTable += '<tr><td>'+o.name+'</td><td>€'+Math.round(net)+'m</td><td>'+
+								 Math.round(o.soldOutMWh/1000)+' GWh</td><td>€'+
+								 Math.round(o.soldOutEur/1000000)+'m</td><td>€'+
+								 Math.round(o.priceMWhOut)+'/MWh</td><td>'+
+								 Math.round(o.boughtInMWh/1000)+' GWh</td><td>€'+
+								 Math.round(o.boughtInEur/1000000)+'m</td><td>€'+
+								 myRound(o.priceMWhIn)+'/MWh</td><td>'+
+								 Math.round(100*o.chargeHours/o.hours)+'%</td><td>'+
+								 Math.round(100*o.dischargeHours/o.hours)+'%</td><td>'+
+								 Math.round(100*o.idleHours/o.hours)+'%</td><td>'+
+								 Math.round(o.toChargeSwitches)+'</td><td>'+
+								 Math.round(100*o.minCharge)+'%</td><td>'+
+								 Math.round(100*o.chargeLevelOut)+'%</td><td>'+
+								 priceChange+'%</tr>';
+		}
+	}
+	return ctx;
+}
+
+var simulateHtmlTable = null;
+function simulateNordpoolFi() {
+	console.log("fetching NordPoolFi2021-2026.json...");
+	try {
+  		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onload = function() {
+			console.log("Got data status"+this.status+", type="+this.responseType);
+			if (this.status == 200) {
+				var data = JSON.parse(this.responseText);
+				const iVat255From = binarySearch(data, '20240901 00.00.00', compare_yyyyMMdd);
+				const i15minFrom = binarySearch(data, '20251001 00.00.00', compare_yyyyMMdd);
+				const year2022 = binarySearch(data, '20220101 00.00.00', compare_yyyyMMdd);
+				const year2023 = binarySearch(data, '20230101 00.00.00', compare_yyyyMMdd);
+				const year2024 = binarySearch(data, '20240101 00.00.00', compare_yyyyMMdd);
+				const year2025 = binarySearch(data, '20250101 00.00.00', compare_yyyyMMdd);
+				const year2026 = binarySearch(data, '20260101 00.00.00', compare_yyyyMMdd);
+
+				console.log("iVat255From="+(iVat255From > 0 ? data[iVat255From][0] : iVat255From)+", i15minFrom="+(i15minFrom >= 0 ? data[i15minFrom][0] : i15minFrom));
+				var i, k, total = 0 ;
+				var spread = [];
+				var curMonth = '';
+				//var sums = {};
+				var hours = 0;
+				for (i = 0; i < 100; i++) spread.push(0);
+				for (i = 0; i < data.length; i++) {
+					const net = Math.round(data[i][1]*1000/(i < iVat255From ? 1.24 : 1.255))/1000;
+					data[i][1] = net*10;	// kWh => MWh, cents => euros
+					if ((i %  4) == 0) {
+						/*const month = data[i][0].substring(6,10)+data[i][0].substring(3,5);
+						if (curMonth != month) {
+							if (curMonth) sums[curMonth] /= hours;
+							curMonth = month;
+							sums[month] = data[i][1];
+							hours = 0;
+						}
+						else {
+							sums[month] += data[i][1];
+						}*/
+						hours++;
+						k = Math.floor(net);
+						if (k < 0) k = 0;
+						else if (k >= 100) k = 99;
+						spread[k]++;
+						total++;
+					}
+				}
+				//sums[curMonth] /= hours;
+				var inFives = {};
+				for (i = 0; i < 100; i++) {
+					const percent = 100*spread[i]/total;
+					spread[i] = myRound(percent,2);
+					const key = 'From '+(5*Math.floor(i/5));
+					if (typeof inFives[key] === 'undefined') inFives[key] = percent;
+					else inFives[key] += percent;
+				}
+				//console.log("spread:"+JSON.stringify(spread));
+				console.log("Percents:"+JSON.stringify(inFives,null,2));
+				//console.log("Average month eur/MWh:"+JSON.stringify(sums,null,2));
+				const chargeLevelIn = getSetFloatParam('initialChargeLevel',50)/100;
+				simulateHtmlTable = '';
+				var ctx = simulateCashFlow("Year 2021", 0, year2022, data, chargeLevelIn, i15minFrom );
+				var net = ctx.operation.netEur, minCharge = ctx.operation.minCharge;
+				ctx = simulateCashFlow("Year 2022", year2022, year2023, data, ctx.operation.chargeLevelOut, i15minFrom );
+				net += ctx.operation.netEur; if (minCharge > ctx.operation.minCharge) minCharge = ctx.operation.minCharge;
+				ctx = simulateCashFlow("Year 2023", year2023, year2024, data, ctx.operation.chargeLevelOut, i15minFrom );
+				net += ctx.operation.netEur; if (minCharge > ctx.operation.minCharge) minCharge = ctx.operation.minCharge;
+				ctx = simulateCashFlow("Year 2024", year2024, year2025, data, ctx.operation.chargeLevelOut, i15minFrom );
+				net += ctx.operation.netEur; if (minCharge > ctx.operation.minCharge) minCharge = ctx.operation.minCharge;
+				ctx = simulateCashFlow("Year 2025", year2025, year2026, data, ctx.operation.chargeLevelOut, i15minFrom );
+				net += ctx.operation.netEur; if (minCharge > ctx.operation.minCharge) minCharge = ctx.operation.minCharge;
+				ctx = simulateCashFlow("To 20.3.2026", year2026, data.length, data, ctx.operation.chargeLevelOut, i15minFrom, 79/365 );
+				net += ctx.operation.netEur; if (minCharge > ctx.operation.minCharge) minCharge = ctx.operation.minCharge;
+				simulateCashFlow("Total", 0, data.length, data, chargeLevelIn, i15minFrom, 5+79/365 );
+				console.log("Cash flow 2021-2026 March:"+net+", minCharge="+minCharge);
+				$('#simulateHtmlTable').html(simulateHtmlTable);
+				$('#salesSimulationParams').css('display','block');
+				// TBD
+			}
+		 };	
+	    //xmlhttp.open("GET","NordPoolFi2021Jan.json",true);	// async=false => sync
+	    xmlhttp.open("GET","NordPoolFi2021-2026.json",true);	// async=false => sync
+  		xmlhttp.send();
+  	}
+  	catch (e) {
+		console.log("Error:"+e);
+  	}
+}
+
 function calcTurbine()
 {
 // experimental code to analyze Mitsubishi M701JAC (2018), input values are customized to match with known facts
@@ -2294,6 +2648,7 @@ console.log("Waiting coolprop to init ...");
 					curColdCycle = cycleData.coldCycle;
 				}
 				iDrawBraytonCycle( "myCanvas", hotCycle, coldCycle, cycleData, drawCompressors );
+				simulateNordpoolFi();
 			}
 			cycleData.hotCycle = hotCycle;
 			cycleData.coldCycle = coldCycle;
@@ -2633,8 +2988,8 @@ function getMetrics(pRatio, storageSize) {
 		rockDensityHp : getFloatParam('rockDensityHp', 3.0 ), 
 		rockDensityLp : getFloatParam('rockDensityLp', 2.8 ), 
 		generatorCostOfKW : getFloatParam('generatorCostOfKW', 0),
-		tcCostOfKW : getFloatParam('tcCostOfKW', 40),		// cost of tubine or compressor power
-		tcCostOfBlade : getFloatParam('tcCostOfBlade', 1000),		// tubine or compressor cost divided by blade count
+		tcCostOfKW : getFloatParam('tcCostOfKW', 32.8),		// cost of turbine or compressor power based on number of blades
+		tcCostOfBlade : getFloatParam('tcCostOfBlade', 1000),		// turbine or compressor cost divided by blade count
 		heCostOfKW : getFloatParam('heCostOfKW', 50),		// cost of heat exchangers  
 		otherCostOfKW: getFloatParam('otherCostOfKW', 50),	// all other power plant cost
 		//highToLowPressureRatio : (pRatio ? pRatio : getFloatParam('highToLowPressureRatio', 25 )),	
@@ -4070,6 +4425,9 @@ if (tRockNew < metrics.tLow || Number.isNaN(tRockNew)) throw new Error("Debug BP
 	
 	// simulateStorageHeatExchange(cycleData, false, 0.2, 3600) => execution time < 2s
 	function simulateStorageHeatExchange(cycleData, noUI, stepLen, rockHeatingTime) {
+		new PlantSimulation(cycleData).fnSimulateChargeDischarge();
+	}
+	function simulateStorageHeatExchangeOLD(cycleData, noUI, stepLen, rockHeatingTime) {
 		if (!metrics) {
 			drawIt(true, true, false);
 			cycleData = lastCycleData;
@@ -5520,15 +5878,16 @@ if (typeof switchTimesText === 'undefined') throw new Error();
 				bottomLines.push(Math.round(tHighLp)+' K');
 				minMaxDefault = {xMinMax:{min:0,max:40, step:5}, yMinMax:null};
 
-				drawRhtLine = function(ctx, dg, t, mmMdp, x, title) {
+				drawRhtLine = function(ctx, dg, t, mmMdp, x, title, addPx) {
 					const rht = getRadiativeHeatTransfer( t, mmMdp, areaFactor, tDiffPerM );
-					const y = toY(dg, rht);
+					var y = toY(dg, rht);
 					const text = title +' ('+myRound(mmMdp)+' mm, '+Math.round(t)+' K) '+myRound(rht,2)+' W/K/m';
 console.log(text+", y="+y);
 					ctx.beginPath();
 					ctx.moveTo(toX(dg,0), y);
 					ctx.lineTo(x, y);
 					ctx.stroke();
+					if (addPx) y += addPx;
 					ctx.fillText(text, x, y);
 					return ctx.measureText(text).width;
 				}
@@ -5538,10 +5897,13 @@ console.log(text+", y="+y);
 							ctx.font = "12px Arial";
 							ctx.fillStyle = 'black';
 							ctx.strokeStyle = 'black';
-							var mmMdp = 3/1000/0.07/0.42; // Stone wool fiber min diameter 3 um, min porosity 93% => 3/0.07 ¨ 0.043 mm
-							var title = "Stone wool+screened crushed stone";
-console.log(title+", mdp="+mmMdp);
-							drawRhtLine(ctx, dg, hpHeCache.tHigh, mmMdp, toX(dg,5), title); 
+							var mmMdpSW = 3/1000/0.07/0.42; // Stone wool fiber min diameter 3 um, min porosity 93% => 3/0.07 ¨ 0.043 mm
+							var mmMdpBC = 10/1000/0.42; // Biochar with 10 um pores
+console.log(title+", mdpSW="+mmMdpSW+"; mmMdpBC="+mmMdpBC);
+							var title = "10um biochar+screened crushed stone";
+							drawRhtLine(ctx, dg, hpHeCache.tHigh, mmMdpBC, toX(dg,5), title, 14); 
+							title = "Stone wool+screened crushed stone";
+							drawRhtLine(ctx, dg, hpHeCache.tHigh, mmMdpSW, toX(dg,5), title); 
 							title = "Low-pressure storage";
 							drawRhtLine(ctx, dg, lpHeCache.tHigh, lpHeCache.medianDP*1000, toX(dg,15), title); 
 							title = "High-pressure storage";
@@ -6501,7 +6863,10 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 		if (metrics.massFlowPercent == 100)
 		{
 console.log("metrics.pHighInDischarge = "+metrics.pHighInDischarge);
-			simulateStorageHeatExchange(cycleData, true, 0.2, 3600); // on UI, 0.2 m slices, time resolution 1h => execution time < 2s
+			//firstChargeDischargeSimulation()
+			//new PlantSimulation(cycleData, 0.2, 3600).firstChargeDischargeSimulation(); // => 859 GWh
+			new PlantSimulation(cycleData, 0.1, 900).firstChargeDischargeSimulation(); // => 911 GWh
+			//simulateStorageHeatExchange(cycleData, true, 0.2, 3600); // on UI, 0.2 m slices, time resolution 1h => execution time < 2s
 		}
 		cycleData.totalWork = (hotCycle[1].workConsumed - coldCycle[1].workProduced) + cycleData.heatPumpNetWorkIn;
 		cycleData.hotWorkConsumed = hotCycle[1].workConsumed;
@@ -6676,6 +7041,14 @@ console.log("cycleData.efficiency="+cycleData.efficiency+", cycleData.efficiency
 					 (tmCosts = metrics.tcCostOfBlade * cBladesTotal)/ cycleData.netWorkOut + 
 					(heCosts = cycleData.heCost) / cycleData.netWorkOut;
 				cycleData.costOfMachinery = tmCosts;
+				metrics.heCostOfKW = heCosts / (cycleData.heatPumpHeating + cycleData.cooling + cycleData.heatPumpHeatExchange + (hotCycle[0].hOut - hotCycle[1].hIn) * hotCycle[0].massFlow)
+				metrics.tcCostOfKW = tmCosts / (hotCycle[0].workProduced*hotCycle[0].getRelativeSize() + 
+					 				   coldCycle[0].workConsumed*coldCycle[0].getRelativeSize() + 
+										   hotCycle[1].workConsumed*hotCycle[1].getRelativeSize() + 
+										   coldCycle[1].workProduced*coldCycle[1].getRelativeSize() + 
+							(cryogenicCooling ? coldCycle[3].workConsumed*coldCycle[3].getRelativeSize() + 
+												coldCycle[2].workProduced*coldCycle[2].getRelativeSize() : 0));
+				console.log("Actual metrics.tcCostOfKW="+metrics.tcCostOfKW);
 			}
 			else {
 				cycleData.costOfMachineryKW = //metrics.generatorCostOfKW + 
@@ -6685,7 +7058,7 @@ console.log("cycleData.efficiency="+cycleData.efficiency+", cycleData.efficiency
 										   coldCycle[1].workProduced*coldCycle[1].getRelativeSize() + 
 							(cryogenicCooling ? coldCycle[3].workConsumed*coldCycle[3].getRelativeSize() + 
 												coldCycle[2].workProduced*coldCycle[2].getRelativeSize() : 0)))/cycleData.netWorkOut  + 
-					(heCosts = metrics.heCostOfKW * (cycleData.heatPumpHeating + cycleData.cooling + cycleData.heatPumpHeatExchange + (hotCycle[0].hOut - hotCycle[1].hIn) * hotCycle[0].massFlow))
+					(heCosts = cycleData.heCost ? cycleData.heCost : metrics.heCostOfKW * (cycleData.heatPumpHeating + cycleData.cooling + cycleData.heatPumpHeatExchange + (hotCycle[0].hOut - hotCycle[1].hIn) * hotCycle[0].massFlow))
 					/ cycleData.netWorkOut;
 			}
 console.log("***** metrics.otherCostOfKW="+metrics.otherCostOfKW+", cycleData.costOfMachineryKW="+cycleData.costOfMachineryKW+", tmCosts="+Math.round(tmCosts)+", heCosts="+Math.round(heCosts)+", cBladesTotal="+cBladesTotal);
@@ -10900,7 +11273,6 @@ console.log("Redraw TP graf...");
 			const gearLoss = cycleData.compressorMassFlow1000*cycleData.gearLoss1000 * 100 / workIn;
 			const generatorLoss = cycleData.compressorMassFlow1000*cycleData.generatorLoss1000 * 100 / workIn;
 			const heatPumpLoss = cycleData.heatPumpLoss * 100 / workIn;
-
 			if (powerAndHeat) {
 				//const totalLoss = (cycleData.totalLoss1000 - cycleData.heatPumpHeating1000) * 100 / cycleData.workConsumed1000;
 				const lostInProcess = 100 - 100*cycleData.efficiency - cycleData.distictHeatPercent - gearLoss - generatorLoss - heatPumpLoss;
@@ -11619,7 +11991,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cHeatPumpEfficiency
 	}
 	function getStageDeltaH( stageData,  constantDeltaH, iStage, cStages, firstToLastDeltaH) {
 		var hDeltaPower = iStageDeltaH( constantDeltaH, iStage, cStages, firstToLastDeltaH);
-		if (iStage > 0 || !stageData.rpm) return hDeltaPower;
+		if (iStage > 0 || stageData.onDesignStages || !stageData.rpm) return hDeltaPower;
 		// adjust max hub/tip with stage count to the first above stageData.maxHubToTip
 		var vPipe = stageData.isCompressor ? stageData.vPipeIn : stageData.vPipeOut;
 		if (typeof vPipe === 'undefined') vPipe = 0;
@@ -11649,7 +12021,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cHeatPumpEfficiency
 				const rTip = Math.sqrt(area/(2*Math.PI)+rMid**2);
 				const rHub = Math.sqrt(rMid**2 - area/(2*Math.PI));
 				hubToTip = rHub/rTip;
-console.log(cLoops+": hubToTip="+hubToTip+", prevHubToTip="+prevHubToTip+", stageData.optHubToTip="+stageData.optHubToTip+", cStages="+cStages);
+//console.log(cLoops+": hubToTip="+hubToTip+", prevHubToTip="+prevHubToTip+", stageData.optHubToTip="+stageData.optHubToTip+", cStages="+cStages);
 				if (hubToTip == stageData.optHubToTip) break;
 				else if (hubToTip > stageData.optHubToTip) {
 					if (prevHubToTip && prevHubToTip < stageData.optHubToTip) {
@@ -19019,7 +19391,7 @@ if (!rotor.tMid || Number.isNaN(rotor.tMid)) throw new Error("Internal error, tM
 			if (rotor.tipToHubSectionArea > tipToHubSectionArea) {
 				rotor.tRoot *= rotor.tipToHubSectionArea/tipToHubSectionArea;
 				if (showTrace) {
-					console.log(stageData.title+stageData.stages.length+":max centrifugal stress exceeded, multiplying root thickness by "+rotor.tipToHubSectionArea/tipToHubSectionArea+"=> tRoot="+rotor.tRoot);
+					//console.log(stageData.title+stageData.stages.length+": too small free passage in hub:"+(1-rotor.tipToHubSectionArea)+" , multiplying root thickness by "+rotor.tipToHubSectionArea/tipToHubSectionArea+"=> tRoot="+rotor.tRoot);
 				}
 				rotor.tipToHubSectionArea = tipToHubSectionArea;
 			}

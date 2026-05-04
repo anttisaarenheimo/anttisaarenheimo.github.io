@@ -55,8 +55,8 @@ class PlantSimulation {
 		this.tLpMaxLow = this.tLowLp+getFloatParam("lpMaxLowDiff", 4);
 		//this.tLpMinHigh = this.tLowLp+10; // no energy is 'lost' when too cold fluid is pre-heated with resistors
 		this.tHpMaxLow = this.tLowHp+getFloatParam("hpMaxLowDiff", swaptHighLpAndtLowHp ? 200 : 50);
-		this.tHpMinHigh = getFloatParam("tMinHighExitHp", 850);		// die fast??
-		this.tLpMinHigh = getFloatParam("tMinHighExitLp", 300);		// die fast??
+		this.tHpMinHigh = metrics.tHigh - getFloatParam("tMaxDiffHighExitHp", 400);		// die fast??
+		this.tLpMinHigh = this.tHighLp - getFloatParam("tMaxDiffHighExitLp", 300);		// die fast??
 		this.calcHeatExchangeCoeffcient = getBooleanParam("calcHeatExchangeCoeffcient", false );
 		this.chargeSnapshots = [];
 		this.hpSideIns = {};
@@ -731,7 +731,8 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 					tGas = this.lpTemps[height].tRock;
 					hGas = this.lpTemps[height].hGasOut;
 				}
-				if (!this.noUI) {
+				//if (!this.noUI) 
+				{
 					processGravelHeatTransfers(this.lpHeCCache, this.lpTemps, this.stepLen, (1 + this.idleTimeAfter) * this.lpHeCCache.rockHeatingTime, metrics.hFromCharge, loop == 0 && (height < 5 || height > this.lpTemps.length-5));
 				}
 				isFull = tGas < this.tLpMinHigh;
@@ -748,7 +749,8 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 				}
 				this.tHighLpOut = tGas;
 				isFull = isFull || tGas > this.tHpMaxLow;
-				if (!this.noUI) {
+				//if (!this.noUI) 
+				{
 					processGravelHeatTransfers(this.hpHeCCache, this.hpTemps, this.stepLen, (1 + this.idleTimeAfter) * this.hpHeCCache.rockHeatingTime, 0, loop == 0 && (height < 5 || height > this.hpTemps.length-5));
 				}
 				//
@@ -1177,6 +1179,128 @@ throw new Error();
 console.log(title+" snapshot: "+JSON.stringify(ret));
 			return ret;
 		};
+		this.showHeatExchangeDiagrams = function( lpTitle, hpTitle, bottomLines, lpArraysOfVals, hpArraysOfVals )
+		{
+			console.log("Showing diagarm...");
+			const cls = this;
+				this.drawIceStorage = function (ctx, dg) {
+					console.log("this.drawIceStorage...");
+					const hIce = metrics.externalCryoStorage ? cls.cycleData.iceStorage.height+metrics.hPressureControl : 0;
+					ctx.beginPath();
+					//ctx.moveTo(toX(dg,0),toY(dg,cls.tMinIceStorage)); 
+					//ctx.moveTo(toX(dg,hIce),toY(dg,cls.tMinIceStorage)); 
+					ctx.moveTo(toX(dg,hIce),toY(dg,cls.tMaxIceStorage)); 
+					ctx.lineTo(toX(dg,0),toY(dg,cls.tMaxIceStorage)); 
+					ctx.lineTo(toX(dg,0),toY(dg,cls.tMinIceStorage)); 
+					//ctx.closePath();
+					ctx.strokeStyle = 'blue';
+					ctx.lineWidth = 2;
+					ctx.stroke();
+					ctx.beginPath();
+					ctx.moveTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tMaxIceStorage)); 
+					ctx.lineTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tMinIceStorage)); 
+					ctx.stroke();
+
+					ctx.font = "12px Arial";
+					ctx.fillStyle = 'blue';
+					var text = "tMax="+Math.round(cls.tMaxIceStorage)+" K";
+					ctx.fillText( text, toX(dg,hIce/2),toY(dg,cls.tMaxIceStorage)); // -ctx.measureText(text).width
+					ctx.font = "16px Arial";
+					text = myRound(cls.cycleData.iceStorage.totalMassInTons/1000000,1)+(metrics.externalIceStorage ? " mt crushed ice" : " mt crushed stone");
+					ctx.fillText( text, toX(dg,0)+30,toY(dg,cls.tMaxIceStorage/2));
+
+					ctx.font = "12px Arial";
+					ctx.fillText( "Pressure control tank", toX(dg,0)+5,toY(dg,cls.tMaxIceStorage)+14);
+
+					ctx.beginPath();
+					//ctx.moveTo(toX(dg,hIce+10),toY(dg,cls.tMinIceStorage-3));
+					//ctx.moveTo(toX(dg,hLP),toY(dg,cls.tMinIceStorage));
+					ctx.moveTo(toX(dg,hLP),toY(dg,cls.tMax)-3);
+					ctx.lineTo(toX(dg,hIce),toY(dg,cls.tMax)-3);
+					ctx.lineTo(toX(dg,hIce),toY(dg,cls.tMinIceStorage));
+					//ctx.closePath();
+					ctx.strokeStyle = 'black';
+					ctx.lineWidth = 2;
+					ctx.stroke();
+					ctx.font = "16px Arial";
+					ctx.fillStyle = 'black';
+					text = myRound(metrics.lowPressureStorageVolume * metrics.lpGravelDensity/1000000,1)+" Mt crushed stone";
+					ctx.fillText( text, toX(dg,hIce)+10,toY(dg,cls.tMax/2));
+					const iLast = lpArraysOfVals.length-1;
+					const kLast = lpArraysOfVals[iLast].length - 1;
+					const lpHeight = cls.stepLen * cls.lpTemps.length;
+					ctx.font = "12px Arial";
+					text = "+"+myRound(lpArraysOfVals[iLast-1][0]-lpArraysOfVals[iLast][0],1)+" K";
+					ctx.fillText( text, toX(dg,0) - ctx.measureText(text).width, toY(dg,lpArraysOfVals[iLast-1][0]));
+					text = Math.round(lpArraysOfVals[iLast][kLast])+" K";
+					//text = myRound(lpArraysOfVals[iLast][lpArraysOfVals[iLast].length-1]-lpArraysOfVals[iLast-1][lpArraysOfVals[iLast-1].length-1],0)+" K";
+					ctx.fillText( text, toX(dg,lpHeight), toY(dg,lpArraysOfVals[iLast][lpArraysOfVals[iLast].length-1]));
+				}
+
+				var minMaxDefault = {min : Math.round(this.tLowLp/10)*10, max : (1+Math.round(this.tHighLp/10))*10};
+				this.drawHeatExchangeDiagram2( 'lpHeatExchangeDiagram', this.lpTemps, lpTitle,  
+												bottomLines, lpArraysOfVals, minMaxDefault, metrics.externalCryoStorage ? this.drawIceStorage : function (ctx, dg) {
+										const lpHeight = cls.stepLen * (cls.lpTemps.length-cls.hFrom);
+										const iLast = lpArraysOfVals.length-1;
+										ctx.strokeStyle = 'black';
+										ctx.lineWidth = 2;
+										ctx.beginPath();
+										ctx.moveTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tLowLp)); 
+										ctx.lineTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tLowLp+50)); 	// random hight 
+										ctx.lineTo(toX(dg,0),toY(dg,cls.tLowLp+50)); 
+										ctx.stroke();
+
+										ctx.fillStyle = 'black';
+										ctx.font = "16px Arial";
+										var text = myRound(metrics.lowPressureStorageVolume * metrics.lpGravelDensity/1000000,1)+" Mt crushed stone";
+										ctx.fillText( text, toX(dg,lpHeight/4)+60,toY(dg,cls.tHighLp/2));
+
+										ctx.font = "12px Arial";
+										ctx.fillText( "Pressure control tank", toX(dg,0)+5,toY(dg,cls.tLowLp)-14);
+										var x, y;
+	console.log("iLast-1="+lpArraysOfVals[iLast-1][0]+", iLast="+lpArraysOfVals[iLast][0]);
+										text = "+"+myRound(lpArraysOfVals[iLast-1][0]-lpArraysOfVals[iLast][0],1)+" K";
+										ctx.fillText( text, x=toX(dg,0) - ctx.measureText(text).width, y=toY(dg,lpArraysOfVals[iLast-1][0]));
+							//console.log("iLast="+iLast+", lpHeight="+lpHeight+", obj:"+JSON.stringify(lpArraysOfVals[iLast-1][0]));
+							//console.log("LP exits:"+x+","+y+":"+text);
+										const kLast = lpArraysOfVals[iLast].length - 1;
+										const jLast = lpArraysOfVals[iLast-1].length - 1;
+	console.log("iLast-1="+lpArraysOfVals[iLast-1][jLast]+", kLast="+lpArraysOfVals[iLast][kLast]);
+										text = Math.round(lpArraysOfVals[iLast][kLast])+" K";// -lpArraysOfVals[iLast-1][lpArraysOfVals[iLast-1].length-1]
+										ctx.fillText( text, x=toX(dg,lpHeight), y=toY(dg,lpArraysOfVals[iLast][kLast]));
+										text = Math.round(lpArraysOfVals[iLast-1][jLast])+" K";// -lpArraysOfVals[iLast-1][lpArraysOfVals[iLast-1].length-1]
+										ctx.fillText( text, x=toX(dg,lpHeight), y=toY(dg,lpArraysOfVals[iLast-1][jLast]));
+	//throw new Error;
+							//console.log("LP exits:"+x+","+y+":"+text);
+									});
+				//var rect = document.getElementById('lpHeatExchangeDiagram').getBoundingClientRect();
+				//console.log("lpHeatExchangeDiagram pos:"+rect.top, rect.right, rect.bottom, rect.left);
+				minMaxDefault = {min : Math.round(this.tLowHp/100)*100, max : (1+Math.round(this.tHighLp/100))*100};
+				this.drawHeatExchangeDiagram2('hpHeatExchangeDiagram', this.hpTemps, hpTitle, bottomLines, hpArraysOfVals, minMaxDefault,
+							function (ctx, dg) {
+								var text = myRound(metrics.highPressureStorageVolume * metrics.gravelDensity/1000000,1)+" mt crushed stone";
+								//text2 = 'Storage capasity '+Math.round(hLastDiscarge*)+' GWh after '+Math.round(hTotal)+ " hours";
+								ctx.font = "16px Arial";
+								ctx.fillStyle = 'black';
+								const height = metrics.dome.hBottomI;
+	//console.log("Hp storage text="+text+", pxX="+toX(dg,height/4)+", pxY="+toY(dg,this.tHighHp/2));							
+								ctx.fillText( text, toX(dg,height/4),toY(dg,cls.tHighHp/2));
+								//ctx.fillText( text2, toX(dg,height/4),toY(dg,cls.tHighHp/2)+20);
+								ctx.font = "12px Arial";
+								const iLast = hpArraysOfVals.length-1;
+								text = "+"+Math.round(hpArraysOfVals[iLast][0]-hpArraysOfVals[iLast-1][0],1)+" K";
+								var x, y;
+								ctx.fillText(text, x=toX(dg,0)-ctx.measureText(text).width, y=toY(dg,hpArraysOfVals[iLast][0]));
+	//console.log("iLast="+iLast+", obj:"+JSON.stringify(hpArraysOfVals[iLast-1][0]));
+	//console.log("HP exits:"+x+","+y+":"+text);
+								//text = myRound(hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1] - hpArraysOfVals[iLast][hpArraysOfVals[iLast].length-1])+" K";
+								text = Math.round(hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1])+" K";
+								ctx.fillText(text, x=toX(dg,height), y=toY(dg,hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1]));
+								text = Math.round(hpArraysOfVals[iLast][hpArraysOfVals[iLast].length-1])+" K";
+								ctx.fillText(text, x=toX(dg,height), y=toY(dg,hpArraysOfVals[iLast][hpArraysOfVals[iLast].length-1]));
+	//console.log("HP exits:"+x+","+y+":"+text+", t2="+hpArraysOfVals[iLast][hpArraysOfVals[iLast].length-1]+", t1="+hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1]);
+							});
+		};
 		this.fnSimulateChargeDischarge = function(noUI, simulations, preHeatingOfChargeLevel) {
 console.log("fnSimulateChargeDischarge...");
 			var lpArraysOfVals = [];
@@ -1453,7 +1577,7 @@ console.log("gasWeightMaxDiff="+this.gasWeightMaxDiff+", this.gasMaxWeight="+thi
 						if (i == 0 && preHeatingOfChargeLevel) {
 							// end border of cache may be missing => duplicate the last item for sure
 							const iCur = preHeatingOfChargeLevel.length-1;
-							if (iCur < 99) throw new Error();
+							//if (iCur < 99) throw new Error();
 							while (preHeatingOfChargeLevel.length < 101) {
 								preHeatingOfChargeLevel.push(preHeatingOfChargeLevel[iCur]);
 							}
@@ -1690,122 +1814,11 @@ if (typeof switchTimesText === 'undefined') throw new Error();
 			}
 		    var elapsedTime = Date.now() - startTime;
 			console.log("elapsedTime="+Math.round(elapsedTime/1000)+" seconds "); 
-			
-	console.log("Showing diagarm...");
-			this.drawIceStorage = function (ctx, dg) {
-	console.log("this.drawIceStorage...");
-				const hIce = metrics.externalCryoStorage ? cls.cycleData.iceStorage.height+metrics.hPressureControl : 0;
-				ctx.beginPath();
-				//ctx.moveTo(toX(dg,0),toY(dg,cls.tMinIceStorage)); 
-				//ctx.moveTo(toX(dg,hIce),toY(dg,cls.tMinIceStorage)); 
-				ctx.moveTo(toX(dg,hIce),toY(dg,cls.tMaxIceStorage)); 
-				ctx.lineTo(toX(dg,0),toY(dg,cls.tMaxIceStorage)); 
-				ctx.lineTo(toX(dg,0),toY(dg,cls.tMinIceStorage)); 
-				//ctx.closePath();
-				ctx.strokeStyle = 'blue';
-				ctx.lineWidth = 2;
-				ctx.stroke();
-				ctx.beginPath();
-				ctx.moveTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tMaxIceStorage)); 
-				ctx.lineTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tMinIceStorage)); 
-				ctx.stroke();
-
-				ctx.font = "12px Arial";
-				ctx.fillStyle = 'blue';
-				var text = "tMax="+Math.round(cls.tMaxIceStorage)+" K";
-				ctx.fillText( text, toX(dg,hIce/2),toY(dg,cls.tMaxIceStorage)); // -ctx.measureText(text).width
-				ctx.font = "16px Arial";
-				text = myRound(cls.cycleData.iceStorage.totalMassInTons/1000000,1)+(metrics.externalIceStorage ? " mt crushed ice" : " mt crushed stone");
-				ctx.fillText( text, toX(dg,0)+30,toY(dg,cls.tMaxIceStorage/2));
-
-				ctx.font = "12px Arial";
-				ctx.fillText( "Pressure control tank", toX(dg,0)+5,toY(dg,cls.tMaxIceStorage)+14);
-
-				ctx.beginPath();
-				//ctx.moveTo(toX(dg,hIce+10),toY(dg,cls.tMinIceStorage-3));
-				//ctx.moveTo(toX(dg,hLP),toY(dg,cls.tMinIceStorage));
-				ctx.moveTo(toX(dg,hLP),toY(dg,cls.tMax)-3);
-				ctx.lineTo(toX(dg,hIce),toY(dg,cls.tMax)-3);
-				ctx.lineTo(toX(dg,hIce),toY(dg,cls.tMinIceStorage));
-				//ctx.closePath();
-				ctx.strokeStyle = 'black';
-				ctx.lineWidth = 2;
-				ctx.stroke();
-				ctx.font = "16px Arial";
-				ctx.fillStyle = 'black';
-				text = myRound(metrics.lowPressureStorageVolume * metrics.lpGravelDensity/1000000,1)+" Mt crushed stone";
-				ctx.fillText( text, toX(dg,hIce)+10,toY(dg,cls.tMax/2));
-				const iLast = lpArraysOfVals.length-1;
-				const kLast = lpArraysOfVals[iLast].length - 1;
-				const lpHeight = cls.stepLen * cls.lpTemps.length;
-				ctx.font = "12px Arial";
-				text = "+"+myRound(lpArraysOfVals[iLast-1][0]-lpArraysOfVals[iLast][0],1)+" K";
-				ctx.fillText( text, toX(dg,0) - ctx.measureText(text).width, toY(dg,lpArraysOfVals[iLast-1][0]));
-				text = Math.round(lpArraysOfVals[iLast][kLast])+" K";
-				//text = myRound(lpArraysOfVals[iLast][lpArraysOfVals[iLast].length-1]-lpArraysOfVals[iLast-1][lpArraysOfVals[iLast-1].length-1],0)+" K";
-				ctx.fillText( text, toX(dg,lpHeight), toY(dg,lpArraysOfVals[iLast][lpArraysOfVals[iLast].length-1]));
-			}
-
-			var minMaxDefault = {min : Math.round(this.tLowLp/10)*10, max : (1+Math.round(this.tHighLp/10))*10};
-			this.drawHeatExchangeDiagram2( 'lpHeatExchangeDiagram', this.lpTemps, Math.round(hTotal)+" hours * "+workToMW(this.cycleData.netWorkOut)+" simulation of low-pressure storage", 
-				bottomLines, lpArraysOfVals, minMaxDefault, metrics.externalCryoStorage ? this.drawIceStorage : function (ctx, dg) {
-									const lpHeight = cls.stepLen * (cls.lpTemps.length-cls.hFrom);
-									const iLast = lpArraysOfVals.length-1;
-									ctx.strokeStyle = 'black';
-									ctx.lineWidth = 2;
-									ctx.beginPath();
-									ctx.moveTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tLowLp)); 
-									ctx.lineTo(toX(dg,metrics.hPressureControl),toY(dg,cls.tLowLp+50)); 	// random hight 
-									ctx.lineTo(toX(dg,0),toY(dg,cls.tLowLp+50)); 
-									ctx.stroke();
-
-									ctx.fillStyle = 'black';
-									ctx.font = "16px Arial";
-									var text = myRound(metrics.lowPressureStorageVolume * metrics.lpGravelDensity/1000000,1)+" Mt crushed stone";
-									ctx.fillText( text, toX(dg,lpHeight/4)+60,toY(dg,cls.tHighLp/2));
-
-									ctx.font = "12px Arial";
-									ctx.fillText( "Pressure control tank", toX(dg,0)+5,toY(dg,cls.tLowLp)-14);
-									var x, y;
-console.log("iLast-1="+lpArraysOfVals[iLast-1][0]+", iLast="+lpArraysOfVals[iLast][0]);
-									text = "+"+myRound(lpArraysOfVals[iLast-1][0]-lpArraysOfVals[iLast][0],1)+" K";
-									ctx.fillText( text, x=toX(dg,0) - ctx.measureText(text).width, y=toY(dg,lpArraysOfVals[iLast-1][0]));
-						//console.log("iLast="+iLast+", lpHeight="+lpHeight+", obj:"+JSON.stringify(lpArraysOfVals[iLast-1][0]));
-						//console.log("LP exits:"+x+","+y+":"+text);
-									const kLast = lpArraysOfVals[iLast].length - 1;
-									const jLast = lpArraysOfVals[iLast-1].length - 1;
-console.log("iLast-1="+lpArraysOfVals[iLast-1][jLast]+", kLast="+lpArraysOfVals[iLast][kLast]);
-									text = Math.round(lpArraysOfVals[iLast][kLast])+" K";// -lpArraysOfVals[iLast-1][lpArraysOfVals[iLast-1].length-1]
-									ctx.fillText( text, x=toX(dg,lpHeight), y=toY(dg,lpArraysOfVals[iLast][lpArraysOfVals[iLast].length-1]));
-//throw new Error;
-						//console.log("LP exits:"+x+","+y+":"+text);
-								});
-			//var rect = document.getElementById('lpHeatExchangeDiagram').getBoundingClientRect();
-			//console.log("lpHeatExchangeDiagram pos:"+rect.top, rect.right, rect.bottom, rect.left);
+			const lpTitle = Math.round(hTotal)+" hours * "+workToMW(this.cycleData.netWorkOut)+" simulation of low-pressure storage";
+			const hpTitle = Math.round(hTotal)+ " hours * "+workToMW(this.cycleData.netWorkOut)+" simulation of high-pressure storage";
+			this.showHeatExchangeDiagrams( lpTitle, hpTitle, bottomLines, lpArraysOfVals, hpArraysOfVals );
+		
 			this.drawStoneAndIceEnthalpies( 'usedHeatCapasitiesAndEnthalpies', this.tLowLp, this.tHighHp );
-			minMaxDefault = {min : Math.round(this.tLowHp/100)*100, max : (1+Math.round(this.tHighLp/100))*100};
-			this.drawHeatExchangeDiagram2('hpHeatExchangeDiagram', this.hpTemps, Math.round(hTotal)+ " hours * "+workToMW(this.cycleData.netWorkOut)+" simulation of high-pressure storage", bottomLines, hpArraysOfVals, minMaxDefault,
-						function (ctx, dg) {
-							var text = myRound(metrics.highPressureStorageVolume * metrics.gravelDensity/1000000,1)+" mt crushed stone";
-							//text2 = 'Storage capasity '+Math.round(hLastDiscarge*)+' GWh after '+Math.round(hTotal)+ " hours";
-							ctx.font = "16px Arial";
-							ctx.fillStyle = 'black';
-							const height = metrics.dome.hBottomI;
-//console.log("Hp storage text="+text+", pxX="+toX(dg,height/4)+", pxY="+toY(dg,this.tHighHp/2));							
-							ctx.fillText( text, toX(dg,height/4),toY(dg,cls.tHighHp/2));
-							//ctx.fillText( text2, toX(dg,height/4),toY(dg,cls.tHighHp/2)+20);
-							ctx.font = "12px Arial";
-							const iLast = hpArraysOfVals.length-1;
-							text = "+"+Math.round(hpArraysOfVals[iLast][0]-hpArraysOfVals[iLast-1][0],1)+" K";
-							var x, y;
-							ctx.fillText(text, x=toX(dg,0)-ctx.measureText(text).width, y=toY(dg,hpArraysOfVals[iLast][0]));
-//console.log("iLast="+iLast+", obj:"+JSON.stringify(hpArraysOfVals[iLast-1][0]));
-//console.log("HP exits:"+x+","+y+":"+text);
-							//text = myRound(hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1] - hpArraysOfVals[iLast][hpArraysOfVals[iLast].length-1])+" K";
-							text = Math.round(hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1])+" K";
-							ctx.fillText(text, x=toX(dg,height), y=toY(dg,hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1]));
-//console.log("HP exits:"+x+","+y+":"+text+", t2="+hpArraysOfVals[iLast][hpArraysOfVals[iLast].length-1]+", t1="+hpArraysOfVals[iLast-1][hpArraysOfVals[iLast-1].length-1]);
-						});
 			this.drawPressureControlDiagram();
 			this.drawRadiativeHeatTransferDiagram();
 			
@@ -1868,7 +1881,7 @@ console.log("iLast-1="+lpArraysOfVals[iLast-1][jLast]+", kLast="+lpArraysOfVals[
 		}
 		// radiative heat transfers in storage
 		this.drawRadiativeHeatTransferDiagram = function()  {
-			const mmMdpFrom = 0, mmMdpTo = 40, mmMdpStep = 1, areaFactor = 2, tDiffPerM = 200;
+			const mmMdpFrom = 0, mmMdpTo = 40, mmMdpStep = 1, areaFactor = 1, tDiffPerM = 200;
 			var mdp, xVals = [], yVals = [], yTitles = [], bottomLines = [];
 			for (mdp = mmMdpFrom; mdp <= mmMdpTo; mdp += mmMdpStep) xVals.push(mdp);
 			yTitles.push('W/K/m');
@@ -1903,7 +1916,7 @@ console.log(text+", y="+y);
 				return ctx.measureText(text).width;
 			}
 			drawDiagram4Y( "radiativeHeatTransfer", xVals, 'mm', yVals, yTitles, 
-					"Radiative heat transfer of crushed stone and inslutations, variation with temperature and mean diameter of particles, temperature change 200 K/m; area factor 2", bottomLines, minMaxDefault,
+					"Radiative heat transfer of crushed stone and inslutations, variation with temperature and mean diameter of particles, temperature change 200 K/m; view factor 1 and rock emissivity 0.94", bottomLines, minMaxDefault,
 					function (ctx, dg) {
 						ctx.font = "12px Arial";
 						ctx.fillStyle = 'black';

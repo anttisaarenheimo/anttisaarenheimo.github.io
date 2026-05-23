@@ -20,8 +20,8 @@ https://github.com/anttisaarenheimo/anttisaarenheimo.github.io
 <SCRIPT src="index_files/jquery-migrate-1.2.1.min.js"></SCRIPT>
 <SCRIPT src="index_files/jquery-ui.js"></SCRIPT>
 <SCRIPT src="coolprop.js"></SCRIPT>
-<SCRIPT src="Kacker-Okapuu_loss_model.js?v=2.0"></SCRIPT>
-<SCRIPT src="PlantSimulation.js?v=170"></SCRIPT>
+<SCRIPT src="Kacker-Okapuu_loss_model.js?v=2.6"></SCRIPT>
+<SCRIPT src="PlantSimulation.js?v=172"></SCRIPT>
 
 <style>
 td {
@@ -62,7 +62,7 @@ th {
 </HEAD> 
 <BODY onload="drawTpDiagram()">
 
-<DIV><H3>Pumped Thermal Energy Storage Designer and Simulator - powered by Coolprop&nbsp;&nbsp;&nbsp; <a target="_blank" href="TeraPTES_en.pdf">Feasibility study</a><!--&nbsp;&nbsp;&nbsp; <a href="TeraPTES_fi.pdf">Feasibility study in finnish</a--></H3></DIV>
+<DIV><H3>Pumped Thermal Energy Storage Designer and Simulator - powered by Coolprop&nbsp;&nbsp;&nbsp; <a target="_blank" href="TeraPTESv2_en.pdf">Feasibility study</a><!--&nbsp;&nbsp;&nbsp; <a href="TeraPTES_fi.pdf">Feasibility study in finnish</a--></H3></DIV>
 <!--ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Design parameters</button>
@@ -81,6 +81,7 @@ th {
 <DIV><LABEL>Fluid:</LABEL>
 	<SELECT id="name" onchange="setGasMassFlowFor1200MW(this)"><OPTION>Argon</OPTION><!--OPTION>CarbonDioxide</OPTION--><OPTION>Helium</OPTION><OPTION>Hydrogen</OPTION><OPTION>Methane</OPTION><OPTION selected>Nitrogen</OPTION><!--OPTION>CarbonDioxide</OPTION--><!--OPTION>R134a</OPTION><OPTION>Water</OPTION--></SELECT>
 	<BUTTON onClick="drawTpDiagram(true)">Update storage, T-P diagram and turbomachines</BUTTON>
+	<INPUT id="doTestSimulation" type="checkbox" value="true"><LABEL>Measure storage size with simulation (+ 30s)</LABEL>
 	<INPUT id="drawCompressors" checked type="checkbox" value="true"><LABEL>Design turbomachines of the plant or update efficiencies when the power level is below 100%</LABEL>
 	<!--<INPUT id="noDistrictHeat" checked type="checkbox" value="true"><LABEL>Use stored liqued nitrogen to maximize electric output</LABEL>-->
 	<!--BUTTON 
@@ -119,27 +120,30 @@ th {
 	</DIV>
 	<DIV>
 		<LABEL>Average hot turbine stage efficiency: </LABEL>
-		<INPUT size="4" id="tEfficiency" type="float" value="0.966" title="The default hot turbine efficiency of is scaled from cryogenic compressor efficiency" >
+		<INPUT size="4" id="tEfficiency" type="float" value="0.964" title="The default hot turbine efficiency of is scaled from cryogenic compressor efficiency" >
 		<LABEL>Average cryogenic compressor stage efficiency: </LABEL>
 		<INPUT size="4" id="cLowEfficiency" type="float" value="0.938" title="The efficiency resulted from the default cryogenic compressor design parameters" > 
 	</DIV>
 	<DIV>
 		<LABEL>Heat pump compressor stage efficiency: </LABEL> <INPUT size="4" id="cHeatPumpEfficiency" type="float" value="0.929">
 		<LABEL>Heat pump turbine stage efficiency: </LABEL> <INPUT size="4" id="tHeatPumpEfficiency" type="float" value="0.968">
-		<INPUT id="updateCompressorEfficiencies" type="checkbox" checked title="Update compressor efficiencies from the calculated efficiency of the compressor designs">
-		<LABEL>Update compressor efficiencies from the design</LABEL>
-		<INPUT id="updateTurbineEfficiencies" type="checkbox" checked  title="Scale the turbine efficiencies from the calculated efficiencies of respective compressor designs">
-		<LABEL>Update turbine efficiencies from the design</LABEL>
+		<LABEL>Cooling water temperature (K): </LABEL><INPUT size="4" id="coolingWaterTemp" type="float" value="278" onchange="metricsChanged()">
 		<!--INPUT id="tEffRange" type="checkbox"><LABEL>Draw diagram for turbine and compressor stage efficiencies </LABEL><INPUT size="4" id="tEfficiencyFrom" type="float" value="0.90"> - <INPUT size="4" id="tEfficiencyTo" type="float" value="0.98"-->
 	</Div>
 	<DIV>
 		<LABEL>Minimum blade chord length (mm): </LABEL><INPUT size="4" id="minChordLengthMm" type="float" value="20">
 		<LABEL>Max enclosed passage in rotor hub (hub tMax/pitch): </LABEL><INPUT size="4" id="maxEnclosedInRoot" type="float" value="0.50">
+		<LABEL>Increase blade strength in main turbine % </Label><INPUT size="4" type="float" id="strengthIncreaseHotTurbine" value="50"/>
+		<LABEL> and in other turbomachines % </Label><INPUT size="4" type="float" id="strengthIncrease" value="10"/>
 	</DIV>
 	<DIV>
 		<!-- powerOnly option produces worse power back % than the combined power ????-->
 		<LABEL>Efficiency of the synchronous motor-generator: </LABEL><INPUT size="4" id="generatorEfficiency" type="float" value="0.99"> 
 		<LABEL>Frequency converter efficiency: </LABEL><INPUT size="4" id="frequencyConverterEfficiency" title="For the heat pump and cold compressor startup" type="float" value="0.97"> 
+		<INPUT id="updateCompressorEfficiencies" type="checkbox" checked title="Update compressor efficiencies from the calculated efficiency of the compressor designs">
+		<LABEL>Update compressor efficiencies from the design</LABEL>
+		<INPUT id="updateTurbineEfficiencies" type="checkbox" checked  title="Scale the turbine efficiencies from the calculated efficiencies of respective compressor designs">
+		<LABEL>Update turbine efficiencies from the design</LABEL>
 		<!--a target="_blank" href="https://www.renk.com/en/products/turbo-high-speed/vacuum-gearbox-systems/het">Vacuum gear efficiency: </a><INPUT size="4" id="gearEfficiency" type="float" value="0.993"--> 
 		<!--INPUT size="4" id="cEfficiencyFrom" type="float" value="0.87"><INPUT size="4" id="cEfficiencyTo" type="float" value="0.93"-->
 	</Div>
@@ -148,7 +152,7 @@ th {
 	<DIV>
 		<LABEL>Primary storage size Mt (curshed stone): </LABEL><INPUT size="4" id="storageSizeMTon" type="float" value="45" onchange="metricsChanged()">
 		<LABEL>Adjust default HP storage size by %</LABEL><INPUT size="2" id="hpStorageSizeAdjusted" type="float" value="120" onchange="metricsChanged()">
-		<LABEL>HP storage utilization %</LABEL><INPUT size="2" id="hpStorageUtilization" type="float" value="55.9" onchange="metricsChanged()">
+		<LABEL>HP storage utilization %</LABEL><INPUT size="2" id="hpStorageUtilization" type="float" value="50.7" onchange="metricsChanged()">
 		<!-- Ice storage pressure must be also the top pressure of the pressure control storage within it.  20kPa pressure difference should be contained with 30 cm thich austenitic steel
 		<!--LABEL>Pressure control storage top pressure: </LABEL><INPUT size="4" id="pControlTopP" type="float" value=""-->
 		<LABEL>Top fill used as </LABEL>
@@ -312,8 +316,8 @@ th {
 		<LABEL>Update the fluid density (kg/m3) lines on T/P diagram (takes a few seconds)</LABEL>
 	</div>
 
-<DIV id="waitUntilReady">
-	<LABEL style="font-size: 200%;font-weight: bold;">Wait a few seconds. Designing the storage, plant and its turbomachines from the default parameters ...</LABEL>
+<DIV id="waitUntilReady0">
+	<LABEL style="font-size: 200%;font-weight: bold;">Wait 20-30 seconds! Designing the storage, plant and turbomachines from the default parameters ...</LABEL>
 </DIV>
 
 		<canvas id="myCanvas" width="1000" height="800" style="border:1px solid #000000;display:none"></canvas>
@@ -344,12 +348,12 @@ th {
 			</DIV>
 			<DIV>
 				<LABEL>Power market type: </LABEL>
-					<INPUT type="radio" id="powerMarketTypeFinland" name="powerMarketType" onclick="setPowerMarketType(this)" value="Finland"><LABEL>Finland</LABEL>
-					<INPUT type="radio" id="powerMarketTypeGermany" checked name="powerMarketType" onclick="setPowerMarketType(this)" value="Germany"><LABEL>Germany</LABEL>
-				<LABEL>Price yield % (hourly price multiplied/divided by yield % powered to purchased/sold MWs/500): </LABEL><INPUT size="3" type="float" id="yield500MW" value=""/>
+					<INPUT type="radio" id="powerMarketTypeFinland" name="powerMarketType" onclick="setPowerMarketType(this)" value="Finland"><LABEL>Finland (high price elasticity)</LABEL>
+					<INPUT type="radio" id="powerMarketTypeGermany" checked name="powerMarketType" onclick="setPowerMarketType(this)" value="Germany"><LABEL>Germany (low price elasticity)</LABEL>
+				<LABEL>Price elasticity % (hourly price multiplied/divided by yield % powered to purchased/sold MWs/500): </LABEL><INPUT size="3" type="float" id="yield500MW" value=""/>
 			</DIV>
 			<DIV>
-				<LABEL>Selling price limit (Eur/MWh) at charge level </LABEL>
+				<LABEL>Selling price limits (Eur/MWh) at charged %</LABEL>
 				<Span>0 %</span><INPUT size="3" type="float" id="sellOutStep0" value=""/>
 				<Span>20 %</span><INPUT size="3" type="float" id="sellOutStep1" value=""/>
 				<Span>40 %</span><INPUT size="3" type="float" id="sellOutStep2" value=""/>
@@ -358,7 +362,7 @@ th {
 				<Span>100 %</span><INPUT size="3" type="float" id="sellOutStep5" value=""/>
 			</DIV>
 			<DIV>
-				<LABEL>Purchase price limit (Eur/MWh) at charge level </LABEL>
+				<LABEL>Purchase price limits (Eur/MWh) at charged % </LABEL>
 				<Span>0%</span><INPUT size="3" type="float" id="buyInStep0" value=""/>
 				<Span>20 %</span><INPUT size="3" type="float" id="buyInStep1" value=""/>
 				<Span>40 %</span><INPUT size="3" type="float" id="buyInStep2" value=""/>
@@ -373,7 +377,7 @@ th {
 				<LABEL>Year to: </LABEL><SELECT id="yearTo"><OPTION>2016</OPTION><OPTION>2017</OPTION><OPTION>2018</OPTION><OPTION>2019</OPTION><OPTION>2020</OPTION><OPTION>2021</OPTION>
 											<OPTION>2022</OPTION><OPTION>2023</OPTION><OPTION>2024</OPTION><OPTION>2025</OPTION><OPTION selected>2026</OPTION></SELECT>
 				<BUTTON onClick="simulateNordpoolFi()">Quick wholesale power market simulation</BUTTON> 
-				<BUTTON onClick="showFullSimulation()">Operate digital plant in power market of selected country (4 min/year)</BUTTON> 
+				<BUTTON onClick="showFullSimulation()">Operate digital plant in power market of selected country (5 minutes/year)</BUTTON> 
 			</DIV>
 			<DIV><LABEL>Hourly wholesale power prices are country averages downloaded from <a href="https://ember-energy.org/data/european-wholesale-electricity-price-data/">here</a>. In countries with multiple exchanges (for example, a 15-minute exchange and a separate 60-minute exchange), the average is taken.</LABEL></DIV>
 			<div><H2 id="simulatePlantQuickTitle"></H2></DIV>
@@ -383,12 +387,15 @@ th {
 			<table id="simulatePlantFullHtmlTable" style"border:solid"></table>
 			<canvas id="plantOperationFull" width="500" height="350" data-height="350"style="border:1px solid #000000;display:none"></canvas>
 		</DIV>
+		<DIV id="waitUntilReady" style="display:none">
+			<LABEL style="font-size: 200%;font-weight: bold;">Designing turbomachines from the default parameters ...</LABEL>
+		</DIV>
 		<DIV id="compressorDesignParams" style="display:none">
 			<H3>Hot compressor design parameters</H3>
 			<DIV><!-- 0.216, 0.44-->
-				<LABEL>Mean line load coefficient: </LABEL><INPUT size="5" type="float" id="hotLoadCoefficient" value="0.345"/>
-				<LABEL>Mean line flow coefficient: </LABEL><INPUT size="5" type="float" id="hotFlowCoefficient" value="0.579"/>
-				<LABEL>Hot compressors:</LABEL><INPUT size="2" data-type="unit" id="cHotUnits2" value="2"/>
+				<LABEL>Mean-line load coefficient: </LABEL><INPUT size="5" type="float" id="hotLoadCoefficient" value="0.345"/>
+				<LABEL>Mean-line flow coefficient: </LABEL><INPUT size="5" type="float" id="hotFlowCoefficient" value="0.579"/>
+				<LABEL>Hot compressors in shaft:</LABEL><INPUT size="2" data-type="unit" id="cHotUnits2" value="1"/>
 				<LABEL>Initial stages:</Label><INPUT size="5" type="float" id="cStagesHot" value="17"/>
 			</DIV>
 			<!--DIV>
@@ -418,7 +425,7 @@ th {
 			<DIV>
 				<LABEL>Reaction:</LABEL><INPUT type="float" size="3" id="hotReaction" value="0.50"/>
 				<!--LABEL>Max reaction in hub:</LABEL><INPUT size="4" type="float" id="maxReactionInHubHot" value="0.7"/-->
-				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHot" value="0.20"/>
+				<LABEL>Max mean-line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHot" value="0.20"/>
 				<LABEL>Min hub/tip ratio: </LABEL><INPUT size="4" type="float" id="optHubToTipHot" value="0.60"/> 
 				<LABEL>Tested hub/tip ratios: </LABEL><INPUT size="4" type="float" id="minHubToTipHot" value="0.50"/> <INPUT size="4" type="float" id="maxHubToTipHot" value="0.99"/> 
 				<LABEL>Rotor blade max thickess in tip mm</LABEL><INPUT size="4" type="float" id="maxTipThicknessHot" value="2"/>
@@ -428,7 +435,7 @@ th {
 				<!--LABEL>Min Reynolds number of rotor tip:</LABEL><INPUT size="4" type="float" id="minTipReHot" value="800000"/-->
 			</DIV>
 			<DIV>
-				<LABEL>Max Custom-450 blade stress (% of 0.2% yield strengths below 427°C) </LABEL><INPUT size="4" type="float" id="gtd450StressPercent" value="33"/>
+				<LABEL>Max Custom-450 blade stress (% of 0.2% yield strength below 427°C) </LABEL><INPUT size="4" type="float" id="gtd450StressPercent" value="33"/>
 				<a target="_blank" href="https://www.carpentertechnology.com/hubfs/7407324/Material%20Saftey%20Data%20Sheets/Custom%20450.pdf">Custom 450</a>
 				<a target="_blank" href="https://upcommons.upc.edu/bitstream/handle/2117/350237/ANEXO%203-%20Materiales.pdf?sequence=2">MAR-M 200</a>
 				<a target="_blank" href="https://www.specialmetals.com/documents/technical-bulletins/nimonic-alloy-105.pdf">Nimonic 105</a>
@@ -441,7 +448,6 @@ th {
 			</DIV>
 			<DIV>
 				<LABEL>Gap between rotor and stator (% of rotor chord length):</LABEL> <INPUT type="float"  size="4" id="rotorStatorGap" value="20" title=""/><SPAN> %</SPAN>
-				<LABEL>Increase blade strength in all turbomachines </Label><INPUT size="4" type="float" id="strengthIncrease" value="20"/><SPAN> %</SPAN>
 			</DIV>
 			<DIV id="shaftData"> <!--style="display:none">-->
 				<!-- https://en.wikipedia.org/wiki/Maraging_steel, https://en.wikipedia.org/wiki/Aermet, https://en.wikipedia.org/wiki/Ultimate_tensile_strength -->
@@ -468,9 +474,9 @@ th {
 			<br/>
 			<H3>Hot turbine design parameters</H3>
 			<DIV><!-- 0.216, 0.44-->
-				<LABEL>Mean line load coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineLoadCoefficient" value="0.70"/>
-				<LABEL>Mean line flow coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineFlowCoefficient" value="0.46"/>
-				<LABEL>Hot turbines:</LABEL><INPUT size="2" data-type="unit" id="cHotTurbineUnits2" value="4"/>
+				<LABEL>Mean-line load coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineLoadCoefficient" value="0.70"/>
+				<LABEL>Mean-line flow coefficient: </LABEL><INPUT size="5" type="float" id="hotTurbineFlowCoefficient" value="0.46"/>
+				<LABEL>Hot turbines in shaft:</LABEL><INPUT size="2" data-type="unit" id="cHotTurbineUnits2" value="2"/>
 				<LABEL>Initial stages:</Label><INPUT size="5" type="float" id="cStagesHotTurbine" value="14"/>
 				<!--LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="hotTurbineRpm" id="hotTurbineRpm1800" value="1800"/><Span>1800</span-->
 			</DIV>
@@ -503,7 +509,7 @@ th {
 				<LABEL>Reaction:</LABEL><INPUT type="float" size="3" id="hotTurbineReaction" value="0.50"/>	<!-- 0.44 => +0.1%-->
 				<!--LABEL>Max reaction in bladed root:</LABEL><INPUT size="4" type="float" id="maxReactionInHubHotTurbine" value="0.8"/-->
 				<!--LABEL>Divide optimal AR by:</LABEL><INPUT size="4" type="float" id="divOptARHotTurbine" value="1"/-->
-				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHotTurbine" value="0.18"/>
+				<LABEL>Max mean-line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHotTurbine" value="0.18"/>
 				<LABEL>Max aspect ratio:</LABEL><INPUT size="4" type="float" id="maxAspectRatioHotTurbine" value="12"/>
 				<LABEL>Min hub/tip ratio: </LABEL><INPUT size="4" type="float" id="optHubToTipHotTurbine" value="0.43"/> 
 				<LABEL>Tested hub/tip ratios: </LABEL><INPUT size="4" type="float" id="minHubToTipHotTurbine" value="0.30"/> <INPUT size="4" type="float" id="maxHubToTipHotTurbine" value="0.99"/> 
@@ -534,9 +540,9 @@ th {
 			<br/>
 			<H3>Cryogenic compressor design parameters</H3>
 			<DIV>
-				<LABEL>Mean line load coefficient: </LABEL><INPUT size="5" type="float" id="coldLoadCoefficient" value="0.32"/>
-				<LABEL>Mean line flow coefficient: </LABEL><INPUT size="5" type="float" id="coldFlowCoefficient" value="0.58"/>
-				<LABEL>Cryogenic compressors:</LABEL><INPUT size="2" data-type="unit" id="cColdUnits2" value="4"/>
+				<LABEL>Mean-line load coefficient: </LABEL><INPUT size="5" type="float" id="coldLoadCoefficient" value="0.32"/>
+				<LABEL>Mean-line flow coefficient: </LABEL><INPUT size="5" type="float" id="coldFlowCoefficient" value="0.58"/>
+				<LABEL>Cryogenic compressors in shaft:</LABEL><INPUT size="2" data-type="unit" id="cColdUnits2" value="2"/>
 				<LABEL>Initial stages:</Label><INPUT size="5" type="float" id="cStagesCold" value="14"/>
 				<!--LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="coldRpm" id="coldRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="coldRpm" id="coldRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="coldRpm" id="coldRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="coldRpm" id="coldRpm1800" value="1800"/><Span>1800</span-->
 			</DIV>
@@ -600,9 +606,9 @@ th {
 			<br/>
 			<H3>Cryogenic turbine design parameters</H3>
 			<DIV>
-				<LABEL>Mean line load coefficient: </LABEL><INPUT size="5" type="float" id="coldTurbineLoadCoefficient" value="0.70"/>
-				<LABEL>Mean line flow coefficient: </LABEL><INPUT size="5" type="float" id="coldTurbineFlowCoefficient" value="0.43"/>
-				<LABEL>Cryogenic turbines:</LABEL><INPUT size="4" data-type="unit" id="cColdTurbineUnits2" value="2"/>
+				<LABEL>Mean-line load coefficient: </LABEL><INPUT size="5" type="float" id="coldTurbineLoadCoefficient" value="0.70"/>
+				<LABEL>Mean-line flow coefficient: </LABEL><INPUT size="5" type="float" id="coldTurbineFlowCoefficient" value="0.43"/>
+				<LABEL>Cryogenic turbines in shaft:</LABEL><INPUT size="4" data-type="unit" id="cColdTurbineUnits2" value="1"/>
 				<LABEL>Initial stages:</Label><INPUT size="5" type="float" id="cStagesColdTurbine" value="4"/>
 				<!--LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="coldTurbineRpm" id="coldTurbineRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="coldTurbineRpm" id="coldTurbineRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="coldTurbineRpm" id="coldTurbineRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="coldTurbineRpm" id="coldTurbineRpm1800" value="1800"/><Span>1800</span-->
 			</DIV>
@@ -631,7 +637,7 @@ th {
 			</DIV>
 			<DIV>
 				<LABEL>Reaction: </LABEL><INPUT type="float" size="3" id="coldTurbineReaction" value="0.50"/>
-				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordColdTurbine" value="0.20"/>
+				<LABEL>Max mean-line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordColdTurbine" value="0.20"/>
 				<LABEL>Max aspect ratio:</LABEL><INPUT size="4" type="float" id="maxAspectRatioColdTurbine" value="10"/>
 				<LABEL>Min hub/tip ratio: </LABEL><INPUT size="4" type="float" id="optHubToTipColdTurbine" value="0.35"/> 
 				<LABEL>Tested hub/tip ratios: </LABEL><INPUT size="4" type="float" id="minHubToTipColdTurbine" value="0.30"/> <INPUT size="4" type="float" id="maxHubToTipColdTurbine" value="0.99"/> 
@@ -669,15 +675,15 @@ th {
 				<LABEL>Heat Pump fluid:</LABEL>
 				<SELECT id="hpFluid" onchange="updateHeatPump($(this).val())"><OPTION>Argon</OPTION><OPTION selected>Helium</OPTION><OPTION>Hydrogen</OPTION><OPTION>Methane</OPTION><OPTION>Nitrogen</OPTION>
 				</SELECT>
-				<LABEL>Heat pump compressors: </LABEL><INPUT size="2" data-type="unit" id="cHpUnits2" value="2"/>
+				<LABEL>Heat pump compressors in shaft: </LABEL><INPUT size="2" data-type="unit" id="cHpUnits2" value="1"/>
 				<LABEL>Compressor #1 stages:</Label><INPUT size="5" type="float" id="cStagesHp" value="15"/>
 				<LABEL>Compressor #2 stages:</Label><INPUT size="5" type="float" id="cStagesHp2" value="18"/>
 				<!--LABEL>Generator rpm:</LABEL><INPUT size="5" type="radio" name="hpRpm" id="hpRpm3000" value="3000"/><Span>3000</span> <INPUT size="5" type="radio" name="hpRpm" id="hpRpm3600" value="3600"/><Span>3600</span><INPUT size="5" type="radio" name="hpRpm" id="hpRpm1500" checked value="1500"/><Span>1500</span> <INPUT size="5" type="radio" name="hpRpm" id="hpRpm1800" value="1800"/><Span>1800</span-->
 			</DIV>
 			<DIV>
-				<LABEL>Mean line load coefficient 1: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient" value="0.33"/>
+				<LABEL>Mean-line load coefficient 1: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient" value="0.33"/>
 				<LABEL>Mean flow coefficient 1: </LABEL><INPUT size="5" type="float" id="hpFlowCoefficient" value="0.59"/>
-				<LABEL>Mean line load coefficient 2: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient2" value="0.33"/>
+				<LABEL>Mean-line load coefficient 2: </LABEL><INPUT size="5" type="float" id="hpLoadCoefficient2" value="0.33"/>
 				<LABEL>Mean flow coefficient 2: </LABEL><INPUT size="5" type="float" id="hpFlowCoefficient2" value="0.60"/>
 				<LABEL>Internal pressure: </LABEL>
 					<!--INPUT size="5" type="radio" name="hpPressure" id="hpPressureAdjusted" value="adjusted"/>
@@ -714,8 +720,7 @@ th {
 				<LABEL>Rotor blade max thickess in tip mm</LABEL><INPUT size="4" type="float" id="maxTipThicknessHp" value="1"/>
 			</DIV>
 			<DIV>
-				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHp" value="0.20"/>
-				<LABEL>Max aspect ratio:</LABEL><INPUT size="4" type="float" id="maxAspectRatioHp" value="7"/>
+				<LABEL>Max mean-line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHp" value="0.20"/>
 				<LABEL>Min hub/tip ratio: </LABEL><INPUT size="4" type="float" id="optHubToTipHp" value="0.61"/> 
 				<LABEL>Tested hub/tip ratios: </LABEL><INPUT size="4" type="float" id="minHubToTipHp" value="0.40"/> 
 											  <INPUT size="4" type="float" id="maxHubToTipHp" value="0.99"/> 
@@ -750,7 +755,7 @@ th {
 			</DIV>
 				<LABEL>Load coefficient of turbine: </LABEL><INPUT size="5" type="float" id="hpTurbineLoadCoefficient" value="0.63"/>
 				<LABEL>Flow coefficient of turbine: </LABEL><INPUT size="5" type="float" id="hpTurbineFlowCoefficient" value="0.45"/>
-				<LABEL>Heat pump turbines: </LABEL><INPUT size="2" data-type="unit" id="cHpTurbineUnits2" value="2"/>
+				<LABEL>Heat pump turbines in shaft: </LABEL><INPUT size="2" data-type="unit" id="cHpTurbineUnits2" value="1"/>
 				<LABEL>Turbine stages:</Label><INPUT size="5" type="float" id="cStagesHpTurbine" value="11"/>
 			</DIV>
 			<DIV>
@@ -764,7 +769,7 @@ th {
 			<DIV>
 				<LABEL>Turbine reaction: </LABEL><INPUT type="float" size="3" id="hpTurbineReaction" value="0.50"/>
 				<LABEL>Turbine solidity c/s </LABEL><INPUT type="float"  size="4" id="solidityHpTurbine" value="1.12" title="Chord spacing: chord length/distance between chords"/>
-				<LABEL>Max mean line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHpTurbine" value="0.18"/>
+				<LABEL>Max mean-line tMax/c:</LABEL><INPUT size="4" type="float" id="tMaxToChordHpTurbine" value="0.18"/>
 				<LABEL>Max aspect ratio:</LABEL><INPUT size="4" type="float" id="maxAspectRatioHpTurbine" value="10"/>
 				<LABEL>Min hub/tip ratio: </LABEL><INPUT size="4" type="float" id="optHubToTipHpTurbine" value="0.45"/> 
 				<LABEL>Tested hub/tip ratios: </LABEL><INPUT size="4" type="float" id="minHubToTipHpTurbine" value="0.30"/> 
@@ -796,7 +801,6 @@ th {
 				<LABEL>Relative pressure loss in each heat exchanger: </LABEL> <INPUT size="4" id="heatExchangePressureLoss" type="float" value="0.001">
 				<LABEL>Heat exchanger panel length: </LABEL><INPUT size="4" id="heatExchangerLength" type="float" value="0.5">
 				<LABEL>Heat exchanger temp difference (K): </LABEL><INPUT size="4" id="heatExchangeDeltaT" type="float" value="2" onchange="metricsChanged()">
-				<LABEL>Cooling water temperature (K): </LABEL><INPUT size="4" id="coolingWaterTemp" type="float" value="278" onchange="metricsChanged()">
 			</DIV>
 			<DIV>
 				<LABEL>Double sheet panel height*sheet thickness at 100 kPa diff: </LABEL><INPUT size="4" id="plateHeightToSheetThickness" type="float" value="40">
@@ -995,7 +999,8 @@ function drawPlantOperationDiagram(id, title, o )
 	drawDiagram4Y( id, xVals, '%', arrayOfyVals, yTitles, title, bottomLines, minMaxDefault);
 }
 
-var preHeatingOfChargeLevel = [];	// 
+// default values for case when there is no plant simulation
+var preHeatingOfChargeLevel = [168.2264535627036,168.22644523173406,168.22643694692132,168.22642869033922,168.22642045369798,168.22641223187784,168.22640402185527,168.22639582115474,168.22638762844386,168.22637944255564,168.22637126260085,168.2263630878503,168.22635491765482,168.22634675161862,168.22633858947444,168.2263304308636,168.22632227541152,168.22631412307328,168.22630597336385,168.2262978263949,168.22628968189596,168.22628153976746,168.22627339985308,168.226265262046,168.2262571262567,168.22624899252284,168.22624086057004,168.22623273041074,168.2262246020277,168.22621647529388,168.22620835024074,168.2262002267492,168.2261921048361,168.2261839844337,168.2261758654921,168.22616774799423,168.22615963189378,168.22615151720544,168.22614340374886,168.22613529165332,168.22612718083133,168.226119071364,168.2261109630785,168.22610285602727,168.22609475023344,168.22608664563356,168.22607854205384,168.22607043978377,168.22606233854626,168.22605423841057,168.22604613955934,168.22603804171445,168.2260299450455,168.2260218494076,168.22601375481952,168.2260056613731,168.22599756886,168.22598947745018,168.22598138709415,168.22597329774393,168.2259652094452,178.39242572825464,204.52321872408797,239.5177294128585,289.77300673473565,360.9238551760038,460.56211192630514,598.3347662873754,786.1812011917697,1038.8100896246285,1374.1004567185796,1813.4966946497073,2381.9898630934304,3110.2092429468307,4033.1158398206317,5190.51574025276,6627.937502019685,8396.61930590601,10553.354506867014,13160.062114068985,16284.757483377005,20000.466572121382,24384.77391480796,29519.72825247782,35491.209460246246,42388.69582475861,50306.6921728955,59347.17963029399,69625.20668068783,81276.5177998852,94475.4657143833,109462.11769377289,126583.02986349165,146359.75034289708,146359.75034289708,146359.75034289708,146359.75034289708,146359.75034289708,146359.75034289708,146359.75034289708,146359.75034289708];
 var testPreHeatingOfChargeLevel = new Array(101);	
 
 function getPreheatingOfChargeLevelMWh( chargeLevel, massFlowKg ) {
@@ -1025,8 +1030,8 @@ function setPowerMarketType(elem) {
 
 function simulateCashFlow(title, iFrom, iTo, data, chargeLevelIn, i15minFrom, wasChargingParam, years) {
 	setPowerMarketType();
-	var cPowerIn = getSetFloatParam('cPowerIn',getIntParam('cHotUnits2',4));
-	var cPowerOut = getSetFloatParam('cPowerOut',getIntParam('cHotTurbineUnits2',4));
+	var cPowerIn = getSetFloatParam('cPowerIn',metrics.cUnits*getIntParam('cHotUnits2',4));
+	var cPowerOut = getSetFloatParam('cPowerOut',metrics.cUnits*getIntParam('cHotTurbineUnits2',4));
 	const ctx = {
 		//data: datesAndMWhPrices,
 		maxChargeMWh: getSetFloatParam('storageCapasityGWh',gCycleData.storedElectricity_kWh/1000000)*1000,
@@ -1353,7 +1358,7 @@ if (Number.isNaN(this.operation.boughtInEur) || Number.isNaN(this.operation.boug
 
 			this.operation.chargeLevelOut = this.chargeLevel;
 			this.operation.maxChargeMWh = this.maxChargeMWh;
-			//console.log("Price yield up:"+Math.round(100*newUp/oldUp)+"%, down="+Math.round(100*newDown/oldDown)+"%");
+			//console.log("Price elasticity up:"+Math.round(100*newUp/oldUp)+"%, down="+Math.round(100*newDown/oldDown)+"%");
 		}
 	// TBD
 	}
@@ -1401,7 +1406,7 @@ if (Number.isNaN(this.operation.boughtInEur) || Number.isNaN(this.operation.boug
 			const minYieldDown = Math.pow(1/ctx.yield500MW, ctx.powerOutMW/500);
 			const maxYieldUp = Math.pow(ctx.yield500MW, ctx.powerInMW*ctx.powerInUnits/500);
 			const maxYieldDown = Math.pow(1/ctx.yield500MW, ctx.powerOutMW*ctx.powerOutUnits/500);
-console.log("Price yield up:"+Math.round(100*minYieldUp)+" - "+Math.round(100*maxYieldUp)+", down:"+Math.round(100*minYieldDown)+" - "+Math.round(100*maxYieldDown));
+console.log("Price elasticity up:"+Math.round(100*minYieldUp)+" - "+Math.round(100*maxYieldUp)+", down:"+Math.round(100*minYieldDown)+" - "+Math.round(100*maxYieldDown));
 	return ctx;
 }
 
@@ -2082,13 +2087,14 @@ function getMixTempAtHP( h, p, tMin, tMax, mix ) {
 	});
 }
 function changeUnits(elem) {
+/*
 	const newRpm = parseInt(elem.value);
 	const change = (newRpm/metrics.rpm)**2;
 	$("[data-type=unit]").each( function() {
 		$(this).val(Math.round(change*parseInt($(this).val())));
 	});
 	metrics.numberOfUnits = Math.round(numberOfUnits*change);
-	metrics.rpm = newRpm;
+	metrics.rpm = newRpm;*/
 }
 
 
@@ -3116,6 +3122,7 @@ console.log("Waiting coolprop to init ...");
 				initConfigurations();
 			}
 			else {
+				const startTime = Date.now();
 				//$("#name").val("Argon");
 				//setGasMassFlowFor1200MW("#name");
 				pLowParam = null;
@@ -3124,6 +3131,7 @@ console.log("Waiting coolprop to init ...");
 				//drawLossParamDiagrams();
 				drawIt(true, true, isChecked('drawCompressors'));
 				$("#waitUntilReady").css("display", "none");
+				console.log("*** USED TIME: "+Math.round((Date.now() - startTime)/1000)+" seconds ***");
 			}
 		}
 	}
@@ -3273,6 +3281,7 @@ console.log("Waiting coolprop to init ...");
 	}
 	var lastCycleData;
 	function drawIt(drawTpDiagram, drawStorageFlag, drawCompressors) {
+			console.log("drawIt("+drawTpDiagram+", "+drawStorageFlag+", "+drawCompressors+")");
 			if (isMetricsChanged) {
 				// for reload of everything
 				console.log("isMetricsChanged="+isMetricsChanged);
@@ -3330,6 +3339,8 @@ console.log("Waiting coolprop to init ...");
 													  cryogenicCooling, adjustedCompressorPlow, true );
 			if (cycleData == null) return;
 			lastCycleData = cycleData;
+
+
 			if (drawTpDiagram) {
 				if (metrics.massFlowPercent == 100) {
 					if (document.getElementById('massFlowPercent').disabled) {
@@ -3347,13 +3358,13 @@ console.log("Waiting coolprop to init ...");
 					curCycleData = gCycleData = cycleData;
 					document.getElementById('massFlowPercent').disabled = false;
 					// update market simulation params to changed values
-					$('#cPowerOut').val(getIntParam('cHotTurbineUnits2',4));
-					$('#cPowerIn').val(getIntParam('cHotUnits2',4));
+					$('#cPowerOut').val(metrics.cUnits*getIntParam('cHotTurbineUnits2',4));
+					$('#cPowerIn').val(metrics.cUnits*getIntParam('cHotUnits2',4));
 					$('#storageCapasityGWh').val(Math.round(gCycleData.storedElectricity_kWh/1000000));
 					$('#netPowerInMW').val(Math.round(gCycleData.netWorkIn/1000));
 					$('#netPowerOutMW').val(Math.round(gCycleData.netWorkOut/1000));
 					if (typeof gCycleData.switchTimeText === 'undefined') {
-						throw new Error("X");
+						//throw new Error("X");
 					}
 					curHotCycle = hotCycleG = cycleData.hotCycle;
 					curColdCycle = coldCycleG = cycleData.coldCycle;
@@ -3364,12 +3375,13 @@ console.log("Waiting coolprop to init ...");
 					curColdCycle = cycleData.coldCycle;
 				}
 				iDrawBraytonCycle( "myCanvas", hotCycle, coldCycle, cycleData, drawCompressors );
-				simulateNordpoolFi();
 			}
 			cycleData.hotCycle = hotCycle;
 			cycleData.coldCycle = coldCycle;
 			if (drawStorageFlag) {
-				drawStorage( 'myPicture', getMetrics(), cycleData );
+				drawStorage( 'myPicture', metrics, gCycleData ? gCycleData : cycleData );
+				simulateNordpoolFi();
+				$("#waitUntilReady0").css("display", "none");
 			}
 /*
 		}
@@ -3682,7 +3694,8 @@ function getScaleOfMaxHighDiff( type, tHigh, tLow )
 	// remaining cold capasity when tHighOut increases in 20 K steps from tLowLp/tLowHp 
 	const tDiffTopRatiosLp=[1,0.9656514262588101,0.9212450796782863,0.891970554444932,0.872315919429013,0.8594809064989352,0.8515590913920444,0.8436194649849025,0.8386481447924269,0.8336698543649289,0.8306795323642817,0.827686698266405,0.8246913510165654,0.8216934895600301,0.8196935179533196,0.8166914638084399,0.8146886960995618,0.812684809402918,0.810679803405995,0.8086736777962792,0.806666432261257,0.8036534634151512,0.8016434166996168,0.7986262446178356,0.7956065491883381,0.791576361585121,0.7875416836552193,0.7814812419288466,0.7713580186666044];
 	const tDiffTopRatiosHp=[1,0.9922539421546865,0.9903157675166752,0.9903157675166752,0.9903157675166752,0.9883769285803449,0.9883769285803449,0.9883769285803449,0.9883769285803449,0.9883769285803449,0.9864374252318734,0.9864374252318734,0.9864374252318734,0.9864374252318734,0.9864374252318734,0.9864374252318734,0.9864374252318734,0.9844972573574378,0.9844972573574378,0.9844972573574378,0.9844972573574378,0.9844972573574378,0.9844972573574378,0.9844972573574378,0.9825564248432151,0.9825564248432151,0.9825564248432151,0.9825564248432151,0.9825564248432151,0.9825564248432151,0.9806149275753829,0.9806149275753829,0.9806149275753829,0.9806149275753829,0.9806149275753829,0.9786727654401184,0.9786727654401184,0.9786727654401184,0.9786727654401184,0.9786727654401184,0.9767299383235988,0.9767299383235988,0.9767299383235988,0.9747864461120014,0.9747864461120014,0.9747864461120014,0.9728422886915036,0.9728422886915036,0.9708974659482825,0.9689519777685155,0.9689519777685155,0.9670058240383798,0.9631115194717113,0.9572650681483751];
-	var maxDiff = ((type == 'lp' ?  tHigh - getFloatParam("tMaxDiffHighExitLp", 300) : tHigh - getFloatParam("tMaxDiffHighExitHp", 400)) - tLow)/20;
+	//var maxDiff = ((type == 'lp' ?  tHigh - getFloatParam("tMaxDiffHighExitLp", 300) : tHigh - getFloatParam("tMaxDiffHighExitHp", 400)) - tLow)/20;
+	var maxDiff = ((type == 'lp' ?  getFloatParam("tMaxDiffHighExitLp", 300) : getFloatParam("tMaxDiffHighExitHp", 400)) - tLow)/20;
 	var tDiffRatios = type == 'lp' ? tDiffTopRatiosLp : tDiffTopRatiosHp;
 	if (tDiffRatios.length-1 <= maxDiff) return tDiffRatios[tDiffRatios.length-1];  	// silly config param => silly results
 	var iMaxDiff = Math.floor(maxDiff);
@@ -3861,11 +3874,15 @@ function getMetrics(pHigh, storageSize, tHighParam) {
 	testResult( 0, 0, 0.02, 0.00005, function (wetness) {
 		//if (tc && tc.wetness) wetness = tc.wetness;	// faster adnd better accurancy
 		metrics.hLow = hGas - (hGas-hLiq)*wetness;
-		testResult( hGas - (hGas - metrics.hLow)*dischargePressureDrop, tSat-10, tSat, 10, function (t) {
+		if (!testResult( hGas - (hGas - metrics.hLow)*dischargePressureDrop, tSat-10, tSat, 10, function (t) {
 			tCompressor = t;
-			return Module.PropsSI('H', 'T', t, 'Q', 1, name);
-		}, 15);
+			const hTest = Module.PropsSI('H', 'T', t, 'Q', 1, name);
+			return hTest == Infinity ? -100 : hTest;
+		}, 15)) {
+			console.error("Could not find tLowInDischarge: t="+tCompressor+", wetness="+wetness);
+		}
 		metrics.pLowInDischarge = Module.PropsSI('P', 'T', tCompressor, 'Q', 1, name);
+		if (metrics.pLowInDischarge == Infinity || Number.isNaN(metrics.pLowInDischarge)) throw new Error;
 		mainTurbin = doAdiabaticProcessWithS( name, metrics.pHigh, metrics.pLowInDischarge, tHigh, tEfficiency,null );
 		mainCompressor = doAdiabaticProcessWithS( name, metrics.pLow, metrics.pHigh, mainTurbin.tOut, cEfficiency, null, tHigh );
 		coldCompressor = doAdiabaticProcess( name, metrics.pLowInDischarge, metrics.pHigh, metrics.hLow, ccEfficiency, null );
@@ -3875,7 +3892,7 @@ function getMetrics(pHigh, storageSize, tHighParam) {
 	metrics.hLow = hGas - (hGas-hLiq)*tc.wetness;
 console.log("tc.wetness="+tc.wetness+", tCompressor="+tCompressor+", pLowInDischarge="+metrics.pLowInDischarge+", tc="+JSON.stringify(tc,null,2));
 
-	if (false)
+	if (name == 'Hydrogen' || name == 'Helium')
 	{
 		// Parts by total rock heat enthalpy 
 		metrics.lpGravelPart = tc.lpGravelWeight / (tc.lpGravelWeight + tc.hpGravelWeight);
@@ -4182,6 +4199,8 @@ if (Math.abs(metrics.V3-metrics.testV3)>10) {
 	return;
 }*/
 		metrics.lowPressureStorageVolume = metrics.V3 - metrics.vLpInsulation + (metrics.topFillUsedAsWeight ||metrics.noTopFill ? 0 : metrics.V4);
+		metrics.storageVolume = metrics.V3 + (metrics.topFillUsedAsWeight ||metrics.noTopFill ? 0 : metrics.V4) + metrics.V1;
+
 //console.log(metrics.lowPressureStorageVolume+" = "+metrics.V4+" + "+metrics.V3+" - "+metrics.vLpInsulation);
 		var hpGravelPartNow = metrics.highPressureStorageVolume*metrics.gravelDensity
 				/(metrics.highPressureStorageVolume*metrics.gravelDensity + metrics.lowPressureStorageVolume*metrics.lpGravelDensity);
@@ -4594,7 +4613,7 @@ console.log("External ice storage:"+JSON.stringify(ret, null, 2));
 				// Sheet thickness = sheetThickness, plate thickness = plateHeight, hpCrossArea = high pressure portion of cross area, distance of walls = 20*sheetThickness
 				// Dh = 2*area/wettedPerimeter, 
 				// vHp = totalCrossArea * hpMassFlow/hpDensity/hpAreaM2; 
-				// vLp = totalCrossArea * lpMassFlow/lpDensity/lpAreaM2;
+				// vLp = totalCrossArea * lpMassFlow/lpDensity/lpAreaM2;°
 				// deltaP1/P1 = deltaP2/P2 
 				// 32*L*hpVisc*vHp/hpDh^2/hpP = 32*L*lpVisc*vLp/lpDh^2/lpP;
 				// = 32*L*hpVisc*totalCrossArea*hpMassFlow/hpDensity/hpAreaM2/hpDh^2/hpP = 32*L*lpVisc*totalCrossArea * lpMassFlow/lpDensity/lpAreaM2/lpDh^2/lpP;
@@ -4957,19 +4976,19 @@ if (Number.isNaN(htRadiativeHeatFlow)) throw new Error("htRadiativeHeatFlow="+ht
 	function processGravelHeatTransfer(cache, items, i, duration, stepLen, trace) 
 	{
 		//return true;
-		const rockThermalConductivity = 2.5; // W/mK, 
+		const rockThermalConductivity = 2.5; // W/m/K, 
 		const area = 1;  // gravel has a very irregular surface, but we but only forward looking part means, assume two infinite plates
 		if (!gravelConductiveHeatTransfer) {
 			// see https://trepo.tuni.fi/bitstream/handle/10024/135911/Convective_heat_transfer_in_crushed.pdf?sequence=1
 			// 5/16 crushed stone top to down heat conducticity 0.37 W/m/K, median partice diameter is 11 mm, but average particle diameter is less, mid temp 294 K =>
 			// We estimate conductive heat transfer based on a random work probably using crushed stone with high silicate content and thus high ambient thermal condutivity
 			// The used conductive heatTransfer does not rally matter, because radiative ht is major part at high temperatures
-			//const tcGravel_5_16 = 0.37; // getFloatParam('tcGravel_5_16', 0.37);
+			const tcGravel_5_16 = 0.37; //getFloatParam('tcGravel_5_16', 0.37);
 			const htRadiative = area*gravelViewFactor*rockEmissivity*stefanBolzman*(Math.pow(294+0.011*dp2AverageDistance,4)-Math.pow(294,4));
 			// 1/0.37 = (1-porosity)/rockThermalConductivity + (1/(gravelConductiveHeatTransfer + htRadiative);
 			// => 1/0.37 - (1-porosity)/rockThermalConductivity = 1/(gravelConductiveHeatTransfer + htRadiative)
 			// => gravelConductiveHeatTransfer = 1/(1/0.37 - (1-porosity)/rockThermalConductivity) - htRadiative;
-			gravelConductiveHeatTransfer = 1/(1/0.37 - (1-cache.porosity)/rockThermalConductivity) - htRadiative;	// OK, radiative is paraller flow
+			gravelConductiveHeatTransfer = 1/(1/tcGravel_5_16 - (1-cache.porosity)/rockThermalConductivity) - htRadiative;	// OK, radiative is paraller flow
 console.log("gravelConductiveHeatTransfer="+gravelConductiveHeatTransfer+"; htRadiativeK294="+htRadiative+", 1/R="+(1/((1-cache.porosity)/rockThermalConductivity + (1/(gravelConductiveHeatTransfer + htRadiative)))));
 		}
 		var tDiff = i+1 == items.length || (cache.iceLength && i+1 == cache.iceLength) ? 0 :  items[i+1].tRock - items[i].tRock;
@@ -7131,6 +7150,8 @@ console.log("pLow="+pLow+", pLowInCompressor="+pLowInCompressor);
 		// Main charge process, the compression from warm pLow => hot pHigh calculated as reverse turbin, because we we know only the high temperature
 		var tc;
 		const cycleData = {};
+		
+		cycleData.minSwitchTime = 16*60; cycleData.maxSwitchTime = 30*60;	// set arbitrary values for default case without simulation
 
 		var mainCompressor = //metrics.massFlowPercent == 100 ? 
 			//doAdiabaticProcessWithS( name, pHighFromCompressor, pLowInCompressor, tHighActual, 1/cEfficiency,showLog ? "Hot compressor" : null, null, powerAndHeat ? null : mainTurbin.tOut-warmHeatExchangerLoss ) :
@@ -7147,8 +7168,13 @@ console.log("pLow="+pLow+", pLowInCompressor="+pLowInCompressor);
 		const tSatInMinP = Module.PropsSI('T', 'P', pLowInCompressor100, 'Q', 0, name);
 console.log("tSatInMinP="+tSatInMinP+", pLowInCompressor100="+pLowInCompressor100);
 		var coldExpander = name == 'TEST_Helium' ? 
-				doAdiabaticProcessWithLiquidAirCooling( name, pLow, pHigh, 1/ctEfficiency, compressorMassFlow, showLog ? "Cold turbine" : null, tSatAir, 1.37 ) :
-				doAdiabaticProcess( name, pLow, pHigh, hLow, 1/ctEfficiency, showLog ? "Cold turbine" : null);
+				doAdiabaticProcessWithLiquidAirCooling( name, pLow, mainCompressor.pOut, 1/ctEfficiency, compressorMassFlow, showLog ? "Cold turbine" : null, tSatAir, 1.37 ) :
+				doAdiabaticProcess( name, pLow, mainCompressor.pOut, hLow, 1/ctEfficiency, showLog ? "Cold turbine" : null);
+/*
+	Forward version produce the same values as the reverse version
+const coldExpanderTest = doAdiabaticProcess( name, mainCompressor.pOut, pLow, coldExpander.hIn, ctEfficiency, showLog ? "Cold turbine test" : null);
+console.log("coldExpander="+JSON.stringify(coldExpander, null, 2));
+console.log("coldExpanderTest="+JSON.stringify(coldExpanderTest, null, 2));*/
 		coldExpander.massFlow = compressorMassFlow;
 		var coldCompressor = name == 'TEST_Helium' ? 
 			doAdiabaticProcessWithLiquidAirCooling( name, pLowInDischarge, pHighInDischarge, ccEfficiency, turbinMassFlow, showLog ? "Cold compressor" : null, tSatAir, 1.37 ) :
@@ -7178,6 +7204,7 @@ console.log("tSatInMinP="+tSatInMinP+", pLowInCompressor100="+pLowInCompressor10
 		// these portios are based on simulations
 		const hpHalfCharged = metrics.hpGravelPart/2;
 		const lpHalfCharged = metrics.externalCryoStorage ? 5/12 : 1/8;	// based on simulations
+console.log("hpHalfCharged="+hpHalfCharged+", lpHalfCharged="+lpHalfCharged);
 			
 		var dischargePDrops = metrics.dischargePDrops;
 		const useExistingPipes = typeof dischargePDrops !== 'undefined';
@@ -7540,15 +7567,15 @@ TBD: Immeadiate grid power control: VFC out flow of cold compressor is heat exch
 */
 		metrics.nim105HeatExchanger = calcFlatPlateHeatExchanger( turbinMassFlow*1000/4, null, hotCycle[0].tIn, 1073, pHigh, pHigh*1.2, metrics.heatExchangePressureLoss,
 							{length: metrics.heatExchangerLength, heatExchangeDeltaT: 10, pLowFluid : name, pHighFluid : name}, 
-							'Nimonic105 '+name+" to "+name+" HE");
+							"Nimonic105 Heat Exchanger");
 		metrics.nim105HeatExchanger.material = 'Nimonic105';
 		metrics.ss304HHeatExchanger = calcFlatPlateHeatExchanger( turbinMassFlow*1000/4, null, 1083, 573, pHigh, pHigh*1.2, metrics.heatExchangePressureLoss,
 							{length: metrics.heatExchangerLength*2, heatExchangeDeltaT: 10, pLowFluid : name, pHighFluid : name}, 
-							'304H '+name+" to "+name+" HE");
+							"304H Heat Exchanger");
 		metrics.nim105HeatExchanger.material = '304H';
 		metrics.alHeatExchanger = calcFlatPlateHeatExchanger( turbinMassFlow*1000/4, null, 583, coldCycle[0].tOut, pHigh, pHigh*1.2, metrics.heatExchangePressureLoss,
 							{length: metrics.heatExchangerLength*2, heatExchangeDeltaT: 5, pLowFluid : name, pHighFluid : name}, 
-							'AL '+name+" to "+name+" HE");
+							"Aluminum Heat Exchanger");
 		// scale heatPumpNetWorkIn to charge massFlow=1
 		const hotGearEfficiency = (cycleData.constantRpmHot ? 1 : metrics.gearEfficiency);
 		const coldGearEfficiency = (cycleData.constantRpmCold ? 1 : metrics.gearEfficiency);
@@ -7645,15 +7672,30 @@ console.log("hotCycle[0].massFlow="+hotCycle[0].massFlow+", hotCycle[1].massFlow
 console.log("metrics.pHighInDischarge = "+metrics.pHighInDischarge);
 			//firstChargeDischargeSimulation()
 			//new PlantSimulation(cycleData, 0.2, 3600).firstChargeDischargeSimulation(); // => 859 GWh
-			const test = new PlantSimulation(cycleData, 0.1, 900)
-			test.firstChargeDischargeSimulation(preHeatingOfChargeLevel); // => 1034 GWh!!
-			metrics.fullPowerSeconds = test.fullPowerSeconds;
-			console.log("fullPowerSeconds="+test.fullPowerSeconds+", => capasity="+(2400*test.fullPowerSeconds/3600/1000)+" GWh");
-			console.log("preHeatingOfChargeLevel="+JSON.stringify(preHeatingOfChargeLevel));
-			//var x = test.switchToChargeMode();
-			//var y = test.switchToDischargeMode();
-			//console.log("Switch to charge:"+JSON.stringify(x)+", wwitch to discharge:"+JSON.stringify(y));
-			//simulateStorageHeatExchange(cycleData, true, 0.2, 3600); // on UI, 0.2 m slices, time resolution 1h => execution time < 2s
+			if (document.getElementById('doTestSimulation').checked) {
+				const test = new PlantSimulation(cycleData, 0.1, 900);
+				preHeatingOfChargeLevel = [];
+				test.firstChargeDischargeSimulation(preHeatingOfChargeLevel); // => 1034 GWh!!
+				metrics.fullPowerSeconds = test.fullPowerSeconds;
+				console.log("fullPowerSeconds="+test.fullPowerSeconds+", => capasity="+(2400*test.fullPowerSeconds/3600/1000)+" GWh");
+				console.log("preHeatingOfChargeLevel="+JSON.stringify(preHeatingOfChargeLevel));
+			}
+			else {
+				// guess pressure control tank size 1/15 of lop-pressure storage size
+				metrics.hPressureControlTank = 0;
+				metrics.pControlVolume = metrics.lowPressureStorageVolume/15;
+				metrics.rPControl = Math.sqrt(Math.abs(metrics.pControlVolume)/25/Math.PI);	// 20 m ice on top => max 250 kpa
+				if (Number.isNaN(metrics.rPControl)) throw new Error();
+				metrics.hPressureControl = 25;
+				metrics.hPressureControlFrom = 5;
+				metrics.pControlArea = Math.PI*metrics.rPControl**2;
+				console.log("rPControl="+metrics.rPControl+", pControlArea="+metrics.pControlArea+", pControlVolume="+metrics.pControlVolume);
+				metrics.maxWetnessData = {};
+				metrics.maxWetnessData.pMin = (metrics.pLowInCharge ? metrics.pLowInCharge : metrics.pLow);
+				metrics.maxWetnessData.pMax = metrics.maxWetnessData.pMin * 1.35;
+				metrics.maxWetnessData.tMax = Module.PropsSI('T', 'P', metrics.maxWetnessData.pMax, 'Q', 1, name);
+				metrics.maxWetnessData.tMin = Module.PropsSI('T', 'P', metrics.maxWetnessData.pMin, 'Q', 1, name);
+			}
 		}
 		cycleData.efficiency1000 =  cycleData.workProduced1000 / cycleData.workConsumed1000;	// not reliable any more, tha actual powers have been scaled to equal motor/generator power
 		// Net out power is equal to in power, the rate mass of flows equals to system roundtrip efficiency
@@ -7725,7 +7767,7 @@ console.log("Average Cp ("+hotCycle[1].tIn+"-"+hotCycle[0].tIn+")="+getAverageRo
 		}
 
 		if (typeof gCycleData.switchTimeText === 'undefined') {
-			throw new Error("X");
+			//throw new Error("X");
 		}
 		cycleData.costOfMainStorage = metrics.totalMiningVolume * metrics.costOfWasteRockM3 //(metrics.noTopFill ? metrics.costOfWasteRockM3 : metrics.costOfMiningM3) //+ (metrics.highPressureStorageSurfaceArea+metrics.lowPressureStorageSurfaceArea)*metrics.costOfSurfaceM2;
 						+ getFloatParam('costOfInsulationM3', 25)*(metrics.vLpInsulation + metrics.highPressureInsulationMVolume)
@@ -7763,6 +7805,10 @@ if (!cycleData.costOfStorage) throw new Error();
 			cycleData.heatPumpCompressorOne.workConsumed *= coldCycle[3].massFlow;
 			cycleData.heatPumpCompressorTwo.workConsumed *= coldCycle[3].massFlow;
 		}
+		if (typeof metrics.liqVolM3 === 'undefined') {
+			const dLiq = Module.PropsSI('D', 'P', metrics.pLowInCharge, 'Q', 0, name);
+			metrics.liqVolM3 = Math.round(cycleData.dischargeTimeS*cycleData.coldCycle[1].wetness*cycleData.coldCycle[0].massFlow*1000/dLiq);
+		}
 		updateCostOfPlant(cycleData);
 /*		
 		if (hotCycle[0].cBlades) {
@@ -7792,7 +7838,9 @@ console.log("*****"+tHigh+": metrics.otherCostOfKW="+metrics.otherCostOfKW+", cy
 		cycleData.costOfPowerKW = metrics.otherCostOfKW + cycleData.costOfMachineryKW;
 		cycleData.costOfPower = cycleData.costOfMachineryKW * netWorkOut;
 		cycleData.costOfPlant = metrics.otherCostOfKW * netWorkOut;
-			
+		cycleData.totalCost = cycleData.costOfStorage+cycleData.costOfPower+cycleData.costOfPlant;
+		cycleData.totalCostOfStoragekWh = cycleData.totalCost / (cycleData.storedElectricity_kWh + cycleData.storedDistrictHeat_kWh);	
+		cycleData.totalCostOfPowerKW = cycleData.totalCost / cycleData.netWorkOut;
 		if (motorGenerator) {
 			// 
 			cycleData.efficiency2 = (cycleData.netWorkIn*metrics.generatorEfficiency - cycleData.heatPumpLoss)*metrics.generatorEfficiency/cycleData.netWorkIn;
@@ -7854,6 +7902,9 @@ console.log("***** metrics.otherCostOfKW="+metrics.otherCostOfKW+", cycleData.co
 			cycleData.costOfPowerKW = metrics.otherCostOfKW + cycleData.costOfMachineryKW;
 			cycleData.costOfPower = cycleData.costOfMachineryKW * cycleData.netWorkOut;
 			cycleData.costOfPlant = metrics.otherCostOfKW * cycleData.netWorkOut;
+			cycleData.totalCost = cycleData.costOfStorage+cycleData.costOfPower+cycleData.costOfPlant;
+			cycleData.totalCostOfStoragekWh = cycleData.totalCost / (cycleData.storedElectricity_kWh + cycleData.storedDistrictHeat_kWh);	
+			cycleData.totalCostOfPowerKW = cycleData.totalCost / cycleData.netWorkOut;
 		}
 	}
 	
@@ -7953,18 +8004,18 @@ console.log("***** metrics.otherCostOfKW="+metrics.otherCostOfKW+", cycleData.co
 	var traceXY = false;
 	var xyLog = '';
 	function toX( dg, val ) {
-		if (typeof val === 'undfined' || Number.isNaN(val)) throw new Error();
 		var ret = dg.baseX ? Math.abs(dg.baseX + val*dg.meterToPixels) 
 				: Math.abs(dg.marginX + (dg.cWidth)*(val - dg.minX)/(dg.maxX-dg.minX));
 		if (traceXY) xyLog += ', ('+ret;
+		if (typeof ret === 'undfined' || Number.isNaN(ret)) throw new Error();
 		return ret;
 	}
 
 	function toY( dg, val ) {
-		if (typeof val === 'undfined' || Number.isNaN(val)) throw new Error();
 		var ret = dg.baseY ? dg.baseY + (dg.cheight - val*dg.meterToPixels) 
 			: dg.marginTop + (dg.cheight)*(dg.maxY-val)/(dg.maxY-dg.minY);
 		if (traceXY) xyLog += ','+ret+')';
+		if (typeof ret === 'undfined' || Number.isNaN(ret)) throw new Error();
 		return ret;
 	}
 	function minMaxVal( dg, vals, minMax ) {
@@ -8041,12 +8092,7 @@ console.log("***** metrics.otherCostOfKW="+metrics.otherCostOfKW+", cycleData.co
 	}
 
 	function drawStorage( canvasId, metrics, cycleData, bottomLines ) {
-		if (metrics.isCylinder) {
-			drawCylinderStorage( canvasId, metrics, cycleData, bottomLines );
-		}
-		else {
-			drawConeStorage( canvasId, metrics, cycleData, bottomLines );
-		}
+		drawConeStorage( canvasId, metrics, cycleData, bottomLines );
 	}
 
 	function testResult( expected, from, to, maxError, calcResult, maxLoops ) {
@@ -8145,7 +8191,7 @@ if (loop > maxLoops && Math.abs(expected-result)>maxError) {
 		const powerAndHeat = !metrics.topFillWithIceWithStorage && (metrics.powerAndHeat ? metrics.powerAndHeat : !getBooleanParam('powerOnly', true ));
 		var title = //Math.round(metrics.totalMiningVolume*metrics.rockDensity/1000000)+" million crushed stone ton "+
 			Math.round(cycleData.storedEnergy_kWh/1000000)+
-				(metrics.massFlowPercent == 100 ? " GWh / "+workToMW(cycleData.netWorkOut) +" pumped thermal energy storage" : 
+				(metrics.massFlowPercent == 100 ? " GWh / "+workToMW(cycleData.netWorkOut) +" pumped thermal energy storage" :
 				" GWh pumped thermal energy storage operating "+Math.round(cycleData.netWorkOut/gCycleData.netWorkOut*100)+" % load of max "+ workToMW(gCycleData.netWorkOut));
 				
 		// let's keep this very simple, set scale 1 m == 2 px, 
@@ -8832,7 +8878,6 @@ console.log("hLpHot="+hLpHot+", rLpHot="+rLpHot+", metrics.rTop="+metrics.rTop);
 				heatExchangeText = ""; //", heat exchange area width ~"+myRound(heLength,0)+" m if \u0394T="+toCelsius(274);
 				metrics.heLengthLp = heLength;
 			} 
-			
 			ctx.fillStyle = 'black'; 
 			ctx.font = px < 12 ? px+"px arial" : "12px arial";
 			
@@ -9801,7 +9846,6 @@ console.log("hLiquidStorage="+hLiquidStorage+", rLiquidStorage="+rLiquidStorage)
 			ctx.font = "bold 12px serif";
 			ctx.fillText("\u2193 "+(cycleData.coldCycle[1].wetness < 0.001 ? myRound(cycleData.coldCycle[1].wetness*1000,2) : Math.round(cycleData.coldCycle[1].wetness*1000))+" ‰ of gas", xColdTurbineLp-1, y1+12);
 		}
-
 		const hpYShift = metrics.topFillWithIceWithStorage ? (yLpTop+4 -(yHpBottom-4-26)) : 0;
 
 		ctx.lineWidth = 4;
@@ -10216,6 +10260,7 @@ console.log("hLiquidStorage="+hLiquidStorage+", rLiquidStorage="+rLiquidStorage)
 				drawLine(0);
 				drawLine(-4);
 				//ctx.fillStyle = 'red'; 
+				ctx.strokeStyle = 'black';
 				ctx.font = "12px serif";
 				ctx.fillText("Resistors bypassed when T-in>"+toCelsius(cycleData.hotCycle[1].tIn-100), towerRightX-200, y2-5);
 				ctx.fillStyle = 'black'; 
@@ -11903,12 +11948,21 @@ console.log("item="+JSON.stringify(item));
 		ctx.setLineDash([]);
 
 		$("#compressorDesignParams").css('display','block');
+
+		drawAllCompressors( ctx, hotCycle, coldCycle, cycleData, drawCompressors);
+		// let the browser to draw the pending pictures
+		//setTimeout( function() { drawAllCompressors(ctx,hotCycle,coldCycle,cycleData); }, 500L );
+	}
+
+	function drawAllCompressors( ctx, hotCycle, coldCycle, cycleData, drawCompressors) 
+	{
+		$("#waitUntilReady").css("display", "block");
 		if (name != 'TEST_Helium' && drawCompressors) {
 		
 			//setup_S_H_P_caches( name, coldCycle[0].sIn, hotCycle[0].sOut, coldCycle[0].hIn, hotCycle[0].hIn, coldCycle[0].pIn, hotCycle[0].pIn );
 
 			//if (redrawTpGraf) throw new Error("We should not be here!!!");
-			var cUnits = getIntParam('cHotUnits2', metrics.cUnits);
+			var cUnits = getIntParam('cHotUnits2', 1)*metrics.cUnits;
 
 			var rel = Math.sqrt(metrics.cUnits/cUnits);
 			const hotCompressor = 
@@ -11917,7 +11971,7 @@ console.log("item="+JSON.stringify(item));
 			metrics.cEfficiency = hotCompressor.averageEfficiency;
 			drawCompressor( "hotCompressorImage", hotCompressor, 125 );  // 1 m == 100 px
 			hotCycle[1].cBlades = hotCompressor.cBladesTotal * cUnits;
-			cUnits = getIntParam('cColdUnits2', metrics.cUnits);
+			cUnits = getIntParam('cColdUnits2', 1)*metrics.cUnits;
 			{
 				const wetStore = null;
 /*			
@@ -11943,7 +11997,7 @@ console.log("item="+JSON.stringify(item));
 				coldCycle[0].cBlades = coldCompressor.cBladesTotal * cUnits;
 			}
 
-			cUnits = getIntParam('cHotTurbineUnits2', metrics.cUnits);
+			cUnits = getIntParam('cHotTurbineUnits2', 1)*metrics.cUnits;
 			rel = Math.sqrt(metrics.cUnits/cUnits);
 			const hotTurbin = 
 				getTurbineStages(hotCycle[0], FIRST_ITEM, hotCycle[0].massFlow/cUnits, "Hot turbine", metrics.dischargePDrops.diameterPipeToHotTurbin*rel, 
@@ -11953,7 +12007,7 @@ console.log("item="+JSON.stringify(item));
 			hotCycle[0].cBlades = hotTurbin.cBladesTotal * cUnits;
 console.log("*** hotCycle[0].cBlades:"+hotCycle[0].cBlades+" = "+hotCompressor.cBladesTotal+" * "+cUnits+", hotCycle[0].version="+hotCycle[0].version);
 
-			cUnits = getIntParam('cColdTurbineUnits2', metrics.cUnits);
+			cUnits = getIntParam('cColdTurbineUnits2', 1)*metrics.cUnits;
 			rel = Math.sqrt(metrics.cUnits/cUnits);
 			const coldTurbin = 
 				getTurbineStages(coldCycle[1], LAST_ITEM, coldCycle[1].massFlow/cUnits, "Cold turbine", metrics.chargePDrops.diameterPipeToColdExpander*rel, 
@@ -11962,7 +12016,7 @@ console.log("*** hotCycle[0].cBlades:"+hotCycle[0].cBlades+" = "+hotCompressor.c
 			drawCompressor( "coldTurbineImage", coldTurbin, 225 );  // 1 m == 150 px
 			coldCycle[1].cBlades = coldTurbin.cBladesTotal * cUnits;
 
-			cUnits = getIntParam('cHpUnits2', metrics.cUnits);
+			cUnits = getIntParam('cHpUnits2', 1)*metrics.cUnits;
 //console.log("hpCompressor1="+JSON.stringify(cycleData.heatPumpCompressorOne));
 //console.log("hpCompressor2="+JSON.stringify(cycleData.heatPumpCompressorTwo));
 
@@ -11985,7 +12039,7 @@ console.log("*** hotCycle[0].cBlades:"+hotCycle[0].cBlades+" = "+hotCompressor.c
 			if (gCycleData == null) {
 				curCycleData = gCycleData = cycleData;
 				if (typeof gCycleData.switchTimeText === 'undefined') {
-					throw new Error("X");
+					//throw new Error("X");
 				}
 				document.getElementById('massFlowPercent').disabled = false;
 			}
@@ -12009,7 +12063,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cHeatPumpEfficiency
 				else {
 					metrics.cHeatPumpEfficiency = averageEfficiency;
 				}
-				redrawTpGraf = true;
+				redrawTpGraf = "HeatPump";
 			}
 			if (metrics.massFlowPercent == 100) {
 				const hpTurbineData = drawHpTurbine( 225 );
@@ -12041,10 +12095,11 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cHeatPumpEfficiency
 						   coldCycle[1].cBlades + 
 						(cryogenicCooling ? coldCycle[3].cBlades + coldCycle[2].cBlades : 0);
 			console.log("cBladesTotalG="+cBladesTotalG);
+			$("#waitUntilReady").css("display", "none");
 		}
 		if (redrawTpGraf) {
 			redrawTpGraf = false;
-console.log("Redraw TP graf...");
+console.trace("Redraw TP graf, reason="+redrawTpGraf);
 			drawIt(true, false, false);
 		}
 		else {
@@ -12127,14 +12182,15 @@ console.log("Redraw TP graf...");
 				(powerAndHeat && !metrics.topFillWithIceWithStorage ? " and stored district heat "+Math.round(cycleData.storedDistrictHeat_kWh/1000000)+" GWh" : "")+
 						", storage heat leak: <"+Math.round(getTotalHeatLost()/1000000)+" MW", x, y );
 			y += 20;
-			textOnWhite( ctx, "Cost of storage "+myRound(gCycleData.costOfStoragekWh,2)+" €/kWh and cost of electric power capasity "+Math.round(gCycleData.costOfPowerKW)+" €/kW", x, y );
+			textOnWhite( ctx, "Cost of storage: "+myRound(gCycleData.totalCostOfStoragekWh,2)+" €/kWh and cost of power: "+Math.round(gCycleData.totalCostOfPowerKW)+" €/kW"
+						+" (additional kWh: "+myRound(gCycleData.costOfStoragekWh,2)+" €, additional power: "+Math.round(gCycleData.costOfPowerKW)+" €/kW)", x, y );
 			y += 20;
 			textOnWhite( ctx, "Total cost "+Math.round(cycleData.totalCostMEur = (cycleData.costOfStorage+cycleData.costOfPower+cycleData.costOfPlant)/1000000)+" million €"+
 				"(main storage: "+Math.round(gCycleData.costOfMainStorage/1000000)+
 				(gCycleData.costOfCryoStorage ? ", cryo storage: "+Math.round(cycleData.costOfCryoStorage/1000000): "")+
 				", power plant and generators: "+Math.round(gCycleData.costOfPlant/1000000)+
 				(gCycleData.costOfMachinery && gCycleData.heCost ? 
-					", turbomachinery: "+Math.round(gCycleData.costOfMachinery/1000000)+" and heat exchangers: "+Math.round(gCycleData.heCost/1000000)+")" :
+					", turbomachinery: "+Math.round(gCycleData.costOfMachinery/1000000)+" and heat pump heat exchangers: "+Math.round(gCycleData.heCost/1000000)+")" :
 					", turbomachinery and heat exchangers: "+Math.round(gCycleData.costOfPower/1000000)+")"), x, y );
 			y += 20;
 			const iceStorage = cycleData.iceStorage ? cycleData.iceStorage : gCycleData.iceStorage;
@@ -12147,12 +12203,14 @@ console.log("Redraw TP graf...");
 					textOnWhite( ctx, "Storage size "+myRound((metrics.storageSizeTons+(iceStorage.earthWorkVolume)*metrics.rockDensity)/1000000,1)+" Mt crushed stone and "+myRound(iceStorage.totalMassInTons/1000000,1)+" Mt crushed ice", x, y );
 				}
 				else {
-					textOnWhite( ctx, "Storage size "+myRound((iceStorage.totalMassInTon + (metrics.totalMiningVolume+iceStorage.earthWorkVolume)*metrics.rockDensity)/1000000,1)+" Mt crushed stone");
+					textOnWhite( ctx, "Storage size "+myRound((iceStorage.totalMassInTon + (metrics.totalMiningVolume+iceStorage.earthWorkVolume)*metrics.rockDensity)/1000000,1)+" Mt crushed stone", x, y);
 				}
 			}
 			else {
 				textOnWhite( ctx, "Storage size "+ myRound((metrics.noTopFill ? metrics.storageSizeTons : metrics.totalMiningVolume*metrics.rockDensity)/1000000,1)+" Mt crushed stone", x, y );
 			}
+			y += 20;
+			textOnWhite( ctx, "Energy density: "+Math.round(cycleData.storedEnergy_kWh/metrics.storageSizeTons)+" Wh/kg, "+Math.round(cycleData.storedEnergy_kWh/metrics.storageVolume)+" Wh/L", x, y);
 			y += 20;
 			if (cycleData.switchTimeText) textOnWhite( ctx, cycleData.switchTimeText, x, y );
 			y += 20;
@@ -12180,7 +12238,7 @@ console.log("drawBraytonCycle done");
 		const ccEfficiency = metrics.cHeatPumpEfficiency; //getFloatParam('cHeatPumpEfficiency', getFloatParam('cLowEfficiency', metrics.cEfficiency));
 		const coldCycle = coldCycleG;
 		const cycleData = gCycleData;
-		const cUnits = getIntParam('cHpUnits2', metrics.cUnits);
+		const cUnits = getIntParam('cHpUnits2', 1)*metrics.cUnits;
 
 		// coldHeatExchangerLoss is the round trip lost when gas flows twice through main heat exhanger, metrics.heatExchangeDeltaT is temp diff in heat pump heat exchanger
 		metrics.heatPumpHighP = getFloatParam('hpHighPressureKPa', 300)*1000;
@@ -12255,7 +12313,7 @@ if (!cycleData.hpDiameterIn) throw new Error("Bad heat exchanger");
 			const hpCompressor2 = cycleData.heatPumpCompressorTwo;
 			const coldCycle = cycleData.coldCycle;
 			const hpTurbin = coldCycle[2];
-			const cUnits = getIntParam('cHpUnits2', metrics.cUnits);
+			const cUnits = getIntParam('cHpUnits2', 1)*metrics.cUnits;
 			const orgFluid = name;
 			name = getInputParam('hpFluid', 'Helium' );
 			
@@ -12324,7 +12382,7 @@ if (!cycleData.hpDiameterIn) throw new Error("Bad heat exchanger");
 		data.push(metrics.ss304HHeatExchanger);
 		data.push(metrics.alHeatExchanger);
 		showHeatExcnagerData("hotHeatExchangerData", data, "" );
-		const cHotTurbines = getIntParam('cHotTurbineUnits2', metrics.cUnits);
+		const cHotTurbines = getIntParam('cHotTurbineUnits2', 1)*metrics.cUnits;
 		const hotHeCost = metrics.nim105HeatExchanger.cost + metrics.ss304HHeatExchanger.cost + metrics.alHeatExchanger.cost;
 		$("#hotHeatExchangerTitle").text("Optional hot storage counter flow micro heat exchangers for immediate power control, "+cHotTurbines+" * €"+Math.round(hotHeCost/1000000)+"m");
 	}
@@ -12389,7 +12447,7 @@ console.log("Update heap pump pressure ...");
 		//heatPumpMassFlow = gCycleData.heatPumpCompressorOne.massFlow;
 		const hpCompressor = isOne ? curCycleData.heatPumpCompressorOne : curCycleData.heatPumpCompressorTwo;
 		const ccEfficiency = metrics.cHeatPumpEfficiency; //getFloatParam('cHeatPumpEfficiency', getFloatParam('cLowEfficiency', metrics.cEfficiency));
-		const cUnits2 = getIntParam('cHpUnits2', metrics.cUnits);
+		const cUnits2 = getIntParam('cHpUnits2', 1)*metrics.cUnits;
 		const grossPower = (hpCompressor.workConsumed*1000)/cUnits2;
 console.log("hpCompressor grossPower:"+grossPower+"=("+hpCompressor.workConsumed+"*1000)/"+cUnits2+", isOne="+isOne+", hpCompressor.massFlow="+heatPumpMassFlow);
 		const hpStages = getCompressorStages(hpCompressor, FIRST_ITEM, heatPumpMassFlow/cUnits2, 
@@ -12421,7 +12479,7 @@ console.log("hpCompressor grossPower:"+grossPower+"=("+hpCompressor.workConsumed
 		const orgFluid = name;
 		const ctEfficiency = metrics.tHeatPumpEfficiency; // getFloatParam('tHeatPumpEfficiency', getFloatParam('tLowEfficiency', metrics.tEfficiency));
 		name = getInputParam('hpFluid', 'Argon' );
-		const cUnits2 = getIntParam('cHpTurbineUnits2', metrics.cUnits);
+		const cUnits2 = getIntParam('cHpTurbineUnits2', 1)*metrics.cUnits;
 		const grossPower = (hpTurbin.workProduced*1000)/cUnits2;
 console.log("hpTurbin grossPower: "+grossPower+"=("+hpTurbin.workProduced+"*"+heatPumpMassFlow+"*1000)/"+cUnits2);
 		const hpTurbinStages = getTurbineStages(hpTurbin, FIRST_ITEM, heatPumpMassFlow/cUnits2, 
@@ -12469,9 +12527,9 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tHeatPumpEfficiency
 			console.log("metrics="+JSON.stringify(metrics, null, 2));
 		}
 		isRedraw = true;
-		var cUnits = getIntParam('cHotUnits2', metrics.cUnits);
-		const cColdUnits = getIntParam('cColdUnits2', metrics.cUnits);
-		const hpUnits = getIntParam('hpUnits2', metrics.cUnits);
+		var cUnits = getIntParam('cHotUnits2', 1)*metrics.cUnits;
+		const cColdUnits = getIntParam('cColdUnits2', 1)*metrics.cUnits;
+		const hpUnits = getIntParam('hpUnits2', 1)*metrics.cUnits;
 		var diameterPipeToHotCompressor = metrics.chargePDrops.diameterPipeToHotCompressor;
 		var diameterPipeFromHotCompressor = metrics.chargePDrops.diameterPipeFromHotCompressor;
 		var diameterPipeToColdCompressor = metrics.dischargePDrops.diameterPipeToColdCompressor;
@@ -12517,7 +12575,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tHeatPumpEfficiency
 			drawCompressor( "coldCompressorImage", compressor, scale ? scale : 150 );  // 1 m == 150 px
 		}
 		else if (type == 'HotTurbine') {
-			cUnits = getIntParam('cHotTurbineUnits2', metrics.cUnits);
+			cUnits = getIntParam('cHotTurbineUnits2', 1)*metrics.cUnits;
 			const rel = Math.sqrt(metrics.cUnits/cUnits);
 			const hotTurbin = 
 				getTurbineStages(curHotCycle[0], FIRST_ITEM, curHotCycle[0].massFlow/cUnits, "Hot turbine", metrics.dischargePDrops.diameterPipeToHotTurbin*rel, 
@@ -12526,7 +12584,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tHeatPumpEfficiency
 			redrawTpGraf = false;
 		}
 		else if (type == 'ColdTurbine') {
-			cUnits = getIntParam('cColdTurbineUnits2', metrics.cUnits);
+			cUnits = getIntParam('cColdTurbineUnits2', 1)*metrics.cUnits;
 			rel = Math.sqrt(metrics.cUnits/cUnits);
 			const coldTurbin = 
 				getTurbineStages(curColdCycle[1], LAST_ITEM, curColdCycle[1].massFlow/cUnits, "Cold turbine", metrics.chargePDrops.diameterPipeToColdExpander*rel, 
@@ -12829,26 +12887,27 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cHeatPumpEfficiency
 		var hDeltaPower = iStageDeltaH( constantDeltaH, iStage, cStages, firstToLastDeltaH);
 		if (iStage > 0 || stageData.onDesignStages || !stageData.rpm) return hDeltaPower;
 		// adjust max hub/tip with stage count to the first above stageData.maxHubToTip
-		var vPipe = stageData.isCompressor ? stageData.vPipeIn : stageData.vPipeOut;
+		// CID and COD turbine is a special case, the first stage defines rTop or rHub => get first stage0 rTip or rHub to get constant radius for the last stage
+		var vPipe = stageData.isCompressor || stageData.constantDiameter != 'mean' ? stageData.vPipeIn : stageData.vPipeOut;
 		if (typeof vPipe === 'undefined') vPipe = 0;
-		var pipe = stageData.isCompressor ? stageData.first : stageData.last;
+		var pipe = stageData.isCompressor || stageData.constantDiameter != 'mean' ? stageData.first : stageData.last;
 		var prevStageCount = 0, prevHubToTip = 0, prevhDeltaPower = 0;
-		if (!stageData.isCompressor && firstToLastDeltaH != 1) {
+		if (!stageData.isCompressor && firstToLastDeltaH != 1 && stageData.constantDiameter == 'mean') {
 			hDeltaPower = iStageDeltaH( constantDeltaH, cStages-1, cStages, firstToLastDeltaH);
 		}
 		const cStagesOrg = cStages;
 		const ratio = constantDeltaH/hDeltaPower;
-		var hubToTip, hubToTipOrg = 0;
+		var hubToTip, hubToTipOrg = 0, rHub, rTip;
 		var cLoops = 0;
 		for (;;) {
 			const meanU = Math.sqrt(hDeltaPower/stageData.stageLoadingCoefficientMean);
-			const v = meanU*stageData.flowCoefficientMean;
+			var v = meanU*stageData.flowCoefficientMean;
 			const hDeltaKinetic = 0.5*v**2 - 0.5*vPipe**2;
 			const h = pipe.h - hDeltaKinetic;
 			const p = safePSH(pipe.s, pipe.h - hDeltaKinetic*(stageData.isCompressor ? 1/stageData.diffuserEfficiency : stageData.diffuserEfficiency), name );
 			const d = Module.PropsSI('D', 'H', h, 'P', p, name);
 			const area = stageData.massFlowInKg/d/v;
-			const rMid = meanU/(2*Math.PI*stageData.rpm/60);
+			var rMid = meanU/(2*Math.PI*stageData.rpm/60);
 			if (Number.isNaN(rMid)) {
 				if (prevStageCount && prevHubToTip > stageData.optHubToTip) {
 					hDeltaPower = prevhDeltaPower;
@@ -12860,8 +12919,34 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cHeatPumpEfficiency
 				hubToTip = 0.1;	
 			}
 			else {
-				const rTip = Math.sqrt(area/(2*Math.PI)+rMid**2);
-				const rHub = Math.sqrt(rMid**2 - area/(2*Math.PI));
+				rTip = Math.sqrt(area/(2*Math.PI)+rMid**2);
+				rHub = Math.sqrt(rMid**2 - area/(2*Math.PI));
+				if (!stageData.isCompressor && stageData.constantDiameter != 'mean') {
+					const pipeOut = stageData.last;
+					const hDeltaKineticOut = 0.5*v**2 - 0.5*stageData.vPipeOut**2;
+					const hOut = pipeOut.h - hDeltaKineticOut;
+					const pOut = safePSH(pipeOut.s, pipeOut.h - hDeltaKineticOut*stageData.diffuserEfficiency, name );
+					const dOut = Module.PropsSI('D', 'H', hOut, 'P', pOut, name);
+					const areaOut = stageData.massFlowInKg/dOut/v;
+					if (stageData.constantDiameter == 'inner') {
+						rMid = Math.sqrt(rHub**2+areaOut/(2*Math.PI));
+						rTip = Math.sqrt(rHub**2+areaOut/Math.PI);
+					}
+					else if (stageData.constantDiameter == 'outer') {
+						rMid = Math.sqrt(rTip**2-areaOut/(2*Math.PI));
+						rHub = Math.sqrt(rTip**2-areaOut/Math.PI);
+					}
+					if (Number.isNaN(rMid)) {
+						if (prevStageCount && prevHubToTip > stageData.optHubToTip) {
+							hDeltaPower = prevhDeltaPower;
+							hubToTip = prevHubToTip;
+							cStages = prevStageCount;
+							break;
+						}
+						cStages--;
+						hubToTip = 0.1;
+					}
+				}
 				hubToTip = rHub/rTip;
 console.log(cLoops+": hubToTip="+hubToTip+", prevHubToTip="+prevHubToTip+", stageData.optHubToTip="+stageData.optHubToTip+", cStages="+cStages);
 				if (hubToTip == stageData.optHubToTip) break;
@@ -12889,9 +12974,11 @@ console.log(cLoops+": hubToTip="+hubToTip+", prevHubToTip="+prevHubToTip+", stag
 			constantDeltaH = stageData.grossPower / cStages / stageData.massFlowInKg;
 			hDeltaPower = iStageDeltaH( constantDeltaH, stageData.isCompressor ? 0 : cStages-1, cStages, firstToLastDeltaH);
 			cLoops++;
-if (cLoops > 100) throw new Error();
+if (cLoops > 400) throw new Error();
 		}
 		stageData.cStages = cStages;
+		stageData.rHub = rHub;
+		stageData.rTip = rTip;
 		stageData.constantDeltaH = stageData.grossPower / cStages / stageData.massFlowInKg;
 		console.log(stageData.title+" ***cStages: "+cStagesOrg+" => "+cStages+", hub/tip: "+hubToTipOrg+" => "+hubToTip);
 		return hDeltaPower;
@@ -13010,7 +13097,24 @@ console.log("iteratePower: "+hDeltaPowerIn+" => "+hDeltaPowerOut+", stageLoading
 				if (!stageData.constantRpm || !rpm) {
 					stage.rTip = Math.sqrt(area/(Math.PI*(1-stage.hubToTipRatio*stage.hubToTipRatio)));
 					stage.rHub = stage.rTip * stage.hubToTipRatio;
-					stage.rMid = Math.sqrt((stage.rTip*stage.rTip+stage.rHub*stage.rHub)/2);
+					if (stageData.rHub && stageData.rTip && !stageData.isCompressor) {
+						if (stageData.constantDiameter == 'inner') {
+							stage.rHub = stageData.rHub;
+							stage.rMid = Math.sqrt(stage.rHub*stage.rHub+area/(2*Math.PI));
+							stage.rTip = Math.sqrt(stage.rHub*stage.rHub+area/Math.PI);
+						}
+						else if (stageData.constantDiameter == 'outer') {
+							stage.rTip = stageData.rTip;
+							stage.rMid = Math.sqrt(stage.rTip*stage.rTip-area/(2*Math.PI));
+							stage.rHub = Math.sqrt(stage.rTip*stage.rTip-area/Math.PI);
+						}
+						else {
+							stage.rMid = Math.sqrt((stage.rTip*stage.rTip+stage.rHub*stage.rHub)/2);
+						}
+					}
+					else {
+						stage.rMid = Math.sqrt((stage.rTip*stage.rTip+stage.rHub*stage.rHub)/2);
+					}
 				}
 			}
 //console.log(stageData.stages.length+": area="+area+", stage.hubToTipRatio="+stage.hubToTipRatio+", rTip="+stage.rTip+", rHub="+stage.rHub);
@@ -13196,8 +13300,10 @@ This is always true, when  flowCoefficient = v/U AND stageLoadingCoefficient == 
 							if (Number.isNaN(stageData.rMid)) throw new Error("Bad geometry, meanU="+meanU+". Decrease number of stages and/or increase number of units.");
 							stage.v = stageData.v = meanU*stageData.flowCoefficientMean;
 							area = stage.flowM3 / stage.blockageFactor / stage.v;
-							stageData.rTip = stage.rTip = Math.sqrt(area/(2*Math.PI)+stage.rMid*stage.rMid);
-							stageData.rHub = stage.rHub = Math.sqrt(stage.rMid*stage.rMid-area/(2*Math.PI));
+							stage.rTip = Math.sqrt(area/(2*Math.PI)+stage.rMid*stage.rMid);
+							stage.rHub = Math.sqrt(stage.rMid*stage.rMid-area/(2*Math.PI));
+							stageData.rTip = stage.rTip;
+							stageData.rHub = stage.rHub;
 							stage.midFlowCoefficient = stageData.flowCoefficientMean;
 							stage.midStageLoadingCoefficient = stageData.stageLoadingCoefficientMean;
 							if (Number.isNaN(stage.midStageLoadingCoefficient)) throw new Error("midStageLoadingCoefficient="+stage.midStageLoadingCoefficient);
@@ -13270,6 +13376,11 @@ if (!stage.v) throw new Error(stageData.title+": v="+stage.v);
 							stage.rHub = stageData.rHub;
 							stage.rMid = Math.sqrt(stage.rHub*stage.rHub+area/(2*Math.PI));
 							stage.rTip = Math.sqrt(stage.rHub*stage.rHub+area/Math.PI);
+							stage.midU = stage.rMid*2*Math.PI*rpm/60;
+							stage.midFlowCoefficient = stage.v/stage.midU;
+							stage.U = stage.rTip*2*Math.PI*rpm/60;
+							const mfcTest = stage.v/(stage.U*stage.rMid/stage.rTip);
+							console.log("stage"+stageData.stages.length+" ***midFlowCoefficient ="+stage.midFlowCoefficient+"="+mfcTest+"="+stage.v+"/"+(stage.U*stage.rMid/stage.rTip)+", U="+stage.U+", v="+stage.v);
 						}
 						else if (stageData.constantDiameter == 'outer') {
 							stage.rTip = stageData.rTip;
@@ -13329,6 +13440,10 @@ if (!stage.v) throw new Error(stageData.title+": v="+stage.v);
 				//stage.deltaH = stage.U * stage.U * stage.stageLoadingCoefficient;
 				stage.stageLoadingCoefficient = stage.hDeltaPower / (stage.U*stage.U);
 				stage.midStageLoadingCoefficient = stage.hDeltaPower / ((stage.U*stage.rMid/stage.rTip)**2);
+				/*if (stageData.constantDiameter == 'inner') {
+					const mfcTest = stage.v/(stage.U*stage.rMid/stage.rTip);
+					console.log("stage"+stageData.stages.length+" ***midFlowCoefficient ="+stage.midFlowCoefficient+"="+mfcTest+"="+stage.v+"/"+(stage.U*stage.rMid/stage.rTip)+", U="+stage.U+", v="+stage.v);
+				}*/
 				if (Number.isNaN(stage.midStageLoadingCoefficient)) throw new Error(stageData.title+": midStageLoadingCoefficient="+stage.midStageLoadingCoefficient);
 			}
 			stage.UMach = stage.U/stage.mach;
@@ -14171,7 +14286,10 @@ console.log(stageData.stages.length+": hNow="+hNow+" part="+(hNow - stageData.hS
 		stageData.gtd450StressPercent = getFloatParam('gtd450StressPercent', 33)/100;
 		stageData.tempStressMaxMPa = getFloatParam('tempStressMaxMPa', 1173);		// MAR-M 200!
 		stageData.tempMaxStressMPaDecr = getFloatParam('tempMaxStressMPaDecr', 1023);
-		stageData.strengthIncrease = 1 + getFloatParam('strengthIncrease', 0)/100;
+		stageData.strengthIncrease = 1 + getFloatParam('strengthIncrease'+cType2, 0)/100;
+		if (stageData.strengthIncrease == 1) {
+			stageData.strengthIncrease = 1 + getFloatParam('strengthIncrease', 0)/100;
+		}
 		stageData.tempMaxStressMPaDecrValue = getFloatParam('tempMaxStressMPaDecrValue', 1);
 		stageData.maxTipThickness = getFloatParam('maxTipThickness'+cType2, 1 )/1000;
 //console.log("stageData.maxTipThickness="+stageData.maxTipThickness); 
@@ -16513,8 +16631,8 @@ if (Number.isNaN(hDeltaKinetic)) throw new Error();
 		}
 		//stageProps.push(getSheetValues('Tip load coefficient', 'stageLoadingCoefficient', data, 2));
 		//stageProps.push(getSheetValues('Tip flow coefficient', 'flowCoefficient', data, 2));
-		stageProps.push(getSheetValues('Mean line load coefficient', 'midStageLoadingCoefficient', data, 2));
-		stageProps.push(getSheetValues('Mean line flow coefficient', 'midFlowCoefficient', data, 2));
+		stageProps.push(getSheetValues('Mean-line load coefficient', 'midStageLoadingCoefficient', data, 2));
+		stageProps.push(getSheetValues('Mean-line flow coefficient', 'midFlowCoefficient', data, 2));
 		//stageProps.push(getSheetValues('Hub load coefficient', 'hubStageLoadingCoefficient', data, 2));
 		//stageProps.push(getSheetValues('Hub flow coefficient', 'hubFlowCoefficient', data, 2));
 		//stageProps.push(getSheetValues('Static pressure rise3', 'pressureRiseCoefficient3', data, 2));
@@ -16629,7 +16747,7 @@ if (Number.isNaN(hDeltaKinetic)) throw new Error();
 			(stageData.isCompressor ? "P-out/P-in: "+myRound(stageData.exit.p/first.p,2) : // +" (max: ~"+myRound(stageData.exit.p/first.p*getMaxRelativePressureRise(stageData,false,false),2)+" with the same rpm and inlet values)" :
 									  "P-in/P-out: "+myRound(first.p/stageData.exit.p,2))
 			 +", Mass flow: "+Math.round(stageData.massFlowInKg)+" kg/s",
-			(stageData.rpmCount == 1 ? "Rpm: "+Math.round(stages[0].rpm) : stageData.rpmCount+" shafts")+", "+stageData.stages.length+" stages, reaction: "+Math.round(stageData.reaction*100)+" %, mean line solidity: "+stageData.solidity, //+" - "+stageData.rearSolidity,
+			(stageData.rpmCount == 1 ? "Rpm: "+Math.round(stages[0].rpm) : stageData.rpmCount+" shafts")+", "+stageData.stages.length+" stages, reaction: "+Math.round(stageData.reaction*100)+" %, mean-line solidity: "+stageData.solidity, //+" - "+stageData.rearSolidity,
 			//"Tip stage loading coefficients: "+ stageData.stageLoadingCoefficientMin + " - "+ stageData.flowCoefficientMin,
 			//"Hub: Max stage loading coefficient: "+myRound(stageData.stages[0].hubStageLoadingCoefficient,2)+ ", max flow coefficient: "+myRound(stageData.stages[0].hubFlowCoefficient,2),
 			"Adaptive aspect ratio (h/c); Hub/Tip ratios from "+myRound(hubToTipRatioFrom,2)+" to "+myRound(hubToTipRatioTo,2)
@@ -16705,7 +16823,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cLowEfficiency+" !=
 				if (updateCompressorEfficiencies) {
 					setEfficiency("cLowEfficiency",averageEfficiency);
 				}
-				redrawTpGraf = true;
+				redrawTpGraf = "ColdCompressor";
 			}
 			else if (!stageData.isCompressor && metrics.tLowEfficiency != averageEfficiency) {
 console.log(stageData.title+" efficiency mismatch: "+metrics.tLowEfficiency+" != "+averageEfficiency);
@@ -16713,7 +16831,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tLowEfficiency+" !=
 				if (updateTurbineEfficiencies) {
 					setEfficiency("tLowEfficiency", averageEfficiency);
 				}
-				redrawTpGraf = true;
+				redrawTpGraf = "ColdTurbine";
 			}
 		}
 		else if (title.indexOf("Hot")==0 && !stageData.onDesignStages) {
@@ -16723,7 +16841,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.cEfficiency+" != "+
 				if (updateCompressorEfficiencies) {
 					setEfficiency("cEfficiency", averageEfficiency);
 				}
-				redrawTpGraf = true;
+				redrawTpGraf = "HotCompressor";
 			}
 			else if (!stageData.isCompressor && metrics.tEfficiency != averageEfficiency) {
 console.log(stageData.title+" efficiency mismatch: "+metrics.tEfficiency+" != "+averageEfficiency);
@@ -16731,7 +16849,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tEfficiency+" != "+
 				if (updateTurbineEfficiencies) {
 					setEfficiency("tEfficiency", averageEfficiency);
 				}
-				redrawTpGraf = true;
+				redrawTpGraf = "HotTurbine";
 			}
 		}
 		if (stageData.pOutTest) {
@@ -18565,8 +18683,8 @@ console.log("Picture OK");
 					const textFromX = stageData.isCompressor ? -0.1 : -0.1;
 					const textFromY = stageData.isCompressor ? -0.13 : -0.35;
 					ctx.fillText( stageData.isCompressor ? 
-									"The compressor stages on Smith's chart. The stage(s) machine loss ‰ variation by stage loading and flow coefficients." :
-									"The turbine stages on Smith's chart. The stage machine loss ‰ variation by stage loading and flow coefficients."
+									"The compressor stages on Smith's chart. Stage machine loss ‰ variation by stage loading and flow coefficients." :
+									"The turbine stages on Smith's chart. Stage machine loss ‰ variation by stage loading and flow coefficients."
 									, getFlowCoefficientPosX(textFromX), getStageLoadingPosY(textFromY));
 					ctx.fillText( stageData.isCompressor ? 
 										"Green loss means that the 1st stage is subsonic, blue loss values are intersonic and in red ones the hub of the 1st stage would stall." :
@@ -19440,7 +19558,7 @@ if (false && trace) {
 									Math.sqrt(Math.abs(Math.pow(Math.sin(β1) - 0.2445/SONC * Γ, 2)+Math.cos(β1) / (ApStar * densityRatio))));
 				throw Error("Internal error: eqDR="+ret.eqDR);
 			}
-			/** The mean line values makes sense, but the algorithm cannot be used for rotor hub or stator tip
+			/** The mean-line values makes sense, but the algorithm cannot be used for rotor hub or stator tip
 			if (title == 'Rotor') {
 				console.log(title+": Γ = "+Γ+", AVDR ="+AVDR+", ApStar = "+ ApStar+", densityRatio ="+densityRatio+", d1="+d1+", d2="+d2+", r1="+r1+", r2="+r2+", vRel1/vRel2="+vRel1/vRel2+", "+(vLE - r2*vTE) / vRel1);
 				console.log("ret.eqDR:"+ret.eqDR+"="+(vRel1/vRel2*(1 + 0.7688 * tMax/c) + 0.6024 * Γ)+" * "+
@@ -19894,7 +20012,7 @@ This was a dead end. Not a useful model
 	}
 
 /*
-Mean line algorithm cannot be usedto ceck spanwise efficiencies
+Mean-line algorithm cannot be usedto ceck spanwise efficiencies
 
 	function testEfficiencyWithDF_DR( loadiCoefficient, flowCoefficient, averageVx, cMid, sMid, rTip, rHub, getMaxThicknessRotor, getMaxThicknessStator,
 									  tipGap, dIn, dMid, dOut, viscIn, viscMid, machIn, machMid, rpm, iStage, stagePower )
@@ -20531,7 +20649,7 @@ console.log("test max rel p2/p2Org: "+(p2/p2Org)+", Vx/VxOrg="+(maxAxialV/stage.
 /*
 	This did not work, the both results were always "No stall" and axial velocity was set to min (v/10) or max (v*10) value 
 	
-	// Try to establish positive and negative mean line incidence angles with the stall algorithm
+	// Try to establish positive and negative mean-line incidence angles with the stall algorithm
 	// Thay are needed to scale the loss coefficients in an off design state.
 	// Negative stall is caused by decreasing the axial velocity down from the optimum => decreases the incidence angle
 	// Positive stall is cased by increasing the axial velocity => increases the incidence angle
@@ -20764,6 +20882,7 @@ function initConfigurations() {
 	}
 	if (!aConfigs.includes("Application defaults")) aConfigs.push("Application defaults");
 	if (!aConfigs.includes("Rpm=3000, 8*300MW")) aConfigs.push("Rpm=3000, 8*300MW");
+	if (!aConfigs.includes("Argon Rpm=1500, 1026 GWh, 4*500MW")) aConfigs.push("Argon Rpm=1500, 1026 GWh, 4*500MW");
 	aConfigs.sort();
 	addOptions(currentConfig);
 
@@ -20806,6 +20925,7 @@ function loadConfig(configName, fnComplete )
 	else {
 		var url = null;
 		if (configName == "Rpm=3000, 8*300MW") url = "rpm3000_8x300MW.json";
+		else if (configName == "Argon Rpm=1500, 1026 GWh, 4*500MW") url = "rpm1500_Argon_1026GWh_2002MW.json"
 		if (url != null) {
 	  		var xmlhttp = new XMLHttpRequest();
 			xmlhttp.onload = function() {
@@ -20863,279 +20983,8 @@ function deleteConfig() {
 		loadConfig('Application defaults');
 	}
 }
-var testObj = {
-  "name": "Nitrogen",
-  "drawCompressors": true,
-  "dischargeMassFlow": "4083",
-  "numberOfUnits": "8",
-  "massFlowPercent": "100",
-  "pHighInDischarge": "1680",
-  "targetPLow": "140",
-  "tHigh": "1250",
-  "dischargePressureDrop": "40",
-  "cEfficiency": "0.906",
-  "tLowEfficiency": "0.957",
-  "diffuserEfficiency": "0.97",
-  "tEfficiency": "0.962",
-  "cLowEfficiency": "0.929",
-  "cHeatPumpEfficiency": "0.917",
-  "tHeatPumpEfficiency": "0.967",
-  "updateCompressorEfficiencies": true,
-  "updateTurbineEfficiencies": true,
-  "minChordLengthMm": "20",
-  "maxEnclosedInRoot": "0.50",
-  "generatorEfficiency": "0.99",
-  "frequencyConverterEfficiency": "0.97",
-  "storageSizeMTon": "45",
-  "hpStorageSizeAdjusted": "102",
-  "hpStorageUtilization": "56.2",
-  "topFillNone": true,
-  "externalCryoStorage": false,
-  "externalIceStorageFalse": true,
-  "iceStorageSize": "55",
-  "pControlPart": "10",
-  "rockDensityHp": "2.8",
-  "hpCp": "0.80",
-  "lpCp": "0.80",
-  "insGravelPorosity": "0.42",
-  "gravelMinLp": "40",
-  "gravelMaxLp": "120",
-  "gravelPorosityLp": "",
-  "gravelMinHp": "6",
-  "gravelMaxHp": "20",
-  "gravelPorosityHp": "",
-  "maxOpenPitAngle": "73",
-  "rampWidth": "8",
-  "rampSlope": "9",
-  "maxTopFillAngle": "70",
-  "increaseAspectRatioBy": "1",
-  "maxPressureDrop": "0.002",
-  "maxHeatFlowOut": "20",
-  "maxCryoHeatFlowOut": "10",
-  "uOfGravelrockwoolMix": "0.1",
-  "costOfWasteRockTon": "2.5",
-  "costOfWallAndRoofAboveM2": "200",
-  "costOfInsulationM3": "25",
-  "costOfRockSurfaceM2": "250",
-  "costOfSteelSurfaceM2": "250",
-  "costOfChannelsM2": "25",
-  "costOfIceStorageWallAndRoofIceM2": "100",
-  "tcCostOfBlade": "1000",
-  "otherCostOfKW": "200",
-  "pRatioRange": true,
-  "pLowPressureRatio": "96",
-  "pRatioFrom": "5",
-  "pRatioTo": "20",
-  "tHighRange": false,
-  "tHighFrom": "800",
-  "tHighTo": "1300",
-  "dischargeMassFlowRange": false,
-  "dischargeMassFlowFrom": "400",
-  "dischargeMassFlowTo": "4000",
-  "heSimulationStepLen": "0.1",
-  "heSimulationTimeResolution": "900",
-  "heSimulations": "2",
-  "idleTime": "50",
-  "calcHeatExchangeCoeffcient": false,
-  "lpMaxLowDiff": "4",
-  "hpMaxLowDiff": "10",
-  "maxHighDiff": "400",
-  "totalGasWeightText": "",
-  "switchTimeText": "",
-  "dischargePressureRange": "",
-  "dischargeHighPressureMax": "",
-  "dischargeLowPressureMax": "",
-  "dischargeHighPressureMin": "",
-  "dischargeLowPressureMin": "",
-  "showEnthalpyAndInternalEnergy": false,
-  "showDensityOnTP": false,
-  "netPowerInMW": "2400",
-  "netPowerOutMW": "2400",
-  "cPowerIn": "8",
-  "cPowerOut": "8",
-  "opexMEur": "10",
-  "storageCapasityGWh": "850",
-  "minChargeHours": "1",
-  "initialChargeLevel": "95",
-  "yield500MW": "10",
-  "sellOutStep0": "320",
-  "sellOutStep1": "240",
-  "sellOutStep2": "160",
-  "sellOutStep3": "75",
-  "sellOutStep4": "45",
-  "sellOutStep5": "16",
-  "buyInStep0": "100",
-  "buyInStep1": "90",
-  "buyInStep2": "85",
-  "buyInStep3": "50",
-  "buyInStep4": "16",
-  "buyInStep5": "1",
-  "hotLoadCoefficient": "0.345",
-  "hotFlowCoefficient": "0.579",
-  "cHotUnits2": "8",
-  "cStagesHot": "17",
-  "hotRpm3000": true,
-  "hotCMD": true,
-  "hotHasIGV": true,
-  "hotIGV_AR": "4",
-  "solidityHot": "0.98",
-  "tipGapMmHot": "0.5",
-  "tipGapPercentHot": "0.25",
-  "divOptARHot": "1.12",
-  "firstToLastDeltaH_Hot": "1",
-  "hotReaction": "0.50",
-  "tMaxToChordHot": "0.20",
-  "optHubToTipHot": "0.60",
-  "minHubToTipHot": "0.50",
-  "maxHubToTipHot": "0.99",
-  "maxTipThicknessHot": "2",
-  "gtd450StressPercent": "33",
-  "cStressMaxMPa": "228",
-  "tempStressMaxMPa": "1200",
-  "tempMaxStressMPaDecrValue": "1",
-  "tempMaxStressMPaDecr": "1023",
-  "rotorStatorGap": "20",
-  "strengthIncrease": "20",
-  "compressorScaleHot": "0",
-  "testHot": false,
-  "testPinHot": "",
-  "testTinHot": "",
-  "testPowerHot": "",
-  "testPoutHot": "",
-  "hotTurbineLoadCoefficient": "0.70",
-  "hotTurbineFlowCoefficient": "0.46",
-  "cHotTurbineUnits2": "8",
-  "cStagesHotTurbine": "14",
-  "hotTurbineCMD": true,
-  "hotTurbineHasIGV": false,
-  "hotTurbinIGV_AR": "4",
-  "solidityHotTurbine": "1.17",
-  "tipGapMmHotTurbine": "0.50",
-  "tipGapPercentHotTurbine": "0.25",
-  "maxTipThicknessHotTurbine": "2",
-  "rotorStatorGapHotTurbine": "40",
-  "hotTurbineReaction": "0.50",
-  "tMaxToChordHotTurbine": "0.18",
-  "maxAspectRatioHotTurbine": "12",
-  "optHubToTipHotTurbine": "0.43",
-  "minHubToTipHotTurbine": "0.30",
-  "maxHubToTipHotTurbine": "0.99",
-  "firstToLastDeltaH_HotTurbine": "1",
-  "hotTurbineNoApproximation": false,
-  "compressorScaleHotTurbine": "0",
-  "testHotTurbine": false,
-  "testPinHotTurbine": "",
-  "testTinHotTurbine": "",
-  "testPowerHotTurbine": "",
-  "testPoutHotTurbine": "",
-  "coldLoadCoefficient": "0.32",
-  "coldFlowCoefficient": "0.58",
-  "cColdUnits2": "16",
-  "cStagesCold": "14",
-  "coldCMD": true,
-  "coldHasIGV": true,
-  "coldIGV_AR": "4",
-  "solidityCold": "0.85",
-  "tipGapMmCold": "0.25",
-  "tipGapPercentCold": "0.20",
-  "maxTipThicknessCold": "2",
-  "coldReaction": "0.5",
-  "optHubToTipCold": "0.58",
-  "minHubToTipCold": "0.35",
-  "maxHubToTipCold": "0.995",
-  "divOptARCold": "1.05",
-  "firstToLastDeltaH_Cold": "1",
-  "cStressMaxMPaCold": "175",
-  "compressorScaleCold": "0",
-  "testCold": false,
-  "testPinCold": "",
-  "testTinCold": "Q",
-  "testPowerCold": "",
-  "wetnessCold": "",
-  "testPoutCold": "",
-  "coldTurbineLoadCoefficient": "0.70",
-  "coldTurbineFlowCoefficient": "0.43",
-  "cColdTurbineUnits2": "8",
-  "cStagesColdTurbine": "4",
-  "coldTurbineCMD": true,
-  "solidityColdTurbine": "1.17",
-  "tipGapMmColdTurbine": "0.25",
-  "tipGapPercentColdTurbine": "0.20",
-  "maxTipThicknessColdTurbine": "5",
-  "coldTurbineReaction": "0.50",
-  "tMaxToChordColdTurbine": "0.20",
-  "maxAspectRatioColdTurbine": "10",
-  "optHubToTipColdTurbine": "0.35",
-  "minHubToTipColdTurbine": "0.30",
-  "maxHubToTipColdTurbine": "0.99",
-  "firstToLastDeltaH_ColdTurbine": "1",
-  "coldTurbineNoApproximation": false,
-  "compressorScaleColdTurbine": "0",
-  "testColdTurbine": false,
-  "testPinColdTurbine": "",
-  "testTinColdTurbine": "",
-  "testPowerColdTurbine": "",
-  "testPoutColdTurbine": "",
-  "hpFluid": "Helium",
-  "cHpUnits2": "8",
-  "cStagesHp": "15",
-  "cStagesHp2": "18",
-  "hpLoadCoefficient": "0.33",
-  "hpFlowCoefficient": "0.59",
-  "hpLoadCoefficient2": "0.33",
-  "hpFlowCoefficient2": "0.60",
-  "hpPressureAbsolute": "absolute",
-  "hpHighPressureKPa": "1000",
-  "hpCMD": true,
-  "hpHasIGV": true,
-  "hpIGV_AR": "4",
-  "hpReaction": "0.53",
-  "solidityHp": "0.8",
-  "tipGapMmHp": "0.25",
-  "tipGapPercentHp": "0.1",
-  "maxTipThicknessHp": "1",
-  "tMaxToChordHp": "0.20",
-  "maxAspectRatioHp": "7",
-  "optHubToTipHp": "0.61",
-  "minHubToTipHp": "0.40",
-  "maxHubToTipHp": "0.99",
-  "divOptARHp": "1.2",
-  "compressorScaleHp": "0",
-  "testHp": false,
-  "testPinHp": "",
-  "testTinHp": "",
-  "testPowerHp": "",
-  "testPoutHp": "",
-  "hpTurbineLoadCoefficient": "0.63",
-  "hpTurbineFlowCoefficient": "0.45",
-  "cHpTurbineUnits2": "8",
-  "cStagesHpTurbine": "11",
-  "hpTurbineCMD": true,
-  "hpTurbineReaction": "0.50",
-  "solidityHpTurbine": "1.12",
-  "tMaxToChordHpTurbine": "0.18",
-  "maxAspectRatioHpTurbine": "10",
-  "optHubToTipHpTurbine": "0.45",
-  "minHubToTipHpTurbine": "0.30",
-  "maxHubToTipHpTurbine": "0.99",
-  "hpTurbineNoApproximation": false,
-  "compressorScaleHpTurbine": "0",
-  "testHpTurbine": false,
-  "testPinHpTurbine": "",
-  "testTinHpTurbine": "",
-  "testPowerHpTurbine": "",
-  "testPoutHpTurbine": "",
-  "heatExchangePressureLoss": "0.001",
-  "heatExchangerLength": "0.5",
-  "heatExchangeDeltaT": "2",
-  "coolingWaterTemp": "278",
-  "plateHeightToSheetThickness": "40",
-  "sheetThicknessToPassageWidth": "20",
-  "hePlateWidthToLength": "4",
-  "costOfAluminumSheetPerTon": "2500",
-  "costOfPlateProcessingPerM2": "5",
-  "heatExchangerFrameAndPipesCostPerM2": "4000"
-}
+var Argon_1026GWh_2002MW={"name":"Argon","doTestSimulation":false,"drawCompressors":true,"dischargeMassFlow":"6622","numberOfUnits":"2","hotRpm1500":true,"massFlowPercent":"100","tHigh":"1255","pHighInDischarge":"1700","targetPLow":"200","dischargePressureDrop":"20","cEfficiency":"0.919","tLowEfficiency":"0.968","diffuserEfficiency":"0.97","tEfficiency":"0.964","cLowEfficiency":"0.935","cHeatPumpEfficiency":"0.934","tHeatPumpEfficiency":"0.968","coolingWaterTemp":"283","minChordLengthMm":"20","maxEnclosedInRoot":"50","strengthIncreaseHotTurbine":"50","strengthIncrease":"10","generatorEfficiency":"0.99","frequencyConverterEfficiency":"0.97","updateCompressorEfficiencies":true,"updateTurbineEfficiencies":true,"storageSizeMTon":"45","hpStorageSizeAdjusted":"130","hpStorageUtilization":"54.9","topFillNone":true,"externalCryoStorage":false,"externalIceStorageTrue":true,"iceStorageSize":"55","scaleToIce":"120","rockDensityHp":"2.8","hpCp":"0.80","lpCp":"0.80","insGravelPorosity":"0.5","gravelMinLp":"40","gravelMaxLp":"120","gravelPorosityLp":"","gravelMinHp":"10","gravelMaxHp":"70","gravelPorosityHp":"","maxOpenPitAngle":"73","rampWidth":"8","rampSlope":"9","maxTopFillAngle":"70","increaseAspectRatioBy":"1","maxPressureDrop":"0.005","maxHeatFlowOut":"20","maxCryoHeatFlowOut":"10","uOfGravelrockwoolMix":"0.1","costOfWasteRockTon":"2.5","costOfWallAndRoofAboveM2":"300","costOfInsulationM3":"25","costOfRockSurfaceM2":"250","costOfSteelSurfaceM2":"250","costOfChannelsM2":"25","iceWorkCostPerTon":"4","costOfIceStorageWallAndRoofIceM2":"100","tcCostOfBlade":"1000","otherCostOfKW":"200","pRatioRange":true,"pHighFrom":"500","pHighTo":"2500","pLowTest":"140","tHighRange":false,"tHighFrom":"800","tHighTo":"1300","dischargeMassFlowRange":false,"dischargeMassFlowFrom":"400","dischargeMassFlowTo":"4000","heSimulationStepLen":"0.1","heSimulationTimeResolution":"900","heSimulations":"2","idleTime":"50","calcHeatExchangeCoeffcient":false,"lpMaxLowDiff":"10","hpMaxLowDiff":"25","tMaxDiffHighExitLp":"300","tMaxDiffHighExitHp":"400","totalGasWeightText":"","switchTimeText":"","dischargePressureRange":"","dischargeHighPressureMax":"","dischargeLowPressureMax":"","dischargeHighPressureMin":"","dischargeLowPressureMin":"","showEnthalpyAndInternalEnergy":false,"showDensityOnTP":false,"netPowerInMW":"2002","netPowerOutMW":"2002","cPowerIn":"1","cPowerOut":"2","opexMEur":"10","storageCapasityGWh":"1026","minChargeHours":"1","initialChargeLevel":"95","powerMarketTypeGermany":true,"yield500MW":"3","sellOutStep0":"450","sellOutStep1":"250","sellOutStep2":"160","sellOutStep3":"110","sellOutStep4":"80","sellOutStep5":"20","buyInStep0":"250","buyInStep1":"170","buyInStep2":"120","buyInStep3":"80","buyInStep4":"50","buyInStep5":"0","marketDataSets":"Germany","yearFrom":"2021","yearTo":"2026","hotLoadCoefficient":"0.35","hotFlowCoefficient":"0.55","cHotUnits2":"1","cStagesHot":"9","hotCMD":true,"hotHasIGV":true,"hotIGV_AR":"4","solidityHot":"1.06","tipGapMmHot":"0.5","tipGapPercentHot":"0.25","divOptARHot":"1.04","firstToLastDeltaH_Hot":"1","hotReaction":"0.5","tMaxToChordHot":"0.20","optHubToTipHot":"0.60","minHubToTipHot":"0.50","maxHubToTipHot":"0.99","maxTipThicknessHot":"2","gtd450StressPercent":"33","cStressMaxMPa":"228","tempStressMaxMPa":"1200","tempMaxStressMPaDecrValue":"1","tempMaxStressMPaDecr":"1023","rotorStatorGap":"20","compressorScaleHot":"0","testHot":false,"testPinHot":"","testTinHot":"","testPowerHot":"","testPoutHot":"","hotTurbineLoadCoefficient":"0.70","hotTurbineFlowCoefficient":"0.46","cHotTurbineUnits2":"2","cStagesHotTurbine":"6","hotTurbineCMD":true,"hotTurbineHasIGV":false,"hotTurbinIGV_AR":"4","solidityHotTurbine":"1.2","tipGapMmHotTurbine":"0.50","tipGapPercentHotTurbine":"0.25","maxTipThicknessHotTurbine":"2","rotorStatorGapHotTurbine":"40","hotTurbineReaction":"0.5","tMaxToChordHotTurbine":"0.18","maxAspectRatioHotTurbine":"12","optHubToTipHotTurbine":"0.43","minHubToTipHotTurbine":"0.30","maxHubToTipHotTurbine":"0.99","firstToLastDeltaH_HotTurbine":"1","hotTurbineNoApproximation":false,"compressorScaleHotTurbine":"0","testHotTurbine":false,"testPinHotTurbine":"","testTinHotTurbine":"","testPowerHotTurbine":"","testPoutHotTurbine":"","coldLoadCoefficient":"0.355","coldFlowCoefficient":"0.565","cColdUnits2":"2","cStagesCold":"6","coldCMD":true,"coldHasIGV":true,"coldIGV_AR":"4","solidityCold":"1.06","tipGapMmCold":"0.25","tipGapPercentCold":"0.20","maxTipThicknessCold":"2","coldReaction":"0.5","optHubToTipCold":"0.58","minHubToTipCold":"0.35","maxHubToTipCold":"0.995","divOptARCold":"1.05","firstToLastDeltaH_Cold":"1","cStressMaxMPaCold":"175","compressorScaleCold":"0","testCold":false,"testPinCold":"","testTinCold":"Q","testPowerCold":"","testWetnessCold":"","testPoutCold":"","coldTurbineLoadCoefficient":"0.65","coldTurbineFlowCoefficient":"0.43","cColdTurbineUnits2":"2","cStagesColdTurbine":"4","coldTurbineCMD":true,"solidityColdTurbine":"1.2","tipGapMmColdTurbine":"0.25","tipGapPercentColdTurbine":"0.20","maxTipThicknessColdTurbine":"5","coldTurbineReaction":"0.55","tMaxToChordColdTurbine":"0.20","maxAspectRatioColdTurbine":"10","optHubToTipColdTurbine":"0.35","minHubToTipColdTurbine":"0.30","maxHubToTipColdTurbine":"0.99","firstToLastDeltaH_ColdTurbine":"1","coldTurbineNoApproximation":false,"compressorScaleColdTurbine":"0","testColdTurbine":false,"testPinColdTurbine":"","testTinColdTurbine":"","testPowerColdTurbine":"","testPoutColdTurbine":"","hpFluid":"Nitrogen","cHpUnits2":"2","cStagesHp":"7","cStagesHp2":"8","hpLoadCoefficient":"0.35","hpFlowCoefficient":"0.56","hpLoadCoefficient2":"0.365","hpFlowCoefficient2":"0.58","hpPressureAbsolute":"absolute","hpHighPressureKPa":"1650","hpCMD":true,"hpHasIGV":true,"hpIGV_AR":"4","hpReaction":"0.5","solidityHp":"1.06","tipGapMmHp":"0.25","tipGapPercentHp":"0.1","maxTipThicknessHp":"1","tMaxToChordHp":"0.20","optHubToTipHp":"0.61","minHubToTipHp":"0.40","maxHubToTipHp":"0.99","divOptARHp":"1.05","compressorScaleHp":"0","testHp":false,"testPinHp":"","testTinHp":"","testPowerHp":"","testPoutHp":"","hpTurbineLoadCoefficient":"0.60","hpTurbineFlowCoefficient":"0.45","cHpTurbineUnits2":"2","cStagesHpTurbine":"6","hpTurbineCMD":true,"hpTurbineReaction":"0.55","solidityHpTurbine":"1.15","tMaxToChordHpTurbine":"0.18","maxAspectRatioHpTurbine":"10","optHubToTipHpTurbine":"0.45","minHubToTipHpTurbine":"0.30","maxHubToTipHpTurbine":"0.99","hpTurbineNoApproximation":false,"compressorScaleHpTurbine":"0","testHpTurbine":false,"testPinHpTurbine":"","testTinHpTurbine":"","testPowerHpTurbine":"","testPoutHpTurbine":"","heatExchangePressureLoss":"0.001","heatExchangerLength":"0.5","heatExchangeDeltaT":"2","plateHeightToSheetThickness":"40","sheetThicknessToPassageWidth":"20","hePlateWidthToLength":"4","costOfAluminumSheetPerTon":"2500","costOfPlateProcessingPerM2":"5","heatExchangerFrameAndPipesCostPerM2":"4000"}
+
 	//const test = getMetrics();
     </SCRIPT>
  </BODY></HTML>

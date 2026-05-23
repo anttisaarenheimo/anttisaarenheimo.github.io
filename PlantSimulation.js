@@ -1132,7 +1132,7 @@ console.log("**** maxWetness: "+maxWetness+" => tMin="+tMin+", ret="+JSON.string
 			if (Math.abs(maxWetnessData.capasityKg) < Math.abs(weightDiffKg)) {
 				const hDiff = this.enthalpyLookup(metrics.externalIceStorage ? this.iceH : this.rockH, tMax - t0) - this.enthalpyLookup0;
 				maxWetnessData.capasityKg = weightDiffKg;
-				metrics.pControlVolume = weightDiffKg/(hDiff * (metrics.externalIceStorage ? metrics.crushedIceDensity : metrics.lpGravelDensity)*1000 / (hGas-hLiq));
+				metrics.pControlVolume = weightDiffKg/(hDiff * (metrics.externalIceStorage ? metrics.crushedIceDensity : metrics.lpGravelDensity)*1000 / (maxWetnessData.hGas-maxWetnessData.hLiq));
 				if (this.cycleData.iceStorage) {
 					metrics.pControlVolume *= 1.2;	// something wrong with ice default size???
 					this.cycleData.iceStorage.pControlVolume = metrics.pControlVolume;
@@ -1339,7 +1339,7 @@ console.log("fnSimulateChargeDischarge...");
 				//modContent.innerText = "hour 0";
 				//sleep(50);
 
-				if (noUI && this.gasWeightMaxDiff) {
+				if ((noUI || !maxWetnessData || !maxWetnessData.enthalpyLookup0) && this.gasWeightMaxDiff) {
 					// gasWeight: empty storage in discharge mode, this.gasLpWeightMin: charged storage in charge mode
 					maxWetnessData = this.getMaxWetnessData( metrics.hasLiquidStorage ? this.gasWeightMaxDiff : this.gasMaxWeight - this.gasLpWeightMin, this.gasMaxWeight );
 				}
@@ -1733,7 +1733,7 @@ console.log("Min volume with liq storage: "+(this.gasWeightMaxDiff)/dGasMaxCharg
 console.log("Min volume without liq storage: "+(this.gasMaxWeight - this.gasWeightMin)/dGasMaxCharge);
 console.log("Volume without liq storage + 50% pControl: "+(this.gasMaxWeight - this.gasWeightMin/2)/dGasMaxCharge);
 					
-					const dLiq = Module.PropsSI('D', 'P', this.lpHeCache.p, 'Q', 0, name);
+					const dLiq = Module.PropsSI('D', 'P', this.lpHeCCache.p, 'Q', 0, name);
 					metrics.liqVolM3 = Math.abs(Math.round((this.gasMaxWeight-this.gasWeightMin)/dLiq));
 					const gasWeightText = name+" min/max weight "+Math.round(this.gasWeightMin/1000)+"/"+Math.round(this.gasMaxWeight/1000)+" tons => max liquid volume: "+metrics.liqVolM3+" m3";
 					var timeMin, timeMax;
@@ -1973,5 +1973,49 @@ console.log(title+", mdpSW="+mmMdpSW+"; mmMdpBC="+mmMdpBC);
 		}
 	}
 	// end of constructor!
+/*
+Checklist:
+https://en.wikipedia.org/wiki/Three-dimensional_losses_and_correlation_in_turbomachinery
+https://www.jafmonline.net/article_1785_552db38eff898db561ebfc12e98241b0.pdf
 
+// Modified surge margin calculation: 
+https://iris.polito.it/retrieve/580ec40f-1a42-42d8-8f74-841adc5600cd/postprint.pdf
+
+Blockage 
+Blade Row and Blockage Modelling in an Axial Compressor Throughflow Code:
+https://core.ac.uk/download/pdf/37320547.pdf
+
+
+Turbin basics:
+https://www.lth.se/fileadmin/tpe/Kurser/Chapter_4.pdf
+
+Denton: 
+https://www.unife.it/ing/lm.meccanica/insegnamenti/fluidodinamica-delle-macchine/materiale-didattico/JT_V115_621-656.pdf
+
+Kracker & Okapuu model implementation:
+Preliminary Design and Optimization of Axial Turbines Accounting for Diffuser Performance
+Roberto Agromayor * and Lars O. Nord
+
+https://www.made-in-china.com/products-search/hot-china-products/Compressor_Blade.html
+Compressor disc for Boeing 737-300 – 737-500  
+https://www.ebay.com/itm/266267945316
+
+https://en.wikipedia.org/wiki/CFM_International_CFM56
+Fan diameter ~1.5
+Turha juttu: file:///C:/Users/asaarenheimo/Downloads/4207__1662749128.pdf
+
+About endwall blockage:
+https://scispace.com/pdf/endwall-blockage-in-axial-compressors-3lkb10wk3t.pdf
+Reynolds correction of profile and endwall losses
+file:///C:/Users/asaarenheimo/Downloads/1-s2.0-S1000936125003413-main.pdf
+
+
+Hyvä ja monipuolinen:
+DESKTOP COMPUTER PROGRAMS FOR PRELIMINARY DESIGN OF TRANSONIC COMPRESSOR ROTORS:
+https://apps.dtic.mil/sti/pdfs/ADA390533.pdf
+file:///C:/Users/asaarenheimo/Downloads/8_476.pdf => solidity lisätty, tsekkaa vielä Niclaksen koodi
+
+
+
+*/
 }

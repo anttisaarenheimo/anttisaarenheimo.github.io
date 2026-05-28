@@ -350,7 +350,7 @@ th {
 				<LABEL>Power market type: </LABEL>
 					<INPUT type="radio" id="powerMarketTypeFinland" name="powerMarketType" onclick="setPowerMarketType(this)" value="Finland"><LABEL>Finland (high price elasticity)</LABEL>
 					<INPUT type="radio" id="powerMarketTypeGermany" checked name="powerMarketType" onclick="setPowerMarketType(this)" value="Germany"><LABEL>Germany (low price elasticity)</LABEL>
-				<LABEL>Price elasticity % (hourly price multiplied/divided by yield % powered to purchased/sold MWs/500): </LABEL><INPUT size="3" type="float" id="yield500MW" value=""/>
+				<LABEL>Price elasticity % (hourly price multiplied or divided by elasticity % powered to purchased/sold MWs/500): </LABEL><INPUT size="3" type="float" id="yield500MW" value=""/>
 			</DIV>
 			<DIV>
 				<LABEL>Selling price limits (Eur/MWh) at charged %</LABEL>
@@ -15358,6 +15358,9 @@ if (false && isRedraw && stageData.title == 'Hot turbine' && stageData.stages.le
 				if (stage.statorLoss.Y_shock) {
 					console.log(stageData.title+":"+stageData.stages.length+" statorLoss="+JSON.stringify(stage.statorLoss));
 				}
+				else { //if (stageData.stages.length > 10){
+					//console.log(stageData.title+":"+stageData.stages.length+" statorLoss="+JSON.stringify(stage.statorLoss));
+				}
 			}
 			if (!stageData.onDesignStages) {
 				stage.blades = Math.round(stage.rotorSolidity*2*(stageData.isCompressor ? stage.rMid : stage.rMidMid)*Math.PI/(2*stage.reaction*bladeHeight/stage.aspectRatio));
@@ -16931,7 +16934,29 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tEfficiency+" != "+
 		if (rad > Math.PI) rad - 2*Math.PI;
 		return rad;
 	}
+/*
+Stage loading coefficient: Ψ = ΔW/U**2, 
+Flow coefficien: Φ = Cx/U, R = reaction
+https://www.lth.se/fileadmin/tpe/Kurser/Chapter_4.pdf 
+Cy3 = Wy3 - U, Cy2 = Wy2 + U, 
+Cy = Cx*tan(α), Wy = Cx*tan(Ꞵ)
+R = Φ/2*(tan(Ꞵ3) - tan(Ꞵ2))
+R = 0.5 + Φ/2*(tan(Ꞵ3) - tan(α2))
+R = 1 + Ψ/2 - Cy2/U = 1 + Ψ/2 - Φ*tan(α2)
+=> tan(α2)=(1 - R + Ψ/2)/Φ
+=> α2 = atan((1 - R + Ψ/2)/Φ)
+R = 0.5 + Φ/2*(tan(Ꞵ3) - tan(α2)) = 0.5 + Φ/2*(tan(Ꞵ3) - (1 - R + Ψ/2)/Φ) 
+=> 2*(R - 0.5)/Φ = tan(Ꞵ3) - (1 - R + Ψ/2)/Φ
+=> tan(Ꞵ3)= 2*(R - 0.5)/Φ + (1 - R + Ψ/2)/Φ = (2*R - 1 + 1 - R + Ψ/2)/Φ = (R + Ψ/2)/Φ
+=> Ꞵ3 = atan((R + Ψ/2)/Φ);
+R = Φ/2*(tan(Ꞵ3) - tan(Ꞵ2)) = Φ/2*((R + Ψ/2)/Φ - tan(Ꞵ2)) = (R + Ψ/2)/2 - tan(Ꞵ2)*Φ/2
+=> tan(Ꞵ2) = 2*((R + Ψ/2)/2 - R)/Φ = (R + Ψ/2 - 2*R)/Φ = (Ψ/2 - R)/Φ
+=> Ꞵ2 = atan((Ψ/2 - R)/Φ)
+Cy3 = Wy3 - U = Cx*tan(α3) = Cx*tan(Ꞵ3) - U
+=> tan(α3) = tan(Ꞵ3) - 1/Φ = (R + Ψ/2)/Φ - 1/Φ = (R - 1 + Ψ/2)/Φ = (Ψ/2 - (1 - R))/Φ
+=> α3 = atan((Ψ/2 - (1 - R)/Φ))
 
+*/
 	function getRowEfficiencyMatchingWithKackerOkapuuY( stageData, stage, tMax, type, useCachedS ) {
 		const isStator = type == 'stator';
 		const hBlade = isStator ? stage.hStator : stage.hRotor;
@@ -16949,7 +16974,7 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tEfficiency+" != "+
 							  toPlusMinPI(Math.atan((stage.midMidStageLoadingCoefficient/2 - reaction)/stage.midMidFlowCoefficient));
 		const α2 = isStator ? toPlusMinPI(Math.atan((stage.midMidStageLoadingCoefficient/2 +(1-reaction))/stage.midMidFlowCoefficient)) :
 							  toPlusMinPI(Math.atan((reaction + stage.midOutStageLoadingCoefficient/2)/stage.midOutFlowCoefficient));
-		var vRelIn = (isStator ? iStage == 0 && !stageData.hasIGV ? stageData.inletC1 : stage.v : stage.vMid) / Math.cos(α1);
+		var vRelIn = (isStator ? iStage == 0 && !stageData.hasIGV ? stageData.inletC1 : stage.v : stage.vMid) / Math.abs(Math.cos(α1));
 		const vRelInActual = vRelIn;
 		var vRelOut = (isStator ? stage.vMid : stage.vOut) / Math.cos(α2);
 		const vRelOutActual = vRelOut;
@@ -16965,12 +16990,12 @@ console.log(stageData.title+" efficiency mismatch: "+metrics.tEfficiency+" != "+
 				if (Math.abs(testLoadCoefficient-loadCoefficient) > 0.00001 || Math.abs(testFlowCoefficient-flowCoefficient) > 0.00001) {
 					throw new Error("Non-stationary data: "+testLoadCoefficient+"<>"+loadCoefficient+" or "+testFlowCoefficient+"<>"+flowCoefficient);
 				}*/
-				vRelIn = Vx / Math.cos(α2In = toPlusMinPI(Math.atan((loadCoefficient/2 - (1-reaction))/flowCoefficient)));
+				vRelIn = Vx / Math.abs(Math.cos(α2In = toPlusMinPI(Math.atan((loadCoefficient/2 - (1-reaction))/flowCoefficient))));
 				vRelOut = Vx / Math.cos(α2Out = toPlusMinPI(Math.atan((loadCoefficient/2 + (1-reaction))/flowCoefficient)));
 			}
 			else {
 				α2Out = toPlusMinPI(Math.atan((stage.midMidStageLoadingCoefficient/2 + reaction)/stage.midMidFlowCoefficient));
-				vRelIn = stage.vMid / Math.cos(α2In = α1);	
+				vRelIn = stage.vMid / Math.abs(Math.cos(α2In = α1));	
 				vRelOut = stage.vMid / Math.cos(α2Out);	
 /*				
 				trace += "\r\nα2="+α2+", α2Out="+α2Out+"=>vRelOut="+vRelOut+", vRelOutActual="+vRelOutActual+", midOutStageLoadingCoefficient="+stage.midOutStageLoadingCoefficient+", midMidStageLoadingCoefficient="+stage.midMidStageLoadingCoefficient

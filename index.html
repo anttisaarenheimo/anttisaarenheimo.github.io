@@ -10,10 +10,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 https://anttisaarenheimo.github.io/index.html
 https://github.com/anttisaarenheimo/anttisaarenheimo.github.io
 -->
+<TITLE>Pumped Thermal Energy Storage</TITLE>
 <META charset="utf-8"> 
 <META http-equiv="Cache-Control" content="no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate">
 <META http-equiv="pragma" content="nocache"> 
-<TITLE>PTES Designer</TITLE>
+<meta name="description" content="936 GWh/2400 MW pumped thermal energy storage of electric power">
 <!--link href="bootstrap.min.css" rel="stylesheet" type="text/css"/-->
 <LINK href="index_files/jquery-ui.css" rel="stylesheet"> 
 <SCRIPT src="index_files/jquery-1.11.0.min.js"></SCRIPT>
@@ -356,7 +357,7 @@ th {
 		<canvas id="diagramDF" width="500" height="350" data-height="350" style="border:1px solid #000000;display:none"></canvas>
 		<canvas id="diagramRe" width="500" height="350" data-height="350"style="border:1px solid #000000;display:none"></canvas>
 		<DIV id="salesSimulationParams" style="display:none">
-			<H3>Energy storage power trading simulation in European power markets 2016-15.4.2026 <!--a href="sahkon-hinta-010121-200326.xlsx">(excel source)</a--></H3>
+			<H3>Energy storage power trading simulation in European power markets 2016-8.6.2026 <!--a href="sahkon-hinta-010121-200326.xlsx">(excel source)</a--></H3>
 			<DIV>
 				<LABEL>Plant in/out power MW: </LABEL><INPUT size="5" type="float" id="netPowerInMW" value=""/>/<INPUT size="5" type="float" id="netPowerOutMW" value=""/>
 				<LABEL>In/Out power units: </LABEL><INPUT size="3" type="float" id="cPowerIn" value=""/>/<INPUT size="3" type="float" id="cPowerOut" value=""/>
@@ -1714,6 +1715,7 @@ function simulateNordpoolFi() {
 				else 
 					lengthInYears = data.length/(365.25*24);
 				}
+console.log(dataSet+": years="+lengthInYears+", last date="+data[data.length-1]);
 				const chargeLevelIn = getSetFloatParam('initialChargeLevel',95)/100;
 				const ctx = simulateCashFlow(null, 0, 0, data, chargeLevelIn, i15minFrom, false, lengthInYears );
 				if (dataSet == 'NordPoolFi2021-2026') {
@@ -1844,7 +1846,7 @@ function simulateNordpoolFi() {
 		};	
 	    //xmlhttp.open("GET","NordPoolFi2021Jan.json",true);	// async=false => sync
 		console.log("Reading "+dataSet+".json");
-	    xmlhttp.open("GET",dataSet+".json",true);	// async=false => sync
+	    xmlhttp.open("GET",dataSet+".json?v=2",true);	// async=false => sync
   		xmlhttp.send();
   	}
   	/*catch (e) {

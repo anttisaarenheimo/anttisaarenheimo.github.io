@@ -71,14 +71,14 @@ console.log("tHpMaxLow="+this.tHpMaxLow+", tLpMaxLow="+this.tLpMaxLow);
 			const t0 = this.t0 = Math.floor(this.tLowLp-2);
 			var t, h = 0;
 			for (t = t0; t <= this.tHighHp+5; t++) {
-				const cpRock = getRockHeatCapasityJinKgK(t);	// per l
+				const cpRock = getRockHeatCapacityJinKgK(t);	// per l
 				h = h + cpRock;
 				this.rockH.push(h);
 			}
 			if (metrics.externalIceStorage) {
 				h = 0;
 				for (t = t0; t <= 273; t++) {
-					const cp = getIceHeatCapasityKJinKgK(t)*1000;	// ice density
+					const cp = getIceHeatCapacityKJinKgK(t)*1000;	// ice density
 					h = h + cp;	// per m3
 					this.iceH.push(h);
 				}
@@ -158,7 +158,7 @@ console.log("HP: uValOfStep="+this.hpTopIns.uValOfStep);
 				var heatTransferOut = (temps[i] - metrics.tAmbient)*2*ctx.uValOfStep*area*duration;
 				//const heatTransferOutWm2 = heatTransferOut /(len*stepLen*duration);
 				while (i >= 0) {
-					const cp = getRockHeatCapasityJinKgK(temps[i]);
+					const cp = getRockHeatCapacityJinKgK(temps[i]);
 					const uVal = i == 0 ? ctx.uValOfStep*2 : ctx.uValOfStep;
 					if (rInner < 1000) {
 						const r = ctx.width*(i + 0.5)/10 + rInner;
@@ -233,7 +233,7 @@ console.log("this.hpSideIns="+JSON.stringify(this.hpSideIns));
 					var heatTransferOut = (temps[i] - metrics.tAmbient)*uValOfIceLastStep*len*duration;
 					const heatTransferOutWm2 = heatTransferOut /(len*this.stepLen*duration);
 					while (i >= 0) {
-						const cp = getRockHeatCapasityJinKgK(temps[i]);		// frozen landfill probably have about the same cp as rock in cryo temps
+						const cp = getRockHeatCapacityJinKgK(temps[i]);		// frozen landfill probably have about the same cp as rock in cryo temps
 						const r = i >= 5 ? landFillWidth*(i - 4.5)/5 + innerCryoIns : innerCryoIns * (i+0.5)/5 + rInner;
 						len = 2*Math.PI*r;
 						const uVal = i > 5 ? uValOfIceLandFillStep : 
@@ -456,10 +456,10 @@ if (!item.area) {
 			}
 
 /*
-			const lpCpToGasCp = getAverageRockHeatCapasitykJinKg(this.tLowLp, this.tHighLp)*1000*(this.tHighLp-this.tLowLp)*volume
+			const lpCpToGasCp = getAverageRockHeatCapacitykJinKg(this.tLowLp, this.tHighLp)*1000*(this.tHighLp-this.tLowLp)*volume
 					/ (Module.PropsSI('H', 'P', pLow, 'T', this.tHighLp, name)-Module.PropsSI('H', 'P', pLow, 'T', this.tLowLp, name));
-			const cpHighGravel = getRockHeatCapasityJinKgK(this.tHighLp), cpLowGravel = getRockHeatCapasityJinKgK(this.tLowLp);
-			const cpLowIce = getRockHeatCapasityJinKgK(this.tLowLp, 'ice');
+			const cpHighGravel = getRockHeatCapacityJinKgK(this.tHighLp), cpLowGravel = getRockHeatCapacityJinKgK(this.tLowLp);
+			const cpLowIce = getRockHeatCapacityJinKgK(this.tLowLp, 'ice');
 			// iceVolume*metrics.lpGravelDensity*cpLowIce+ cpLowGravel*volume*metrics.lpGravelDensity=cpHighGravel*volume*metrics.lpGravelDensity =>
 			const iceVolume = (cpHighGravel*volume-cpLowGravel*volume) / cpLowIce;
 console.log("LP Storage size:"+myRound(volume*metrics.lpGravelDensity/1000000, 1)+" Mt, lpCpToGasCp="+lpCpToGasCp+", iceVolume="+(iceVolume/1000000));
@@ -503,7 +503,7 @@ if (!item.area) {
 			last.roofTemps = [];
 			this.hpSideIns.sideWallHeatTransfer(this.hpTopIns, last.tRock, last.area, this.rockHeatingTime, last.roofTemps);
 
-			const hpCpToGasCp = getAverageRockHeatCapasitykJinKg(this.tLowHp, this.tHighHp)*1000*(this.tHighHp-this.tLowHp)*volume 
+			const hpCpToGasCp = getAverageRockHeatCapacitykJinKg(this.tLowHp, this.tHighHp)*1000*(this.tHighHp-this.tLowHp)*volume 
 					/ (Module.PropsSI('H', 'P', metrics.pHigh, 'T', this.tHighHp, name)-Module.PropsSI('H', 'P', metrics.pHigh, 'T', this.tLowHp, name));
 console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+" Mt, hpCpToGasCp="+hpCpToGasCp);
 			//console.log("hpTemps="+JSON.stringify(this.hpTemps));
@@ -544,18 +544,18 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 				hpWeightDiff += (dHigh - dLow)*item.area*this.stepLen*metrics.hpGravelPorosity;
 				item.diffKg = hpWeightDiff;
 			}
-			this.curLiquidCapasityKg = hpWeightDiff - weightDiff;
-			const curLiquidCapasityKg = this.curLiquidCapasityKg;
+			this.curLiquidCapacityKg = hpWeightDiff - weightDiff;
+			const curLiquidCapacityKg = this.curLiquidCapacityKg;
 
 			const lastMassFlow = this.cycleData.coldCycle[1].massFlow; 
 			const firstMassFlow = lastMassFlow*2111/1837;
-			const midMassFlow = firstMassFlow - (firstMassFlow - lastMassFlow)*weightDiff/(weightDiff+curLiquidCapasityKg);
+			const midMassFlow = firstMassFlow - (firstMassFlow - lastMassFlow)*weightDiff/(weightDiff+curLiquidCapacityKg);
 			var massFlow = (firstMassFlow+midMassFlow)/2;
 			const lastPower = this.cycleData.coldCycle[1].workProduced - this.cycleData.heatPumpNetWorkIn;
 			const firstPower = this.cycleData.coldCycle[1].workProduced*172/128 
 				- this.cycleData.heatPumpNetWorkIn*11/22.5*2111/1837;	// based on temp diff*massFlow, higher pressure ratio => less cooling
 			// assume, that the power decrease is also linear, it's not but difference is probably small and the error is is balanced in step 3
-			const midPower = firstPower - (firstPower - lastPower)*weightDiff/(weightDiff+curLiquidCapasityKg);
+			const midPower = firstPower - (firstPower - lastPower)*weightDiff/(weightDiff+curLiquidCapacityKg);
 			var power = (firstPower+midPower)/2;
 			var timeNeeded = weightDiff/(massFlow*1000);
 			{
@@ -608,7 +608,7 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 			// THIS IS UNDERESTIMATE THE WORK DONE!!! Should integrate in small steps, but it would be too slow
 			var minMassFlow = lastMassFlow*1886/1837;
 			massFlow = (minMassFlow+midMassFlow)/2;
-			timeNeeded = curLiquidCapasityKg/(massFlow*1000);
+			timeNeeded = curLiquidCapacityKg/(massFlow*1000);
 			const minPower = this.cycleData.coldCycle[1].workProduced*114/128 
 				- this.cycleData.heatPumpNetWorkIn*27.5/22.5*1886/1837;	// based on temp diff*massFlow, higher pressure ratio => less cooling
 			power = (minPower+midPower)/2;
@@ -635,7 +635,7 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 			// 1. Use cold turbine to increase LP storage pressure from 124 to 140
 			// the convection mainly flows in the cold lower part: 
 			// we fill lp storage from top to down until all slices have the target pressure and density, 
-			const curLiquidCapasityKg = this.curLiquidCapasityKg ? this.curLiquidCapasityKg : maxWetnessData.capasityKg*(1.15-this.chargeLevel)/1.1;		// approximation from Pressure control tank chart
+			const curLiquidCapacityKg = this.curLiquidCapacityKg ? this.curLiquidCapacityKg : maxWetnessData.capacityKg*(1.15-this.chargeLevel)/1.1;		// approximation from Pressure control tank chart
 			var weightDiff = 0, hpWeightDiff = 0;
 			for (height = this.lpTemps.length-1; height >= 0; height--) {
 				const item = this.lpTemps[height];
@@ -653,18 +653,18 @@ console.log("HP Storage size:"+myRound(volume*metrics.gravelDensity/1000000, 1)+
 			}
 			const firstMassFlow = this.cycleData.coldCycle[0].massFlow*1121/1016; 
 			const lastMassFlow = this.cycleData.coldCycle[0].massFlow;
-			const midMassFlow = firstMassFlow - (firstMassFlow - lastMassFlow)*weightDiff/(weightDiff+curLiquidCapasityKg);
+			const midMassFlow = firstMassFlow - (firstMassFlow - lastMassFlow)*weightDiff/(weightDiff+curLiquidCapacityKg);
 			const lastPower = this.cycleData.coldCycle[0].workConsumed;
 			const firstPower = this.cycleData.coldCycle[0].workConsumed*98/95;
 			// assume, that the power decrease is also linear, it's not but difference is probably small and the error is is balanced in step 3
-			const midPower = firstPower - (firstPower - lastPower)*weightDiff/(weightDiff+curLiquidCapasityKg);
+			const midPower = firstPower - (firstPower - lastPower)*weightDiff/(weightDiff+curLiquidCapacityKg);
 
 			// 1. Compress liquid fluid from pressure control tank to the high-pressure storage
 			// Assumes full charged tank => THIS IS UNDERESTIMATE THE WORK CONSUMED!!! Should integrate in small steps, but it would be too slow
 			const minMassFlow = lastMassFlow* 1886/1837;
 			var massFlow = (minMassFlow+midMassFlow)/2;
 			const minPower = this.cycleData.coldCycle[0].workConsumed*114/128 
-			var timeNeeded = curLiquidCapasityKg/(massFlow*1000);
+			var timeNeeded = curLiquidCapacityKg/(massFlow*1000);
 			var power = (minPower+midPower)/2;
 			workConsumed = power*timeNeeded/3600;		// Wh
 			if (Number.isNaN(workConsumed)) throw new Error();
@@ -923,8 +923,8 @@ console.log("Updating storage max size:"+this.maxHotVolume+" => "+hotVolume);
 			var xVals = [], arraysOfVals = [], yTitles = [], bottomLines = [];
 			var minMaxDefault = {min : Math.round(tLowLp/10)*10, max : (1+Math.round(tHighHp/10))*10};
 			var iceCp = [], rockCp = [], rockH = [], iceH = [], h = 0;
-			bottomLines.push('Gravel heat capasity kJ/m3/K');
-			bottomLines.push('Crushed ice heat capasity kJ/m3/K');
+			bottomLines.push('Gravel heat capacity kJ/m3/K');
+			bottomLines.push('Crushed ice heat capacity kJ/m3/K');
 			bottomLines.push('Gravel enthalpy MJ/m3 ('+Math.round(1000*metrics.lpGravelDensity)+' kg/m3)');
 			bottomLines.push('Crushed ice enthalpy MJ/m3 ('+Math.round(1000*metrics.crushedIceDensity)+' kg/m3)');
 			const dLiq = Module.PropsSI('D', 'P', this.lpHeCache.p, 'Q', 0, name);
@@ -946,7 +946,7 @@ console.log("Updating storage max size:"+this.maxHotVolume+" => "+hotVolume);
 			yTitles.push('MJ/m3');
 			yTitles.push('MJ/m3');
 			for (t = this.tLowLp; t <= 273; t++) {
-				const cp = getIceHeatCapasityKJinKgK(t)*1000*metrics.crushedIceDensity;	// ice density
+				const cp = getIceHeatCapacityKJinKgK(t)*1000*metrics.crushedIceDensity;	// ice density
 				iceCp.push(cp);
 				h = h + (cp/1000);
 				iceH.push(h);
@@ -955,7 +955,7 @@ console.log("Updating storage max size:"+this.maxHotVolume+" => "+hotVolume);
 			h = 0;
 			for (t = this.tLowLp; t <= this.tHighHp; t++) {
 				xVals.push(t);
-				const cpRock = getRockHeatCapasityJinKgK(t) * metrics.lpGravelDensity;
+				const cpRock = getRockHeatCapacityJinKgK(t) * metrics.lpGravelDensity;
 				rockCp.push(cpRock);
 				h = h + (cpRock/1000);
 				rockH.push(h);
@@ -1072,7 +1072,7 @@ console.log( (metrics.pHigh/metrics.pLow)+": pControlVolume="+metrics.pControlVo
 			//const hRockSat = this.enthalpyLookup(rockH, tMax-t0);
 			var ret = {};
 			//ret.height = this.hIce;
-			ret.capasityKg = maxDiff;
+			ret.capacityKg = maxDiff;
 			//maxWetness *= 0.1;	
 			ret.gasMaxWeight = gasMaxWeight;
 			ret.maxWetness = maxWetness;
@@ -1129,9 +1129,9 @@ console.log("**** maxWetness: "+maxWetness+" => tMin="+tMin+", ret="+JSON.string
 				}*/
 				weightDiffKg += (d2-d)*this.hpTemps[k].area*this.stepLen*metrics.hpGravelPorosity;
 			}
-			if (Math.abs(maxWetnessData.capasityKg) < Math.abs(weightDiffKg)) {
+			if (Math.abs(maxWetnessData.capacityKg) < Math.abs(weightDiffKg)) {
 				const hDiff = this.enthalpyLookup(metrics.externalIceStorage ? this.iceH : this.rockH, tMax - t0) - this.enthalpyLookup0;
-				maxWetnessData.capasityKg = weightDiffKg;
+				maxWetnessData.capacityKg = weightDiffKg;
 				metrics.pControlVolume = weightDiffKg/(hDiff * (metrics.externalIceStorage ? metrics.crushedIceDensity : metrics.lpGravelDensity)*1000 / (maxWetnessData.hGas-maxWetnessData.hLiq));
 				if (this.cycleData.iceStorage) {
 					metrics.pControlVolume *= 1.2;	// something wrong with ice default size???
@@ -1279,7 +1279,7 @@ console.log(title+" snapshot: "+JSON.stringify(ret));
 				this.drawHeatExchangeDiagram2('hpHeatExchangeDiagram', this.hpTemps, hpTitle, bottomLines, hpArraysOfVals, minMaxDefault,
 							function (ctx, dg) {
 								var text = myRound(metrics.highPressureStorageVolume * metrics.gravelDensity/1000000,1)+" mt crushed stone";
-								//text2 = 'Storage capasity '+Math.round(hLastDiscarge*)+' GWh after '+Math.round(hTotal)+ " hours";
+								//text2 = 'Storage capacity '+Math.round(hLastDiscarge*)+' GWh after '+Math.round(hTotal)+ " hours";
 								ctx.font = "16px Arial";
 								ctx.fillStyle = 'black';
 								const height = metrics.dome.hBottomI;
@@ -1365,7 +1365,7 @@ console.log("fnSimulateChargeDischarge...");
 					tLpOut = this.lpTemps[this.hFrom].tRock + this.lpTemps[this.hFrom].deltaT;
 					tHpOut = this.hpTemps[this.hpTemps.length-1].tRock + this.hpTemps[this.hpTemps.length-1].deltaT;
 					if (noUI && tLpOut > (this.tLowLp+0.1) && tDiffRatiosLp == null) {
-						// calc ratios how much tLow diff increase lp capasity
+						// calc ratios how much tLow diff increase lp capacity
 						tDiffRatiosLp = new Array(20);
 						var tDiff = tDiffRatiosLp.length-1;
 						var k;
@@ -1385,7 +1385,7 @@ console.log("fnSimulateChargeDischarge...");
 						//console.log("tDiffRatiosLp="+JSON.stringify(tDiffRatiosLp));
 					}
 					if (noUI && tHpOut < (this.tHighHp-1) && tDiffTopRatiosHp == null) {
-						// calc how much this.tHpMinHigh decrease hp cold capasity?
+						// calc how much this.tHpMinHigh decrease hp cold capacity?
 						tDiffTopRatiosHp = new Array(Math.floor((this.tHighHp - this.tLowHp)/20) + 2);
 						var tDiff = 0;
 						var k;
@@ -1519,7 +1519,7 @@ console.log("gasWeightMaxDiff="+this.gasWeightMaxDiff+", this.gasMaxWeight="+thi
 					tLpOut = this.lpTemps[this.lpTemps.length-1].tRock + this.lpTemps[this.lpTemps.length-1].deltaT;
 					tHpOut = this.hpTemps[0].tRock + this.hpTemps[0].deltaT;
 					if (noUI && tHpOut > (this.tLowHp+0.1) && tDiffRatiosHp == null) {
-						// calc ratios how much this.tHpMaxLow increase hp cold capasity
+						// calc ratios how much this.tHpMaxLow increase hp cold capacity
 						tDiffRatiosHp = new Array(50);
 						var tDiff = tDiffRatiosHp.length-1;
 						var k;
@@ -1539,7 +1539,7 @@ console.log("gasWeightMaxDiff="+this.gasWeightMaxDiff+", this.gasMaxWeight="+thi
 						//console.log("tDiffRatiosHp="+JSON.stringify(tDiffRatiosHp));
 					}
 					if (noUI && tLpOut < (this.tHighLp-1) && tDiffTopRatiosLp == null) {
-						// calc how much this.tLpMinHigh decrease hp cold capasity?
+						// calc how much this.tLpMinHigh decrease hp cold capacity?
 						tDiffTopRatiosLp = new Array(Math.floor((this.tHighLp - this.tLowLp)/20) + 2);
 						var tDiff = 0;
 						var k;
@@ -1680,18 +1680,18 @@ console.log("New discharge ratio: "+pHighDischargeActual+"/"+pLowDischargeActual
 							//metrics.pControlWithSolids ? this.getMaxWetnessData( maxDiff, maxWeight ) : getNewWetnessData( maxDiff, maxWeight );
 					}
 					{
-						var hpCapasityJ = 0;
+						var hpCapacityJ = 0;
 						const tMin = this.t0;
 						for (k = 0; k < this.hpTemps.length; k++) {
 							const hMin = this.enthalpyLookup(this.rockH, this.hpTemps[k].tMin - this.t0) - this.hpEnthalpy0;
 							const hMax = this.enthalpyLookup(this.rockH, this.hpTemps[k].tMax - this.t0) - this.hpEnthalpy0;
-							hpCapasityJ += (hMax-hMin)*this.hpTemps[k].area*this.stepLen*metrics.gravelDensity*1000;
-if (Number.isNaN(hpCapasityJ)) throw new Error();
+							hpCapacityJ += (hMax-hMin)*this.hpTemps[k].area*this.stepLen*metrics.gravelDensity*1000;
+if (Number.isNaN(hpCapacityJ)) throw new Error();
 						}
-						this.cycleData.hpStorageHeatCapacity = hpCapasityJ;
-						metrics.hpStorageUtilization = this.cycleData.hpStorageHeatCapacity/(1000*getAverageRockHeatCapasitykJinKg(this.cycleData.coldCycle[0].tOut,this.cycleData.hotCycle[0].tIn)*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(this.cycleData.hotCycle[0].tIn-this.cycleData.coldCycle[0].tOut));
+						this.cycleData.hpStorageHeatCapacity = hpCapacityJ;
+						metrics.hpStorageUtilization = this.cycleData.hpStorageHeatCapacity/(1000*getAverageRockHeatCapacitykJinKg(this.cycleData.coldCycle[0].tOut,this.cycleData.hotCycle[0].tIn)*metrics.highPressureStorageVolume*1000*metrics.gravelDensity*(this.cycleData.hotCycle[0].tIn-this.cycleData.coldCycle[0].tOut));
 						$("#hpStorageUtilization").val(myRound(metrics.hpStorageUtilization*100,1));
-						console.log("hpCapasityJ=hpStorageHeatCapacity="+this.cycleData.hpStorageHeatCapacity+" J == "+Math.round(this.cycleData.hpStorageHeatCapacity/(3600*1000000))+" MWh, hpStorageUtilization="+metrics.hpStorageUtilization);
+						console.log("hpCapacityJ=hpStorageHeatCapacity="+this.cycleData.hpStorageHeatCapacity+" J == "+Math.round(this.cycleData.hpStorageHeatCapacity/(3600*1000000))+" MWh, hpStorageUtilization="+metrics.hpStorageUtilization);
 					}
 					// densities OK, but otherwise these do not make very much sense (volumens OK)
 console.log("HP: this.gasWeightMaxDiff tons="+this.gasWeightMaxDiff/1000+", this.gasWeightMinDiff tons="+this.gasWeightMinDiff/1000);
@@ -1707,7 +1707,7 @@ console.log("max: dGasMaxCharge2="+dGasMaxCharge2+", possible: dGasMaxCharge="+d
 					const hGasMaxDischarge = Module.PropsSI('H', 'P', this.hpHeCache.p, 'D', dGasMaxDischarge, name);
 					const hGasColdHp = Module.PropsSI('H', 'P', this.hpHeCache.p, 'T', this.hpHeCCache.tLow, name);
 					const mwhMax = (hGasMaxDischarge-hGasMaxCharge)*this.gasMaxWeight/1000000/3600;
-					const hDeltaRock = getAverageRockHeatCapasitykJinKg(tGasMinCharge, this.hpHeCCache.tLow)*1000*(this.hpHeCCache.tLow-tGasMinCharge);
+					const hDeltaRock = getAverageRockHeatCapacitykJinKg(tGasMinCharge, this.hpHeCCache.tLow)*1000*(this.hpHeCCache.tLow-tGasMinCharge);
 					const hDeltaGas = hGasColdHp - hGasMaxCharge;
 					const coldRecoveryRockTons = this.gasWeightMaxDiff*hDeltaGas/hDeltaRock/1000;
 					console.log("hDeltaRock="+hDeltaRock+", hDeltaGas="+hDeltaGas); 
